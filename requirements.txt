@@ -1,0 +1,40 @@
+# PyTorch (GPU version for RTX 4060)
+# Comentar/descomentar según tu hardware
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.6.0
+
+# Core dependencies
+numpy==1.26.4
+scipy
+
+# Audio processing
+soundfile
+webrtcvad
+
+# Transcription
+openai-whisper
+vosk
+
+# Speaker diarization
+resemblyzer
+scikit-learn
+
+# NLP & Emotion analysis
+transformers
+pysentimiento
+sentencepiece  # Requerido para modelos de traducción
+
+# Translation
+sacremoses  # Tokenizador para MarianMT
+
+# API
+fastapi
+uvicorn
+python-multipart
+
+# UI
+streamlit
+plotly  # Para visualizaciones de emociones
+
+# Compatibilidad
+protobuf>=3.20,<4  # Evitar conflictos con transformers
