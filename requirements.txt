@@ -1,40 +1,59 @@
-# PyTorch (GPU version for RTX 4060)
-# Comentar/descomentar según tu hardware
+# =====================================================
+# Proyecto: Voz a Texto con Enfoque en Tono Emocional
+# Archivo de dependencias actualizado
+# =====================================================
+
+# PyTorch (GPU version para CUDA 12.1 - RTX 4060)
+# Cambiar a cu118 para CUDA 11.8 o eliminar para CPU-only
 --extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.6.0
+torch>=2.0.0
 
-# Core dependencies
-numpy==1.26.4
-scipy
+# =====================================================
+# Core / Utilidades
+# =====================================================
+numpy>=1.24.0
+scipy>=1.10.0
 
-# Audio processing
-soundfile
-webrtcvad
+# =====================================================
+# Procesamiento de Audio
+# =====================================================
+soundfile>=0.12.0
+webrtcvad>=2.0.10
+librosa>=0.10.0
 
-# Transcription
-openai-whisper
-vosk
+# =====================================================
+# Transcripción
+# =====================================================
+openai-whisper>=20231117
+vosk>=0.3.45
 
-# Speaker diarization
-resemblyzer
-scikit-learn
+# =====================================================
+# Diarización de Hablantes
+# =====================================================
+resemblyzer>=0.1.1
+scikit-learn>=1.3.0
 
-# NLP & Emotion analysis
-transformers
-pysentimiento
-sentencepiece  # Requerido para modelos de traducción
+# =====================================================
+# NLP y Análisis Emocional (Transformers)
+# =====================================================
+transformers>=4.35.0
+pysentimiento>=0.7.0
+sentencepiece>=0.1.99
+sacremoses>=0.0.53
 
-# Translation
-sacremoses  # Tokenizador para MarianMT
+# =====================================================
+# API Web (FastAPI)
+# =====================================================
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
 
-# API
-fastapi
-uvicorn
-python-multipart
+# =====================================================
+# Visualización (Dashboard HTML opcional)
+# =====================================================
+plotly>=5.18.0
 
-# UI
-streamlit
-plotly  # Para visualizaciones de emociones
-
+# =====================================================
 # Compatibilidad
-protobuf>=3.20,<4  # Evitar conflictos con transformers
+# =====================================================
+protobuf>=3.20.0,<4.0.0
