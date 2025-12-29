@@ -6,7 +6,7 @@ import logging
 from functools import lru_cache
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
-
+from collections import deque
 import torch
 import numpy as np
 from transformers import pipeline
@@ -36,6 +36,29 @@ class EmotionResult:
     confidence: float
     source: str  # 'text', 'audio', 'text_es', 'text_en', 'multimodal'
 
+class TemporalEmotionState:
+#estado para suavizado temporal de emociones
+    def add(self,emotions:Dict[str,float])->None:
+        self.history.append(emotions.copy())
+    
+    def get_smoothed(self, current: Dict[str, float], alpha: float = 0.6) -> Dict[str, float]:
+        #retorna las emociones suavizadas con el historial
+        if not self.history:
+            return current
+        
+        all_emotions = set(current.keys())
+        for hist in self.history:
+            all_emotions.update(hist.keys())
+        
+        smoothed = {}
+        for emotion in all_emotions:
+            current_val = current.get(emotion, 0.0)
+            hist_vals = [h.get(emotion, 0.0) for h in self.history]
+            if hist_vals:
+                smoothed[emo]=alpha*current_val+(1-alpha)*hist_avg
+            else:
+                smoothed[emo]=current_val
+        return smoothed
 
 def get_device() -> str:
     """Determina el dispositivo a usar (GPU/CPU)."""
@@ -251,8 +274,8 @@ def _fuse_weighted_average(
         
     # 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
     # Usuario requiere prácticamente eliminar neutral/other de los resultados
-    BOOST_FACTOR = 1.6  # Potenciar emociones FUERTEMENTE (era 1.0, luego 1.3)
-    NEUTRAL_DAMP = 0.25  # Castigar neutral SEVERAMENTE (era 1.0, luego 0.5)
+    BOOST_FACTOR = 1.8  # Potenciar emociones FUERTEMENTE (era 1.0, luego 1.3)
+    NEUTRAL_DAMP = 0.15  # Castigar neutral SEVERAMENTE (era 1.0, luego 0.5)
     
     adjusted_scores = {}
     total_score = 0.0
@@ -273,7 +296,7 @@ def _fuse_weighted_average(
         for emo, s in adjusted_scores.items():
             final_emotions[emo] = round(s / total_score, 4)
     else:
-        final_emotions = fused_raw # Fallback
+        final_emotions = {"neutral": 1.0} # Fallback
 
     if not final_emotions:
         return EmotionResult({}, "neutral", 0.0, 0.0, "multimodal")
@@ -281,29 +304,23 @@ def _fuse_weighted_average(
     top_emotion = max(final_emotions, key=final_emotions.get)
     top_score = final_emotions[top_emotion]
 
-    # --- LÓGICA "FORZAR EMOCIÓN" (ULTRA-AGGRESSIVE) ---
+    # Logica para forzar emociones
     # Si la ganadora es 'neutral' u 'other', buscamos la siguiente mejor opción.
     # UMBRAL MUY BAJO: Cualquier emoción con >8% será promovida sobre neutral
     if top_emotion.lower() in ["neutral", "other", "others", "neu"]:
         # Filtramos emociones que NO sean neutral/other y tengan mínimo 8% de presencia
         candidates = {
             k: v for k, v in final_emotions.items() 
-            if k.lower() not in ["neutral", "other", "others", "neu"] and v > 0.08
+            if k.lower() not in ["neutral", "other", "others", "neu"] and v > 0.05
         }
         
         if candidates:
             # Encontramos una alternativa válida - SIEMPRE la promovemos
-            alt_emotion = max(candidates, key=candidates.get)
-            alt_score = candidates[alt_emotion]
-            
-            # Promocionamos la alternativa
-            top_emotion = alt_emotion
-            top_score = alt_score
-    # -----------------------------------------------
-    
-    # Confianza basada en concordancia entre modalidades
+            top_emotion = max(candidates, key=candidates.get)
+            top_score = candidates[top_emotion]
+
     confidence = _calculate_confidence(text_result, audio_result)
-    
+
     return EmotionResult(
         emotions=final_emotions,
         top_emotion=top_emotion,
@@ -466,3 +483,53 @@ def compute_weighted_emotion_score(
     )
     
     return sorted_emotions
+
+
+class TemporalEmotionAnalyzer:
+    def __init__(self):
+        self.history = []
+        self.segment_count = 0
+    
+    def analyze_segment(
+        self,
+        text_es: str,
+        text_en: str = "",
+        audio_path: Optional[str] = None,
+        audio_weight: float = 0.4,
+        apply_smoothing: bool = True
+    ) -> EmotionResult:
+        result_es = analyze_text_emotion_es(text_es)
+        
+        if text_en:
+            result_en = analyze_text_emotion_en(text_en)
+            text_emotions = {}
+            all_emos = set(result_es.emotions.keys()) | set(result_en.emotions.keys())
+            for emo in all_emos:
+                text_emotions[emo] = (result_es.emotions.get(emo, 0.0) + result_en.emotions.get(emo, 0.0)) / 2
+            text_result = EmotionResult(
+                emotions=text_emotions,
+                top_emotion=max(text_emotions, key=text_emotions.get),
+                top_score=max(text_emotions.values()),
+                confidence=(result_es.confidence + result_en.confidence) / 2,
+                source="text_combined"
+            )
+        else:
+            text_result = result_es
+        
+        audio_result = None
+        if audio_path:
+            audio_result = analyze_audio_emotion(audio_path)
+        
+        if audio_result and audio_weight > 0:
+            fused = fuse_emotions(text_result, audio_result)
+        else:
+            fused = text_result
+        
+        self.history.append(fused.emotions.copy())
+        self.segment_count += 1
+        
+        return fused
+    
+    def reset(self):
+        self.history = []
+        self.segment_count = 0

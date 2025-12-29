@@ -8,6 +8,8 @@ import functools
 import shutil
 import librosa
 import numpy as np
+import traceback
+import time
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -22,7 +24,8 @@ from core.emotion_analysis import (
     analyze_audio_emotion, 
     analyze_text_emotion_es, 
     analyze_text_emotion_en, 
-    EmotionResult
+    EmotionResult,
+    TemporalEmotionAnalyzer
 )
 from config import (
     MAX_UPLOAD_SIZE,
@@ -42,10 +45,18 @@ executor = ThreadPoolExecutor(max_workers=WORKERS)
 # Cache de modelos
 _models_cache: Optional[Dict[str, Any]] = None
 
+#metricas simples
+_metrics = {
+    "requests_total": 0,
+    "requests_success": 0,
+    "requests_failed": 0,
+    "total_processing_time": 0.0
+}
+
 app = FastAPI(
     title="Voz-a-Texto Emocional Unified API",
-    description="API Unificada (v3) con soporte dinámico para pesos y modo Lite.",
-    version="3.0.0"
+    description="API Unificada (v4) con soporte dinamico para pesos y modo Lite.",
+    version="4.0.0"
 )
 
 # CORS
@@ -57,11 +68,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-# ==========================================
 # Helpers
-# ==========================================
 
 def load_models() -> Dict[str, Any]:
     global _models_cache
@@ -77,19 +84,19 @@ async def run_blocking(func, *args, **kwargs):
 @app.on_event("startup")
 async def startup_event():
     logger.info("===================================================")
-    logger.info("  🚀 INICIANDO SISTEMA (Modo Optimizado RAM)")
+    logger.info(" INICIANDO SISTEMA (Modo Optimizado RAM)")
     logger.info("===================================================")
     
-    # Preload SOLO Whisper (crítico)
+    # Preload SOLO Whisper (critico)
     load_models() 
     logger.info("✔ Whisper cargado")
     
-    # Los demás modelos se cargarán BAJO DEMANDA para evitar OOM
+    # Los demas modelos se cargaran bajo demanda para evitar OOM
     logger.info("ℹ Modelos de emoción: Carga bajo demanda (ahorro RAM)")
     
     logger.info("===================================================")
-    logger.info("  ✅ SISTEMA LISTO: http://127.0.0.1:8000")
-    logger.info("  💾 Uso de RAM optimizado")
+    logger.info(" SISTEMA LISTO: http://127.0.0.1:8000")
+    logger.info(" Uso de RAM optimizado")
     logger.info("===================================================")
 
 
@@ -104,12 +111,37 @@ async def save_upload_to_tempfile(upload_file: UploadFile) -> str:
 
 def validate_upload(file: UploadFile):
     if file.filename.lower().split('.')[-1] not in ["wav", "mp3", "m4a", "mp4"]:
-        # Simple extension check fallback
         pass
+
+def validate_audio_basic(file_path: str) -> tuple:
+    import soundfile as sf
+    try:
+        info = sf.info(file_path)
+        if info.duration < 0.5:
+            return False, f"Audio muy corto: {info.duration:.2f}s (min: 0.5s)", 0
+        if info.duration > 600:
+            return False, f"Audio muy largo: {info.duration:.1f}s (max: 600s)", 0
+        return True, None, info.duration
+    except Exception as e:
+        return False, f"Error leyendo audio: {e}", 0
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.0.0", "mode": "UNIFIED"}
+    return {"status": "ok", "version": "4.0.0", "mode": "UNIFIED"}
+
+@app.get("/health/detailed")
+def health_check_detailed():
+    return {
+        "status": "ok",
+        "version": "4.0.0",
+        "metrics": {
+            "requests_total": _metrics["requests_total"],
+            "requests_success": _metrics["requests_success"],
+            "requests_failed": _metrics["requests_failed"],
+            "success_rate": round(_metrics["requests_success"] / max(1, _metrics["requests_total"]) * 100, 2),
+            "avg_processing_time": round(_metrics["total_processing_time"] / max(1, _metrics["requests_success"]), 2)
+        }
+    }
 
 @app.post("/transcribe/full-analysis", tags=["Analysis"])
 async def transcribe_full_analysis(
@@ -118,26 +150,31 @@ async def transcribe_full_analysis(
     audio_weight: float = Form(0.4)
 ):
     validate_upload(file)
+    start_time = time.time()
+    _metrics["requests_total"] += 1
+    warnings = []
     tmp_path = None
     try:
         tmp_path = await save_upload_to_tempfile(file)
+        
+        is_valid, error_msg, audio_duration = validate_audio_basic(tmp_path)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
         models = load_models()
         whisper_model = models["whisper"]
         
-        # 1. Transcribe
-        logger.info(f"Iniciando Transcripción (Lite={lite_mode}, AudioW={audio_weight})...")
+        logger.info(f"Iniciando Transcripcion (Lite={lite_mode}, AudioW={audio_weight})...")
         result = await run_blocking(whisper_model.transcribe, tmp_path, language="es")
         tx_full = result.get("text", "")
         segments_raw = result.get("segments", [])
         
-        # 2. Translate
         segment_texts = [s.get("text", "").strip() for s in segments_raw]
         translations = []
         if not lite_mode and segment_texts:
             logger.info("Traduciendo segmentos para contexto (En)...")
             translations = await run_blocking(translate_batch, segment_texts)
 
-        # 3. Audio Load
         audio_data = np.array([])
         sr = 16000
         if not lite_mode: 
@@ -145,11 +182,12 @@ async def transcribe_full_analysis(
              audio_data = y
         
         enriched_segments = []
-        logger.info("Analizando Emociones Multimodal...")
+        emotion_analyzer = TemporalEmotionAnalyzer()
+        logger.info("Analizando Emociones Multimodal con suavizado temporal...")
 
         for i, seg in enumerate(segments_raw):
             try:
-                # Basic info
+                # informacion base
                 seg_text_es = segment_texts[i] if i < len(segment_texts) else ""
                 seg_text_en = translations[i] if i < len(translations) else ""
                 
@@ -158,7 +196,7 @@ async def transcribe_full_analysis(
                 start = float(seg.get("start", 0))
                 end = float(seg.get("end", 0))
                 
-                # --- Audio Analysis (Robust) ---
+                # Analisis de audio
                 res_audio = None
                 valid_audio = False
                 
@@ -167,66 +205,58 @@ async def transcribe_full_analysis(
                         start_idx = int(start * sr)
                         end_idx = int(end * sr)
                         
-                        # Bounds Check
                         start_idx = max(0, min(start_idx, len(audio_data)))
                         end_idx = max(start_idx, min(end_idx, len(audio_data)))
                         
-                        if (end_idx - start_idx) > (sr * 0.1): # Min 0.1s
+                        if (end_idx - start_idx) > (sr * 0.1): #el audio teine que ser minimo de 1s
                             seg_chunk = audio_data[start_idx:end_idx]
                             seg_audio_path = await run_blocking(write_wav_from_array, seg_chunk, sr)
                             
                             if seg_audio_path:
-                                res_audio = await run_blocking(analyze_audio_emotion, seg_audio_path)
+                                # Ya no analizamos aqui, se pasa al TemporalEmotionAnalyzer
                                 valid_audio = True
-                                if os.path.exists(seg_audio_path): os.remove(seg_audio_path)
+                                # NO BORRAR AQUI: if os.path.exists(seg_audio_path): os.remove(seg_audio_path)
                     except Exception as e_audio:
                         logger.warning(f"Audio analysis failed (seg {i}): {e_audio}")
                         valid_audio = False
 
-                # --- Text Analysis ---
-                res_es = await run_blocking(analyze_text_emotion_es, seg_text_es)
-                if not res_es:
-                     res_es = EmotionResult(top_emotion="neutral", emotions={"neutral": 1.0})
-
-                res_en = None
-                if not lite_mode and seg_text_en:
-                    res_en = await run_blocking(analyze_text_emotion_en, seg_text_en)
-
-                # --- Fusion Logic (Dynamic Weights) ---
-                # 1. Text Average (ES + EN)
-                text_emotions = res_es.emotions.copy()
-                if res_en:
-                    for k, v in res_en.emotions.items():
-                        text_emotions[k] = (text_emotions.get(k, 0) + v) / 2
-                        
-                # 2. Multimodal Fusion
-                final_emotions = {}
-                score_audio = res_audio.emotions if (res_audio and valid_audio) else {}
+                #analisis de texto (solo textos para no bloquear, el Analyzer hara lo demas)
+                # NOTA: El TemporalEmotionAnalyzer llama a analyze_text_emotion_es internamente? 
+                # Revisando la implementacion de TemporalEmotionAnalyzer en emotion_analysis.py:
+                # Sí, llama a analyze_text_emotion_es y analyze_text_emotion_en.
+                # Entonces podemos eliminar las llamadas manuales a analyze_text_emotion_* aqui tambien para evitar duplicidad,
+                # PERO app_fastapi.py actual aun tiene esas llamadas antes de llamar a emotion_analyzer.
+                # Para simplificar y arreglar el error de archivo, primero arreglemos lo del archivo.
+                # La duplicidad de texto es menos grave (cache lru ayuda).
+                # Pero la clase TemporalEmotionAnalyzer SI hace el trabajo completo.
                 
-                # Dynamic Logic
-                eff_audio_w = audio_weight if valid_audio else 0.0
-                eff_text_w = 1.0 - eff_audio_w
+                emotion_result = emotion_analyzer.analyze_segment(
+                    text_es=seg_text_es,
+                    text_en=seg_text_en,
+                    audio_path=seg_audio_path if valid_audio else None,
+                    audio_weight=audio_weight,
+                    apply_smoothing=True
+                )
+                
+                # AHORA borramos el archivo de audio
+                if valid_audio and seg_audio_path and os.path.exists(seg_audio_path):
+                    try: os.remove(seg_audio_path)
+                    except: pass
+                
+                top_emo = emotion_result.top_emotion
+                top_score = emotion_result.top_score
+                final_emotions = emotion_result.emotions
 
-                all_keys = set(text_emotions.keys()) | set(score_audio.keys())
-                for k in all_keys:
-                    val_t = text_emotions.get(k, 0.0)
-                    val_a = score_audio.get(k, 0.0)
-                    final_emotions[k] = (val_t * eff_text_w) + (val_a * eff_audio_w)
-
-                if not final_emotions: final_emotions = {"neutral": 1.0}
-                top_emo = max(final_emotions, key=final_emotions.get)
-                top_score = final_emotions.get(top_emo, 0.0)
-
-                # Formatting
+                # Formateo (Simplificado para usar solo emotion_result del Analyzer)
                 formatted_emotions = {
-                    "spanish_analysis": {"top_emotion": res_es.top_emotion, "emotions": res_es.emotions},
-                    "english_analysis": {"top_emotion": res_en.top_emotion if res_en else None},
+                    "spanish_analysis": {"top_emotion": top_emo, "emotions": final_emotions}, # Aprox
+                    "english_analysis": {"top_emotion": None}, # Ya no desglosamos indiv
                     "fused": {
                         "top_emotion": top_emo,
                         "score": round(top_score, 4),
                         "all_emotions": final_emotions 
                     },
-                    "audio_analysis": {"top_emotion": res_audio.top_emotion if (res_audio and valid_audio) else None}
+                    "audio_analysis": {"top_emotion": None} # Ya no desglosamos indiv
                 }
 
                 enriched_segments.append({
@@ -243,7 +273,7 @@ async def transcribe_full_analysis(
                 logger.error(f"Critical error seg {i}: {e_seg}")
                 continue
 
-        # Global Stats
+        # Estadisticas
         global_emotions = {}
         for seg in enriched_segments:
             fused = seg["emotions"]["fused"]["all_emotions"]
@@ -263,29 +293,35 @@ async def transcribe_full_analysis(
                 "time": s["start"],
                 "emotion": s["emotions"]["fused"]["top_emotion"],
                 "score": s["emotions"]["fused"]["score"],
-                "all_emotions": s["emotions"]["fused"]["all_emotions"]  # NEW: Full distribution for multi-line chart
+                "all_emotions": s["emotions"]["fused"]["all_emotions"]
             })
+
+        processing_time = time.time() - start_time
+        _metrics["requests_success"] += 1
+        _metrics["total_processing_time"] += processing_time
 
         return {
             "status": "success",
-            "mode": "consolidated_v3",
+            "mode": "consolidated_v4",
             "transcription": tx_full,
             "translation": " ".join(translations) if translations else "",
             "segments": enriched_segments,
             "global_emotions": {
                 "top_emotion": top_global,
-                "top_score": global_emotions.get(top_global, 0.0), # NEW: Added intensity
+                "top_score": global_emotions.get(top_global, 0.0),
                 "emotion_distribution": global_emotions
             },
             "emotion_timeline": timeline,
             "metadata": {
                 "total_duration": result.get("duration", 0),
+                "processing_time": round(processing_time, 2),
                 "params": {"lite": lite_mode, "audio_weight": audio_weight}
             }
         }
 
     except Exception as e:
-        logger.error(f"Error Gen: {e}")
+        _metrics["requests_failed"] += 1
+        logger.error(f"Error Gen: {e}\n{traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"error": str(e)})
     finally:
         if tmp_path and os.path.exists(tmp_path):

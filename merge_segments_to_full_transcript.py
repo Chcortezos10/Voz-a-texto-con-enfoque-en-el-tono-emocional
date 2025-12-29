@@ -1,6 +1,5 @@
-# merge_segments_to_full_transcript.py
 """
-Fusiona segmentos de transcripción consecutivos del mismo hablante.
+Fusiona segmentos de transcripcion consecutivos del mismo hablante.
 """
 import json
 from pathlib import Path
@@ -19,7 +18,7 @@ def merge_segments(segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     Returns:
         Lista de segmentos fusionados
     """
-    # Asegurarse de que los segmentos estén ordenados por tiempo
+    # Asegurarse de que los segmentos esten ordenados por tiempo
     segments = sorted(segments, key=lambda s: s.get("start", 0.0))
     
     merged = []
@@ -44,7 +43,7 @@ def merge_segments(segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         else:
             last = merged[-1]
             if speaker == last["speaker"]:
-                # Extender rango temporal y añadir texto
+                # Extender rango temporal y agregar texto
                 last["end"] = max(last["end"], end)
                 if text:
                     last["texts"].append(text)

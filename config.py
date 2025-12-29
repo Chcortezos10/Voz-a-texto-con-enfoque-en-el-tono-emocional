@@ -17,17 +17,17 @@ OUTPUT_DIR = PROJECT_ROOT / "output"
 # Configuración de audio
 TARGET_SR = 16000  # Sample rate objetivo en Hz
 
-# Configuración de VAD (Voice Activity Detection)
-VAD_MODE = 2  # 0-3 (0 menos agresivo, 3 más agresivo)
+# Configuracion de VAD (Voice Activity Detection)
+VAD_MODE = 2  # 0-3 (0 menos agresivo, 3 mas agresivo)
 VAD_FRAME_MS = 30  # Frame size en ms (10, 20, 30)
 
-# Configuración de embeddings y diarización
+# Configuracion de embeddings y diarizacion
 WINDOW_SEC = 2.5  # Ventana para embeddings (segundos)
 HOP_SEC = 0.75  # Salto entre ventanas (segundos)
-CHANGE_SIM_THRESHOLD = 0.82  # Similitud coseno mínima para considerar "misma voz"
+CHANGE_SIM_THRESHOLD = 0.82  # Similitud coseno minima para considerar "misma voz"
 MIN_SEG_SEC = 0.25  # Ignorar segmentos muy cortos (segundos)
 
-# Configuración de API FastAPI
+# Configuracion de API FastAPI
 MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 50 * 1024 * 1024))  # 50 MB default
 ALLOWED_MIME: Set[str] = {
     "audio/wav",
@@ -38,10 +38,10 @@ ALLOWED_MIME: Set[str] = {
     "audio/mp4"
 }
 
-# Configuración de workers
+# Configuracion de workers
 WORKERS = int(os.getenv("WORKERS", "2"))
 
-# Configuración de CORS - incluye wildcard para desarrollo y archivos locales
+# Configuracion de CORS - incluye wildcard para desarrollo y archivos locales
 CORS_ORIGINS = [
     "*",  # Permitir todos los orígenes (para desarrollo)
     "http://localhost:8501",
@@ -51,33 +51,31 @@ CORS_ORIGINS = [
     "null",  # Para archivos locales (file://)
 ]
 
-# Configuración de modelos
-# Usar modelo 'small' por defecto para mejor precisión con RTX 4060
+# Configuracion de modelos
+# Usar modelo 'small' por defecto para mejor precision con RTX 4060
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")  # tiny, base, small, medium, large
 
-# Modelos de HuggingFace para análisis emocional
+# Modelos de HuggingFace para analisis emocional
 TEXT_EMOTION_MODEL = "j-hartmann/emotion-english-distilroberta-base"  # Inglés (7 emociones)
 AUDIO_EMOTION_MODEL = "superb/wav2vec2-base-superb-er"  # Emociones en audio
 SENTIMENT_MODEL = "tabularisai/multilingual-sentiment-analysis"
 
-# Modelos adicionales para precisión mejorada
-TRANSLATION_MODEL = "Helsinki-NLP/opus-mt-es-en"  # Traducción ES → EN
+# Modelos adicionales para precision mejorada
+TRANSLATION_MODEL = "Helsinki-NLP/opus-mt-es-en"  # Traduccion ES → EN
 EMOTION_ES_MODEL = "daveni/twitter-xlm-roberta-emotion-es"  # Emociones en español directo
 
-# Configuración de logging
+# Configuracion de logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-# Constantes para conversión de audio
-PCM16_MAX = 32767  # Valor máximo para audio PCM de 16 bits
-VOSK_CHUNK_FRAMES = 4000  # Número de frames por iteración en Vosk
+# Constantes para conversion de audio
+PCM16_MAX = 32767  # Valor maximo para audio PCM de 16 bits
+VOSK_CHUNK_FRAMES = 4000  # Numero de frames por iteracion en Vosk
 VAD_MERGE_GAP_SEC = 0.2  # Gap máximo para fusionar regiones VAD (segundos)
 
 # Límites de seguridad
 MAX_AUDIO_DURATION_SEC = int(os.getenv("MAX_AUDIO_DURATION", 600))  # 10 minutos por defecto
 
-# ============================================
 # Configuración de Análisis Multi-Modal
-# ============================================
 
 # Pesos para fusión de emociones (texto vs audio)
 # Valores más altos = más importancia a esa modalidad
@@ -90,16 +88,13 @@ FUSION_MODE = os.getenv("FUSION_MODE", "weighted_average")
 # Umbral mínimo de confianza para considerar una emoción válida
 MIN_EMOTION_CONFIDENCE = float(os.getenv("MIN_EMOTION_CONFIDENCE", "0.3"))
 
-# ============================================
 # Configuración de GPU (CUDA)
-# ============================================
-
 # Dispositivo para modelos de deep learning
 # 'auto' detecta automáticamente, 'cuda' fuerza GPU, 'cpu' fuerza CPU
 DEVICE = os.getenv("DEVICE", "auto")
 
 
-# Mapeo de emociones SIMPLIFICADO (Solo 4 categorías básicas)
+# Mapeo de emociones SIMPLIFICADO (Solo 4 categorias basicas)
 # Usuario requiere SOLO: Feliz, Enojado, Triste, Neutral
 # Todas las demás emociones se consolidan en estas 4
 EMOTION_MAPPING = {
