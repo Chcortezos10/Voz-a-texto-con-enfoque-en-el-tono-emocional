@@ -1,0 +1,61 @@
+# =====================================================
+# Docker Compose - Voz a Texto con Enfoque en Tono Emocional
+# =====================================================
+# Uso:
+#   docker-compose up --build        # Construir e iniciar
+#   docker-compose up -d             # Iniciar en segundo plano
+#   docker-compose down              # Detener
+#   docker-compose logs -f           # Ver logs en tiempo real
+# =====================================================
+
+version: "3.8"
+
+services:
+  transcriptor-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: transcriptor-emocional
+
+    # Habilitar GPU NVIDIA (comentar si no tienes GPU)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CUDA_VISIBLE_DEVICES=0
+
+    volumes:
+      # Persistir modelos descargados (evita re-descargar en cada reinicio)
+      - whisper_models:/root/.cache/whisper
+      - huggingface_cache:/root/.cache/huggingface
+      # Carpetas de datos y salida (opcional)
+      - ./data:/app/data
+      - ./output:/app/output
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s # Tiempo para cargar modelos grandes
+
+    restart: unless-stopped
+
+    # Límites de memoria (ajustar según tu sistema)
+    # mem_limit: 8g
+    # memswap_limit: 10g
+
+volumes:
+  whisper_models:
+    name: transcriptor_whisper_cache
+  huggingface_cache:
+    name: transcriptor_hf_cache

@@ -1,0 +1,59 @@
+# =====================================================
+# Dockerfile - Voz a Texto con Enfoque en Tono Emocional
+# =====================================================
+
+# Base image con soporte CUDA para GPU (RTX 4060 compatible)
+# Usar python:3.11-slim si no necesitas GPU
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+
+# Metadatos
+LABEL maintainer="Christian"
+LABEL description="API de transcripción de voz a texto con análisis emocional"
+LABEL version="4.0.0"
+
+# Evitar prompts interactivos durante instalación
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Variables de entorno del proyecto
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema necesarias para audio processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libsndfile1 \
+    libportaudio2 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements primero (para cache de Docker)
+COPY requirements.txt .
+
+# Instalar dependencias de Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el código fuente del proyecto
+COPY . .
+
+# Crear directorios necesarios
+RUN mkdir -p /app/data /app/output /app/model
+
+# Puerto de la API FastAPI
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Comando para ejecutar la aplicación
+# Usar workers=1 para evitar problemas con modelos grandes en memoria
+CMD ["uvicorn", "app_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

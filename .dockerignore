@@ -1,0 +1,58 @@
+# =====================================================
+# .dockerignore - Archivos a excluir del build de Docker
+# =====================================================
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv/
+ENV/
+env/
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+
+# Archivos de audio de prueba (no necesarios en producción)
+*.wav
+*.mp3
+*.m4a
+*.mp4
+test*.wav
+test*.mp3
+
+# Outputs y data local
+output/
+data/
+
+# Modelo descargado (se descargará al iniciar)
+model/
+modelo/
+
+# Archivos de documentación
+*.md
+!README.md
+
+# Archivos batch de Windows
+*.bat
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
