@@ -5,7 +5,6 @@ Utiliza Helsinki-NLP/opus-mt-es-en para traducción de alta calidad.
 import logging
 from functools import lru_cache
 from typing import Optional, List
-
 import torch
 from transformers import MarianMTModel, MarianTokenizer
 

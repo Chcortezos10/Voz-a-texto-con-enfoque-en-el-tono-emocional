@@ -278,3 +278,20 @@ def windows_within_regions(
                 merged.append((s, e))
 
     return merged
+
+def validate_audio_energy(audio: np.ndarray, sr: int) -> tuple:
+    #valida que el audio tenga energia 
+
+    if audio.size == 0:
+        return False,0.0,"Audio vacio"
+
+    rms = np.sqrt(np.mean(audio**2))
+    if rms < min_rms:
+        return False,rms,f"Audio sin energia, rms={rms:.4f}"
+
+    peak = np.max(np.abs(audio))
+    warning = None
+    if peak > 0.99:
+        warning = "audio posiblemente saturado, max={peak:.4f}"
+    return True,rms,warning
+    

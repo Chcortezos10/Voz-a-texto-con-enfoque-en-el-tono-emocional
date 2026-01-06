@@ -1,20 +1,26 @@
-# 🎭 Voz-a-Texto Emocional V5
+# 🎭 Voz-a-Texto Emocional
 
-Sistema avanzado de transcripción y análisis emocional de audio con interfaz visual interactiva.
+Sistema avanzado de transcripción y análisis emocional de audio con interfaz visual interactiva, desarrollado con FastAPI y modelos de IA.
+
+---
 
 ## ✨ Características Principales
 
-- 🎤 **Transcripción** - OpenAI Whisper en español
-- � **Análisis Emocional Simplificado** - 4 categorías: 😊 Feliz, 😠 Enojado, 😢 Triste, 😐 Neutral
-- � **Análisis Multi-Modal** - Combina texto y tono de voz
-- � **Dashboard Interactivo** - Métricas, gráficos y momentos destacados
-- ⚡ **Optimizado para RAM** - Carga de modelos bajo demanda
+| Característica               | Descripción                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| 🎤 **Transcripción**         | OpenAI Whisper en español con soporte GPU            |
+| 😊 **Análisis Emocional**    | 4 categorías: Feliz, Enojado, Triste, Neutral        |
+| 🔀 **Análisis Multi-Modal**  | Combina análisis de texto y tono de voz              |
+| 📊 **Dashboard Interactivo** | Métricas, gráficos Timeline y momentos destacados    |
+| 🐳 **Docker Ready**          | Despliegue containerizado con soporte GPU NVIDIA     |
+| 🛡️ **Resiliencia**           | Circuit Breaker, Retry Logic y Graceful Degradation  |
+| ✅ **Validación**            | Validación completa de audio, segmentos y parámetros |
 
 ---
 
 ## 🚀 Inicio Rápido
 
-### Opción 1: Script Automático (Recomendado)
+### Opción 1: Script Automático (Windows)
 
 ```bash
 # Doble clic en:
@@ -38,11 +44,27 @@ uvicorn app_fastapi:app --host 127.0.0.1 --port 8000
 
 Luego abre `dashboard.html` en tu navegador.
 
+### Opción 3: Docker
+
+```bash
+# Construir e iniciar
+docker-compose up --build
+
+# Iniciar en segundo plano
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener
+docker-compose down
+```
+
 ---
 
-## 📊 Dashboard V5
+## 📊 Dashboard
 
-El dashboard incluye:
+El dashboard HTML5 incluye:
 
 | Característica           | Descripción                                       |
 | ------------------------ | ------------------------------------------------- |
@@ -58,22 +80,37 @@ El dashboard incluye:
 ## 📁 Estructura del Proyecto
 
 ```
-├── core/                      # Módulos principales
-│   ├── emotion_analysis.py    # Análisis emocional (4 categorías)
-│   ├── translation.py         # Traducción ES→EN
-│   ├── audio_processing.py    # Procesamiento de audio
-│   └── models.py              # Carga de Whisper
+├── core/                          # Módulos principales
+│   ├── emotion_analysis.py        # Análisis emocional multi-modal
+│   ├── translation.py             # Traducción ES→EN (Helsinki-NLP)
+│   ├── audio_processing.py        # Procesamiento de audio
+│   ├── transcription.py           # Transcripción con Whisper
+│   ├── diarization.py             # Diarización de hablantes
+│   └── models.py                  # Carga de modelos Whisper
 │
-├── app_fastapi.py             # API REST unificada (puerto 8000)
-├── config.py                  # Configuración y mapeo de emociones
-├── dashboard.html             # Dashboard V5 interactivo
-├── run_system_v2.bat          # Script de inicio
-└── requirements.txt           # Dependencias
+├── app_fastapi.py                 # API REST unificada (puerto 8000)
+├── config.py                      # Configuración y mapeo de emociones
+├── Validators.py                  # Validación de audio y parámetros
+├── Resilience.py                  # Circuit Breaker y Retry Logic
+│
+├── dashboard.html                 # Dashboard web interactivo
+├── run_system_v2.bat              # Script de inicio (Windows)
+├── run_system.sh                  # Script de inicio (Linux/Mac)
+│
+├── Dockerfile                     # Configuración Docker
+├── docker-compose.yml             # Orquestación de contenedores
+├── requirements.txt               # Dependencias Python
+│
+├── model/                         # Modelos descargados
+├── data/                          # Archivos de datos
+└── output/                        # Archivos de salida
 ```
 
 ---
 
-## 🔌 API Endpoint
+## 🔌 API Endpoints
+
+### Análisis Completo
 
 ```bash
 POST /transcribe/full-analysis
@@ -93,6 +130,13 @@ curl -X POST "http://127.0.0.1:8000/transcribe/full-analysis" \
   -F "lite_mode=false"
 ```
 
+### Health Check
+
+```bash
+GET /health           # Estado básico
+GET /health/detailed  # Estado detallado con métricas
+```
+
 ---
 
 ## ⚙️ Configuración de Emociones
@@ -101,18 +145,81 @@ Las emociones se simplifican a 4 categorías en `config.py`:
 
 | Salida         | Emociones Incluidas             |
 | -------------- | ------------------------------- |
-| � **feliz**    | alegría, sorpresa, positividad  |
+| 😊 **feliz**   | alegría, sorpresa, positividad  |
 | 😠 **enojado** | ira, disgusto, rechazo          |
 | 😢 **triste**  | tristeza, miedo, vulnerabilidad |
 | 😐 **neutral** | neutral, otros                  |
 
 ---
 
+## 🛡️ Módulos de Resiliencia
+
+### Circuit Breaker
+
+Protege contra fallos en cascada con estados: CLOSED, OPEN, HALF_OPEN.
+
+### Retry with Backoff
+
+Reintentos automáticos con delay exponencial y jitter.
+
+### Graceful Degradation
+
+Valores por defecto cuando fallan servicios externos.
+
+### Fallback Chain
+
+Cadena de handlers alternativos para operaciones críticas.
+
+---
+
+## ✅ Validación
+
+| Validador             | Función                                           |
+| --------------------- | ------------------------------------------------- |
+| `AudioValidator`      | Valida formato, duración, sample rate y contenido |
+| `SegmentValidator`    | Valida segmentos de transcripción                 |
+| `ParametersValidator` | Valida parámetros de API                          |
+
+---
+
 ## 🛠️ Requisitos
 
-- Python 3.10+
-- 4GB RAM mínimo (8GB recomendado)
-- Windows 10/11
+| Requisito | Especificación                                    |
+| --------- | ------------------------------------------------- |
+| Python    | 3.10+                                             |
+| RAM       | 4GB mínimo (8GB recomendado)                      |
+| GPU       | NVIDIA con CUDA (opcional, acelera procesamiento) |
+| SO        | Windows 10/11, Linux, macOS                       |
+
+---
+
+## 🐳 Docker
+
+El proyecto incluye soporte completo para Docker con:
+
+- **GPU NVIDIA**: Habilitado por defecto (comentar si no hay GPU)
+- **Volúmenes persistentes**: Cache de modelos Whisper y HuggingFace
+- **Health checks**: Monitoreo automático del servicio
+- **Auto-restart**: Reinicio automático en caso de fallo
+
+---
+
+## 📋 Modelos Utilizados
+
+| Modelo                                        | Propósito                         |
+| --------------------------------------------- | --------------------------------- |
+| OpenAI Whisper (small)                        | Transcripción de audio en español |
+| Helsinki-NLP/opus-mt-es-en                    | Traducción español → inglés       |
+| daveni/twitter-xlm-roberta-emotion-es         | Análisis emocional en español     |
+| j-hartmann/emotion-english-distilroberta-base | Análisis emocional en inglés      |
+
+---
+
+## 📝 Notas Importantes
+
+1. **Primera ejecución**: Descarga ~1-2GB de modelos automáticamente
+2. **Audio mínimo**: 2-3 segundos para análisis correcto
+3. **GPU**: Detecta CUDA automáticamente para acelerar procesamiento
 
 ---
 
