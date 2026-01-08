@@ -44,12 +44,23 @@ class EmotionResult:
     source: str  # 'text', 'audio', 'text_es', 'text_en', 'multimodal'
 
 class TemporalEmotionState:
-#estado para suavizado temporal de emociones
-    def add(self,emotions:Dict[str,float])->None:
+    """Estado para suavizado temporal de emociones."""
+    
+    def __init__(self):
+        self.history: List[Dict[str, float]] = []
+    
+    def add(self, emotions: Dict[str, float]) -> None:
         self.history.append(emotions.copy())
     
+    def update(self, emotions: Dict[str, float]) -> None:
+        """Alias for add method."""
+        self.add(emotions)
+    
+    def reset(self) -> None:
+        self.history = []
+    
     def get_smoothed(self, current: Dict[str, float], alpha: float = 0.6) -> Dict[str, float]:
-        #retorna las emociones suavizadas con el historial
+        """Retorna las emociones suavizadas con el historial."""
         if not self.history:
             return current
         
@@ -62,20 +73,23 @@ class TemporalEmotionState:
             current_val = current.get(emotion, 0.0)
             hist_vals = [h.get(emotion, 0.0) for h in self.history]
             if hist_vals:
-                smoothed[emo]=alpha*current_val+(1-alpha)*hist_avg
+                hist_avg = sum(hist_vals) / len(hist_vals)
+                smoothed[emotion] = alpha * current_val + (1 - alpha) * hist_avg
             else:
-                smoothed[emo]=current_val
+                smoothed[emotion] = current_val
         return smoothed
 
+@dataclass
 class ProsodyFeatures:
-# se cargan caracteristicas prosódicas del audio
-    pitch_mean:float=150.0
-    pitch_std:float=20.0
-    pitch_range:float=50.0
-    energy_mean:float=0.05
-    energy_std:float=0.02
-    speech_rate:float=3.0
-    pause_ratio:float=0.2
+    """Características prosódicas del audio."""
+    pitch_mean: float = 150.0
+    pitch_std: float = 20.0
+    pitch_range: float = 50.0
+    energy_mean: float = 0.05
+    energy_std: float = 0.02
+    energy_range: float = 0.0
+    speech_rate: float = 3.0
+    pause_ratio: float = 0.2
 
 class ProsodyAnalyzer:
 # analiza las caracteristicas prosódicas del audio para la inferencia de las emociones
@@ -91,42 +105,47 @@ class ProsodyAnalyzer:
         self.energy_thresholds={"low":0.02,"high":0.08}
         self.rate_thresholds={"slow":2.0,"fast":4.5}
     
-    def extract_features(self,y:np.ndarray)->ProsodyFeatures:
+    def extract_features(self, audio: np.ndarray, sr: int = None) -> ProsodyFeatures:
         """Extrae características prosódicas del audio."""
-        if not librosa_disponible or len(audio)<1:
+        if sr is not None:
+            self.sr = sr
+        
+        if audio is None or len(audio) < 1:
             return ProsodyFeatures()
         try:
-            #pitch usando pyin
-            fo,voiced_flag, voiced_probs = librosa.pyin(audio,
+            # Pitch usando pyin
+            fo, voiced_flag, voiced_probs = librosa.pyin(
+                audio,
                 fmin=librosa.note_to_hz('C2'),
                 fmax=librosa.note_to_hz('C7'),
-                sr=self.sr)
+                sr=self.sr
+            )
             
             fo_valid = fo[~np.isnan(fo)]
-            if len(fo_valid)==0:
-                fo_valid=np.array([150.0])
+            if len(fo_valid) == 0:
+                fo_valid = np.array([150.0])
 
-            pitch_mean=np.mean(fo_valid)
-            pitch_std=np.std(fo_valid)
-            pitch_range=np.max(fo_valid)-np.min(fo_valid)
+            pitch_mean = float(np.mean(fo_valid))
+            pitch_std = float(np.std(fo_valid))
+            pitch_range = float(np.max(fo_valid) - np.min(fo_valid))
 
-            #energia del audio usando librosa 
+            # Energía del audio usando librosa 
             rms = librosa.feature.rms(y=audio, frame_length=2048, hop_length=512)[0]
-            energy_mean=float(np.mean(rms))
-            energy_std=float(np.std(rms))
-            energy_range=float(np.max(rms)-np.min(rms))
+            energy_mean = float(np.mean(rms))
+            energy_std = float(np.std(rms))
+            energy_range = float(np.max(rms) - np.min(rms))
 
-            #velocidad de habla
+            # Velocidad de habla
             energy_diff = np.abs(np.diff(rms))
-            threshold = np.mean(energy_diff)+np.std(energy_diff)
-            speech_onsets=np.sum(energy_diff>threshold)
-            duration = len (audio)/self.sr
-            speech_rate=speech_onsets/max(duration,0.1)
+            threshold = np.mean(energy_diff) + np.std(energy_diff)
+            speech_onsets = np.sum(energy_diff > threshold)
+            duration = len(audio) / self.sr
+            speech_rate = speech_onsets / max(duration, 0.1)
 
-            #ratio de pausas en el audio
-            silence_threshold = energy_mean*0.3
+            # Ratio de pausas en el audio
+            silence_threshold = energy_mean * 0.3
             silence_frames = np.sum(rms < silence_threshold)
-            pause_ratio = silence_frames / len(rms)
+            pause_ratio = silence_frames / max(len(rms), 1)
     
             return ProsodyFeatures(
                 pitch_mean=pitch_mean,
@@ -142,49 +161,51 @@ class ProsodyAnalyzer:
             logger.error(f"Error al extraer características prosódicas: {e}")
             return ProsodyFeatures()
 
-def infer_emotion(self,features:ProsodyFeatures)->tuple[str,float]:
-    #infiere la emocion en base a las caracteristicas prosodsicas del audio 
-    #utiliza las reglas de prosodia para inferir la emocion
-    score={}
-    for emotion,rule in self.PROSODY_RULES.items():
-        score=0.0
-        checks=0
-        
-        #se evalua el pitch
-        if features["pitch"] == "high" and features.pitch_mean>self.pitch_thresholds["high"]:
-            score+=1
-        elif features["pitch"] == "low" and features.pitch_mean<self.pitch_thresholds["low"]:
-            score+=1
-        elif features["pitch"] == "medium" and features.pitch_mean<self.pitch_thresholds["low"]:
-            score+=1
-        checks+=1
+    def infer_emotion(self, features: ProsodyFeatures) -> tuple:
+        """Infiere la emoción en base a las características prosódicas del audio."""
+        scores = {}
+        for emotion, rules in self.PROSODY_RULES.items():
+            score = 0.0
+            checks = 0
+            
+            # Evaluar pitch
+            if rules["pitch"] == "high" and features.pitch_mean > self.pitch_thresholds["high"]:
+                score += 1
+            elif rules["pitch"] == "low" and features.pitch_mean < self.pitch_thresholds["low"]:
+                score += 1
+            elif rules["pitch"] == "medium" and self.pitch_thresholds["low"] <= features.pitch_mean <= self.pitch_thresholds["high"]:
+                score += 1
+            checks += 1
 
-        #evaluar la variabilidad que se tiene en el pitch
-        if rules["pitch_var"] == "high" and features.pitch_std> 30:
-            score+=1
-        elif rules["pitch_var"] == "low" and features.pitch_std< 30:
-            score+=1
-        checks+=1
-        #evaluar la energia
-        if rules["energy"] == "high" and features.energy_mean > self.energy_thresholds["high"]:
-            score += 1
-        elif rules["energy"] == "low" and features.energy_mean < self.energy_thresholds["low"]:
-            score += 1
-        elif rules["energy"] == "medium" and self.energy_thresholds["low"] <= features.energy_mean <= self.energy_thresholds["high"]:
-            score += 1
-        checks += 1
+            # Evaluar variabilidad del pitch
+            if rules["pitch_var"] == "high" and features.pitch_std > 30:
+                score += 1
+            elif rules["pitch_var"] == "low" and features.pitch_std < 30:
+                score += 1
+            checks += 1
+            
+            # Evaluar energía
+            if rules["energy"] == "high" and features.energy_mean > self.energy_thresholds["high"]:
+                score += 1
+            elif rules["energy"] == "low" and features.energy_mean < self.energy_thresholds["low"]:
+                score += 1
+            elif rules["energy"] == "medium" and self.energy_thresholds["low"] <= features.energy_mean <= self.energy_thresholds["high"]:
+                score += 1
+            checks += 1
 
-        #evaluar la velocidad de habla
-        if rules["rate"] == "fast" and features.speech_rate>self.rate_thresholds["fast"]:
-            score+=1
-        elif rules["rate"] == "slow" and features.speech_rate<self.rate_thresholds["slow"]:
-            score+=1
-        checks+=1
+            # Evaluar velocidad de habla
+            if rules["rate"] == "fast" and features.speech_rate > self.rate_thresholds["fast"]:
+                score += 1
+            elif rules["rate"] == "slow" and features.speech_rate < self.rate_thresholds["slow"]:
+                score += 1
+            checks += 1
 
-        scores[emotion]=score/max(checks,1)
+            scores[emotion] = score / max(checks, 1)
 
-    top_emotion = max(scores,key=scores.get)
-    return top_emotion,scores[top_emotion]
+        if not scores:
+            return "neutral", 0.5
+        top_emotion = max(scores, key=scores.get)
+        return top_emotion, scores[top_emotion]
 
 _prosody_analyzer:Optional[ProsodyAnalyzer]=None
 
@@ -645,41 +666,41 @@ class TemporalEmotionAnalyzer:
         apply_smoothing: bool = True
     ) -> EmotionResult:
 
-        result = []
+        results = []
         weights = []
 
-        #analisis de texto en español
+        # Análisis de texto en español
         result_es = analyze_text_emotion_es(text_es)
         if result_es:
-            result.append(result_es)
+            results.append(result_es)
             weights.append(0.35)
         
-        #analisis de texto en ingles
+        # Análisis de texto en inglés
         if text_en and text_en.strip():
             result_en = analyze_text_emotion_en(text_en)
             if result_en:
-                result.append(result_en)
+                results.append(result_en)
                 weights.append(0.25)
 
-        #analisis de audio
+        # Análisis de audio
         if audio_path and audio_weight > 0:
             try:
                 audio_result = analyze_audio_emotion(audio_path)
                 if audio_result:
-                    result.append(audio_result)
-                    weights.append(audio_weight*0.6)
+                    results.append(audio_result)
+                    weights.append(audio_weight * 0.6)
             except Exception as e:
                 logger.error(f"Error al analizar el audio: {e}")
 
-        #analisis prosodico 
+        # Análisis prosódico 
         if self.use_prosody and audio_array is not None and len(audio_array) > 0:
             try:
-                ProsodyFeatures = self._prosody_analyzer.extract_features(audio_array, sr)
-                prosody_emo, prosody_conf = self._prosody_analyzer.infer_emotion(ProsodyFeatures)
+                prosody_features = self._prosody_analyzer.extract_features(audio_array, sr)
+                prosody_emo, prosody_conf = self._prosody_analyzer.infer_emotion(prosody_features)
                 prosody_emotions = {prosody_emo: prosody_conf}
-                for emo in ["feliz","enojado","triste","neutral"]:
+                for emo in ["feliz", "enojado", "triste", "neutral"]:
                     if emo not in prosody_emotions:
-                        prosody_emotions[emo] = (1-prosody_conf)/3
+                        prosody_emotions[emo] = (1 - prosody_conf) / 3
 
                 prosody_result = EmotionResult(
                     emotions=prosody_emotions,
@@ -688,13 +709,13 @@ class TemporalEmotionAnalyzer:
                     confidence=prosody_conf,
                     source="prosody"
                 )
-                result.append(prosody_result)
-                weights.append(audio_weight*0.4)
+                results.append(prosody_result)
+                weights.append(audio_weight * 0.4)
             except Exception as e:
                 logger.error(f"Error al analizar el audio: {e}")
 
         #fusion de resultados
-        if not result:
+        if not results:
             return EmotionResult(
                 emotions={"neutral": 1.0},
                 top_emotion="neutral",
@@ -705,37 +726,40 @@ class TemporalEmotionAnalyzer:
         total_weight = sum(weights)
         weights = [w / total_weight for w in weights]
 
-        #calcular emociones ponderadas
+        # Calcular emociones ponderadas
         all_emotions = set()
-        for r in result:
+        for r in results:
             all_emotions.update(r.emotions.keys())
 
         fused_emotions = {}
         for emo in all_emotions:
             weight_sum = 0.0
-            for result, weight in zip(result, weights):
-                weight_sum += result.emotions.get(emo, 0.0) * weight
+            for res, weight in zip(results, weights):
+                weight_sum += res.emotions.get(emo, 0.0) * weight
             fused_emotions[emo] = weight_sum
         
-        #aplicamos los ajustes de sensibilidad
+        # Aplicamos los ajustes de sensibilidad
         fused_emotions = self._apply_sensitivity_adjustments(fused_emotions)
         
-        #normalizar 
+        # Normalizar 
         total = sum(fused_emotions.values())
         if total > 0:
-            fused_emotions = {k:round(v/total, 4) for k,v in fused_emotions.items()}
+            fused_emotions = {k: round(v/total, 4) for k, v in fused_emotions.items()}
 
-        # suavizaso temporal 
+        # Suavizado temporal 
         if apply_smoothing:
-            fused_emotions = self._temporal_state.get_smoothed(fused_emotions,alpha=0.7)
+            fused_emotions = self._temporal_state.get_smoothed(fused_emotions, alpha=0.7)
 
-        #guardar en el historial
+        # Guardar en el historial
         self._temporal_state.update(fused_emotions)
         self.history.append(fused_emotions.copy())
         self.segment_count += 1
 
-        #deteminamos el top de meociones
-        agreement = self._calculate_agreement(result)
+        # Determinamos el top de emociones
+        top_emotion = max(fused_emotions, key=fused_emotions.get) if fused_emotions else "neutral"
+        top_score = fused_emotions.get(top_emotion, 0.5)
+        
+        agreement = self._calculate_agreement(results)
         confidence = (top_score + agreement) / 2
 
         return EmotionResult(
@@ -766,63 +790,57 @@ class TemporalEmotionAnalyzer:
             if top.lower() in ["neutral","other","others","neu"]:
                 candidatos = {k: v for k, v in adjusted.items() 
                             if k.lower() not in ["neutral", "other", "others", "neu"] and v > MIN_THRESHOLD}
-                top = max(candidatos,key=candidatos.get)
-
                 if candidatos:
-                    best = max(candidatos,key=candidatos.get)
+                    best_alt = max(candidatos, key=candidatos.get)
                     adjusted[best_alt] *= 1.5
-                return adjusted
+        return adjusted
 
-    def _calculate_agreement(self,results:List[EmotionResult]) -> float:
-        #calcular la agreement entre los resultados
+    def _calculate_agreement(self, results: List[EmotionResult]) -> float:
+        """Calcula la concordancia entre los resultados."""
         if len(results) < 2:
             return 1.0
         
         top_emotions = [r.top_emotion for r in results]
         from collections import Counter
         counts = Counter(top_emotions)
-        most_common = counts.most_common(1)[0][1]
+        most_common_count = counts.most_common(1)[0][1]
 
         return most_common_count / len(results)
     
     def reset(self):
-        #resetea el estado del analizador
+        """Resetea el estado del analizador."""
         self.history = []
         self.segment_count = 0
-        self.temporal_state.reset()
+        self._temporal_state.reset()
     
     def get_emotion_summary(self) -> Dict[str, Any]:
-        #obtiene un resumen de las emociones
+        """Obtiene un resumen de las emociones."""
         if not self.history:
-            return {"dominant": "neutral", "distribution":{},"transitions":0}
+            return {"dominant": "neutral", "distribution": {}, "transitions": 0}
 
-        accumulated ={}
-        for emotions in self.history:
-            for emo,score in emotions.items():
-                accumulated[emo] = accumulated.get(emo,0) + score 
-
-        #acumular emociones
+        # Acumular emociones
         accumulated = {}
         for emotions in self.history:
-            for emo,score in emotions.items():
-                accumulated[emo] = accumulated.get(emo,0) + score
+            for emo, score in emotions.items():
+                accumulated[emo] = accumulated.get(emo, 0) + score
 
-        #normalizar
+        # Normalizar
         total = sum(accumulated.values())
         if total > 0:
-            accumulated = {k:round(v/total, 4) for k,v in accumulated.items()}
+            accumulated = {k: round(v/total, 4) for k, v in accumulated.items()}
 
-        #calcular la transicion
+        # Calcular transiciones
         transitions = 0
         prev_top = None
         for emotions in self.history:
-            top = max(emotions.items(),key=lambda x:x[1])[0]
-            if prev_top and prev_top != top:
-                transitions += 1
-            prev_top = current_top
+            if emotions:
+                top = max(emotions.items(), key=lambda x: x[1])[0]
+                if prev_top and prev_top != top:
+                    transitions += 1
+                prev_top = top
         
-        return{
-            "dominant": max(accumulated,key=accumulated.get) if accumulated else "neutral",
+        return {
+            "dominant": max(accumulated, key=accumulated.get) if accumulated else "neutral",
             "distribution": accumulated,
             "transitions": transitions,
             "segment_count": self.segment_count
