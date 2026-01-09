@@ -108,9 +108,9 @@ class AudioValidator:
         elif sample_rate != self.TARGET_SAMPLE_RATE:
             warnings.append(f"Sample rate {sample_rate}Hz será convertido a {self.TARGET_SAMPLE_RATE}Hz")           
 
-        #validar canales
+        #validar canales (advertencia, no error - librosa convierte automáticamente)
         if channels != 1:
-            errors.append(f"Audio debe ser mono (canales: {channels})")
+            warnings.append(f"Audio estéreo ({channels} canales) será convertido a mono")
         
         #8._ validar energia 
         if not errors:
@@ -191,7 +191,8 @@ class SegmentValidator:
 class ParametersValidator:
     #validador de parametros de api
     @staticmethod
-    def validate_audio_weight(audio_weight: float) -> Tuple[bool, list]:
+    def validate_audio_weight(audio_weight: float) -> Tuple[float, Optional[str]]:
+        warning = None
         if audio_weight < 0:
             audio_weight = 0.0
             warning = "audio_weight negativo, ajustado a 0.0"
@@ -199,23 +200,22 @@ class ParametersValidator:
             audio_weight = 1.0
             warning = "audio_weight > 1, ajustado a 1.0"
         
-        return weight, warning
+        return audio_weight, warning
     @staticmethod
     def validate_request_params(lite_mode: bool,
         audio_weight: float
-    ) -> Tuple[bool, float, list]:
+    ) -> Tuple[float, list, bool]:
         warnings = []
         audio_weight, weight_warning = ParametersValidator.validate_audio_weight(audio_weight)
         if weight_warning:
             warnings.append(weight_warning)
-        return audio_weight, warnings
 
-        #coherencia:lite_mode implica audio_weight = 0
+        # Coherencia: lite_mode implica audio_weight = 0
         if lite_mode and audio_weight > 0:
             audio_weight = 0.0
             warnings.append("lite_mode implica audio_weight = 0, ajustado a 0.0")
         
-        return audio_weight, warnings,lite_mode
+        return audio_weight, warnings, lite_mode
     
     def validate_audio_file(file_path: Union[str, Path]) -> AudioValidationResult:
         #funcion de conveniencia para validar un archivo de audio.
@@ -231,3 +231,19 @@ class ParametersValidator:
             return True, msg
         else:
             return False, f"audio invalido: {result.errors}"
+
+def validate_audio_energy(
+    audio: np.ndarray, 
+    sr: int, 
+    min_rms: float = 0.001
+) -> tuple:
+    # Validacion rapida de energia parecida a lo que se hace dentro de AudioValidator
+    rms = np.sqrt(np.mean(audio**2))
+    if rms < min_rms:
+         return False, f"Energía muy baja (RMS={rms:.4f})"
+    
+    # Check clipping
+    if np.max(np.abs(audio)) > 0.99:
+        return True, "Posible clipping detectado"
+        
+    return True, None

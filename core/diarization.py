@@ -8,6 +8,9 @@ from resemblyzer import VoiceEncoder
 from sklearn.preprocessing import normalize
 
 from config import WINDOW_SEC, CHANGE_SIM_THRESHOLD, MIN_SEG_SEC
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def compute_embeddings(
@@ -87,18 +90,18 @@ def cluster_speakers(
         Array de etiquetas (N,)
     """
     N = len(embeddings)
-    print(f"[DBG cluster_speakers] N={N}, num_speakers={num_speakers}, type={type(num_speakers)}")
+    logger.debug(f"[DBG cluster_speakers] N={N}, num_speakers={num_speakers}, type={type(num_speakers)}")
     
     # Si tenemos pocos embeddings, devolvemos todo 0
     if N < 2:
-        print(f"[DBG] N < 2, retornando todos 0")
+        logger.debug(f"[DBG] N < 2, retornando todos 0")
         return np.zeros(N, dtype=int)
         
     try:
         # Modo Manual: K fijo (verifica que num_speakers sea un int > 0)
         if num_speakers is not None and num_speakers > 0:
             k = min(num_speakers, N)
-            print(f"[DBG] Modo MANUAL: Forzando k={k}")
+            logger.debug(f"[DBG] Modo MANUAL: Forzando k={k}")
             clustering = AgglomerativeClustering(
                 n_clusters=k,
                 metric='cosine',
@@ -120,7 +123,7 @@ def cluster_speakers(
         # Si el usuario no especificó nada, asumimos que intenta buscar diferencias
         start_k = max(2, min_speakers) if min_speakers else 2
         
-        print(f"Iniciando auto-clustering (búsqueda K={start_k}..{search_max})...")
+        logger.debug(f"Iniciando auto-clustering (búsqueda K={start_k}..{search_max})...")
         
         for k in range(start_k, search_max + 1):
             model = AgglomerativeClustering(
@@ -136,7 +139,7 @@ def cluster_speakers(
             except:
                 score = -1.0
                 
-            print(f"  K={k}: Silhouette Score = {score:.4f}")
+            logger.debug(f"  K={k}: Silhouette Score = {score:.4f}")
             
             if score > best_score:
                 best_score = score
@@ -149,21 +152,20 @@ def cluster_speakers(
         MIN_SCORE_THRESHOLD = 0.01 
         
         if best_score > MIN_SCORE_THRESHOLD:
-            print(f"✔ Auto-clustering seleccionado: {best_k} hablantes (Score: {best_score:.4f})")
+            logger.info(f"✔ Auto-clustering seleccionado: {best_k} hablantes (Score: {best_score:.4f})")
             return best_labels
         else:
-            print(f"⚠ Score máximo ({best_score:.4f}) bajo. Fallback: intentando separar al menos 2 si score > 0.")
+            logger.warning(f"⚠ Score máximo ({best_score:.4f}) bajo. Fallback: intentando separar al menos 2 si score > 0.")
             # Fallback agresivo: si score positivo y detectó >1, úsalos
             if best_score > 0 and best_k > 1:
-                 print(f"  -> Forzando {best_k} hablantes por fallback (Score positivo).")
+                 logger.info(f"  -> Forzando {best_k} hablantes por fallback (Score positivo).")
                  return best_labels
             
             return np.zeros(N, dtype=int)
 
     except Exception as e:
-        print(f"Error en clustering: {e}. Fallback a todos 0.")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error en clustering: {e}. Fallback a todos 0.", exc_info=True)
+        # import traceback; traceback.print_exc() -> handled by exc_info=True
         return np.zeros(N, dtype=int)
 
 

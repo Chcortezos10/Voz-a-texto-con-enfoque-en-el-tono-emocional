@@ -34,57 +34,9 @@ from config import (
     TARGET_SR
 )
 
-MAPEO_EMOCIONAL_EXTENDIDO = {
-    #EMOCIONES BAS3E
-    "joy": "feliz",
-    "happiness": "feliz",
-    "happy": "feliz",
-    "hap": "feliz",
-    "alegría": "feliz",
-    "excitement": "feliz",
-    "amusement": "feliz",
-    "love": "feliz",
-    "optimism": "feliz",
-    "pride": "feliz",
-    "relief": "feliz",
-    "surprise": "feliz",
-    "sorpresa": "feliz",
-    "admiration": "feliz",
-    "approval": "feliz",
-    "caring": "feliz",
-    "desire": "feliz",
-    "gratitude": "feliz",
-    
-    "anger": "enojado",
-    "angry": "enojado",
-    "ang": "enojado",
-    "ira": "enojado",
-    "disgust": "enojado",
-    "disgusto": "enojado",
-    "annoyance": "enojado",
-    "disapproval": "enojado",
-    
-    "sadness": "triste",
-    "sad": "triste",
-    "tristeza": "triste",
-    "fear": "triste",
-    "fea": "triste",
-    "miedo": "triste",
-    "grief": "triste",
-    "remorse": "triste",
-    "disappointment": "triste",
-    "embarrassment": "triste",
-    "nervousness": "triste",
-    
-    "neutral": "neutral",
-    "neu": "neutral",
-    "others": "neutral",
-    "otros": "neutral",
-    "realization": "neutral",
-    "curiosity": "neutral",
-    "confusion": "neutral",
 
-}
+# MAPEO_EMOCIONAL_EXTENDIDO eliminado en favor de config.EMOTION_MAPPING
+
 
 MODELOS_DE_TEXTO =[
     {"name": EMOTION_ES_MODEL, "weight": 0.30, "language": "es"},
@@ -450,7 +402,7 @@ def analyze_text_go_emotions(text: str) -> EmotionResult:
         for result in results:
             label = result["label"].lower()
             score = float(result["score"])
-            mapped = MAPEO_EMOCIONAL_EXTENDIDO.get(label, "neutral")
+            mapped = EMOTION_MAPPING.get(label, "neutral")
             emotions[mapped] = emotions.get(mapped, 0.0) + score
         
         total = sum(emotions.values())

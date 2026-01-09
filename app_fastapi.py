@@ -46,6 +46,12 @@ from config import (
     CHANGE_SIM_THRESHOLD,
     MIN_SEG_SEC
 )
+from Resilience import (
+    WHISPER_BREAKER,
+    EMOTION_TEXT_BREAKER,
+    retry_with_backoff_async
+)
+from Validators import AudioValidator, ParametersValidator
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -136,6 +142,15 @@ def validate_upload(file: UploadFile):
     if file.filename.lower().split('.')[-1] not in ["wav", "mp3", "m4a", "mp4"]:
         pass
 
+async def validate_request_params(lite_mode: bool, audio_weight: float):
+    """Valida parámetros con ParametersValidator"""
+    audio_weight, warnings, lite_mode = ParametersValidator.validate_request_params(
+        lite_mode, audio_weight
+    )
+    if warnings:
+        logger.warning(f"Parámetros ajustados: {warnings}")
+    return audio_weight, warnings, lite_mode
+
 def validate_audio_basic(file_path: str) -> tuple:
     import soundfile as sf
     try:
@@ -166,6 +181,24 @@ def health_check_detailed():
         }
     }
 
+@retry_with_backoff_async(max_retries=2, base_delay=1.0)
+async def safe_transcribe(model, path):
+    # WHISPER_BREAKER.call espera func, *args, fallback, **kwargs
+    # Como run_blocking ejecuta func(*args), aqui pasamos WHISPER_BREAKER.call a run_blocking?
+    # No, run_blocking ejecuta en threadpool. WHISPER_BREAKER.call es sincrono (a menos que usemos call_async pero ese no estaba exposed como sync wrapper).
+    # Pero transcribe es bloqueante.
+    # Asi que mejor ejecutamos WHISPER_BREAKER.call dentro del threadpool, y que el call llame a model.transcribe.
+    
+    def _wrapped_transcribe():
+        return WHISPER_BREAKER.call(
+            model.transcribe,
+            path,
+            language="es",
+            fallback=lambda *a, **k: {"text": "", "segments": []}
+        )
+    
+    return await run_blocking(_wrapped_transcribe)
+
 @app.post("/transcribe/full-analysis", tags=["Analysis"])
 async def transcribe_full_analysis(
     file: UploadFile = File(...),
@@ -177,7 +210,11 @@ async def transcribe_full_analysis(
     validate_upload(file)
     start_time = time.time()
     _metrics["requests_total"] += 1
-    warnings = []
+    
+    # Validar parametros
+    audio_weight, param_warnings, lite_mode = await validate_request_params(lite_mode, audio_weight)
+    
+    warnings = param_warnings
     tmp_path = None
     
     if num_speakers:
@@ -185,15 +222,29 @@ async def transcribe_full_analysis(
     try:
         tmp_path = await save_upload_to_tempfile(file)
         
-        is_valid, error_msg, audio_duration = validate_audio_basic(tmp_path)
-        if not is_valid:
-            raise HTTPException(status_code=400, detail=error_msg)
+        # Nueva validacion con AudioValidator
+        validator = AudioValidator()
+        validation_result = validator.validate_audio(tmp_path)
+
+        if not validation_result.is_valid:
+            raise HTTPException(
+                status_code=400, 
+                detail={
+                    "message": "Audio inválido",
+                    "errors": validation_result.errors,
+                    "warnings": validation_result.warnings
+                }
+            )
+        
+        if validation_result.warnings:
+            warnings.extend(validation_result.warnings)
+            logger.warning(f"Advertencias de audio: {validation_result.warnings}")
         
         models = load_models()
         whisper_model = models["whisper"]
         
         logger.info(f"Iniciando Transcripcion (Lite={lite_mode}, AudioW={audio_weight}, Diarization={enable_diarization})...")
-        result = await run_blocking(whisper_model.transcribe, tmp_path, language="es")
+        result = await safe_transcribe(whisper_model, tmp_path)
         tx_full = result.get("text", "")
         segments_raw = result.get("segments", [])
         
