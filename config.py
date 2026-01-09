@@ -22,8 +22,8 @@ VAD_MODE = 2  # 0-3 (0 menos agresivo, 3 mas agresivo)
 VAD_FRAME_MS = 30  # Frame size en ms (10, 20, 30)
 
 # Configuracion de embeddings y diarizacion
-WINDOW_SEC = 2.5  # Ventana para embeddings (segundos)
-HOP_SEC = 0.75  # Salto entre ventanas (segundos)
+WINDOW_SEC = 1.5  # Ventana para embeddings (segundos) - Reducido para mejor resolución
+HOP_SEC = 0.5  # Salto entre ventanas (segundos)
 CHANGE_SIM_THRESHOLD = 0.82  # Similitud coseno minima para considerar "misma voz"
 MIN_SEG_SEC = 0.25  # Ignorar segmentos muy cortos (segundos)
 

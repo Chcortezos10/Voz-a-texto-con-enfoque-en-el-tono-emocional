@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92bf1b38-f887-4281-bc95-d99220d09702" name="Changes" comment="Se anade archivos docker">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Resilience.py" beforeDir="false" afterPath="$PROJECT_DIR$/Resilience.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/audio_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/audio_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/translation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test#2.mp3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.wav" beforeDir="false" />
-    </list>
+    <list default="true" id="92bf1b38-f887-4281-bc95-d99220d09702" name="Changes" comment="Se anade archivos docker" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,6 +19,31 @@
     &quot;assignee&quot;: &quot;Chcortezos10&quot;
   }
 }</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1767837855" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="experimentacion" />
+                    <option name="lastUsedInstant" value="1767837854" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Chcortezos10/Voz-a-texto-con-enfoque-en-el-tono-emocional.git&quot;,
@@ -49,8 +65,8 @@
     "Python.streamlit_viewer.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "com.google.cloudcode.ide_session_index": "20260106_0001",
-    "git-widget-placeholder": "#1 on experimentacion",
+    "com.google.cloudcode.ide_session_index": "20260107_0000",
+    "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -83,6 +99,7 @@
       <workItem from="1766984283493" duration="16000" />
       <workItem from="1766984330484" duration="129000" />
       <workItem from="1767725977606" duration="621000" />
+      <workItem from="1767837753765" duration="124000" />
     </task>
     <task id="LOCAL-00001" summary="se actualiza los requeriments">
       <option name="closed" value="true" />
@@ -113,6 +130,29 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/experimentacion" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="se actualiza los requeriments" />
