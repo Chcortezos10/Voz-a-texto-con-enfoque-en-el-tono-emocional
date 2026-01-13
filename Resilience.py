@@ -5,7 +5,7 @@ import asyncio
 import functools
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Union, Optional, Callable, Any, Dict, TypeVar
 
@@ -32,7 +32,7 @@ class CircuitBreakerState:
     last_success_time: float = 0.0
 
 class CircuitBreaker:
-    _instance: Dict[str, 'CircuitBreaker'] = {}
+    _instances: Dict[str, 'CircuitBreaker'] = {}
 
     def __init__(self,
         name: str,
@@ -40,7 +40,7 @@ class CircuitBreaker:
         self.name = name
         self.config = config or CircuitBreakerConfig()
         self.state = CircuitBreakerState()
-        self._lock = asyncio.Lock() if asyncio.get_event_loop().is_running() else None
+        self._lock = None
     
     @classmethod
     def get_or_create(cls,
@@ -55,56 +55,59 @@ class CircuitBreaker:
     @property
     def is_available(self) -> bool:
         #retorna true si el circuit breaker esta abierto
-        if self._state.state == CircuitBreakerState.CLOSED:
+        if self.state.state == CircuitState.CLOSED:
             return True
-        if self._state.state == CircuitBreakerState.HALF_OPEN:
-            elapsed = time.time()-self._state.last_failure_time
+        if self.state.state == CircuitState.HALF_OPEN:
+            elapsed = time.time()-self.state.last_failure_time
             if elapsed >= self.config.reset_timeout:
-                self._state.state = CircuitState.HALF_OPEN
-                self._state.success_count = 0
+                self.state.state = CircuitState.HALF_OPEN
+                self.state.success_count = 0
                 logger.info(f"CircuitBreaker [{self.name}]: OPEN -> HALF_OPEN")
                 return True
             return False
         return False
-    return True
+        return False
+
 
     def record_success(self)->None:
         #registra la llamada existosa
-        self._state.last_success_time = time.time()
-        self._state.failure_count =0 
+        self.state.last_success_time = time.time()
+        self.state.failure_count = 0 
 
-        if self._state.state == CircuitBreakerState.HALF_OPEN:
-            self._state.success_count += 1
-            if self._state.success_count >= self.config.success_threshold:
-                self._state.state = CircuitState.CLOSED
+        if self.state.state == CircuitState.HALF_OPEN:
+            self.state.success_count += 1
+            if self.state.success_count >= self.config.success_threshold:
+                self.state.state = CircuitState.CLOSED
                 logger.info(f"CircuitBreaker [{self.name}]: HALF_OPEN -> CLOSED (recovered)")
 
-    def record_failure(self)->None:
+    def record_failure(self, exception: Optional[Exception] = None) -> None:
         #registra la llamada fallida
-        self._state.last_failure_time = time.time()
-        self._state.failure_count += 1
-        if self._state.state == CircuitBreakerState.CLOSED:
-            if self._state.failure_count >= self.config.failure_threshold:
-                self._state.state = CircuitState.OPEN
+        if exception:
+             logger.debug(f"CircuitBreaker failure recorded: {exception}")
+        self.state.last_failure_time = time.time()
+        self.state.failure_count += 1
+        if self.state.state == CircuitState.CLOSED:
+            if self.state.failure_count >= self.config.failure_threshold:
+                self.state.state = CircuitState.OPEN
                 logger.info(f"CircuitBreaker [{self.name}]: CLOSED -> OPEN (failed)")
 
-    def call(self,func:callable[...,T],*Args,Fallback:Optional[Callable[...,T]] = None,**kwargs)->T:
+    def call(self, func: Callable[..., T], *args, fallback: Optional[Callable[..., T]] = None, **kwargs) -> T:
         #ejecuta la funcion protegida por el circuit breaker
         if not self.is_available:
-            if Fallback:
+            if fallback:
                 logger.warning(f"CircuitBreaker[{self.name}]: OPEN -> FALLBACK")
-                return Fallback(*Args,**kwargs)
+                return fallback(*args, **kwargs)
             raise CircuitBreakerError(f"CircuitBreaker [{self.name}]: Abierto")
 
         try:
-            result = func(*args,**kwargs)
+            result = func(*args, **kwargs)
             self.record_success()
             return result
         except Exception as e:
             self.record_failure(e)
-            if Fallback:
-                looger.warning(f"Circuitbreakear [{self.name}]:Error {e}-usando fallback")
-                return Fallback(*Args,**kwargs)
+            if fallback:
+                logger.warning(f"CircuitBreaker [{self.name}]:Error {e}-usando fallback")
+                return fallback(*args, **kwargs)
             raise
 
         async def call_async(self,func:Callable[...,T],*args,fallback:Optional[Callable[...,T]] = None,**kwargs)->T:
@@ -125,7 +128,7 @@ class CircuitBreaker:
             except Exception as e:
                 self.record_failure(e)
                 if fallback:
-                    looger.warning(f"Circuitbreakear [{self.name}]:Error {e}-usando fallback")
+                    logger.warning(f"CircuitBreaker [{self.name}]:Error {e}-usando fallback")
                     if asyncio.iscoroutinefunction(fallback):
                         return await fallback(*args,**kwargs)
                     return fallback(*args,**kwargs)
@@ -199,7 +202,8 @@ def retry_with_backoff_async(
     base_delay: float = 1.0,
     max_delay: float = 30.0,
     exponential_base: float = 2.0,
-    exceptions: tuple = (Exception,)):
+    exceptions: tuple = (Exception,),
+    on_retry: Optional[Callable[[int, Exception], None]] = None):
 
 # version async del decorador de reintentos
     def decorator(func:Callable[..., T]) -> Callable[..., T]:
@@ -231,8 +235,8 @@ def retry_with_backoff_async(
                         on_retry(attempt+1,e)
                     await asyncio.sleep(delay)
                 raise last_exception
-            return wrapper
-        return decorator    
+        return wrapper
+    return decorator    
 
 @dataclass
 class FallbackChain:
@@ -277,12 +281,14 @@ class GracefulDegradation:
     #maneja degradacion cuando los serivxios fallan 
     #proporciona valores por defecto o alternativas 
 
-    return {"top_emotion": "neutral",
+    DEFAULT_EMOTION = {
+            "top_emotion": "neutral",
             "top_score": 0.5,
             "confidence": 0.0,
             "emotions": {"neutral": 1.0},
             "source": "fallback",
-            "degraded": True}
+            "degraded": True
+    }
     
     def default_translation(text:str)->str:
         return { "text": "",
@@ -310,22 +316,22 @@ class GracefulDegradation:
 # Instancias globales de circuit breakers para modelos
 WHISPER_BREAKER = CircuitBreaker.get_or_create(
     "whisper",
-    CircuitBreakerConfig(failure_threshold=3, recovery_timeout=60)
+    CircuitBreakerConfig(failure_threshold=3, reset_timeout=60)
 )
 
 EMOTION_TEXT_BREAKER = CircuitBreaker.get_or_create(
     "emotion_text",
-    CircuitBreakerConfig(failure_threshold=5, recovery_timeout=30)
+    CircuitBreakerConfig(failure_threshold=5, reset_timeout=30)
 )
 
 EMOTION_AUDIO_BREAKER = CircuitBreaker.get_or_create(
     "emotion_audio",
-    CircuitBreakerConfig(failure_threshold=5, recovery_timeout=30)
+    CircuitBreakerConfig(failure_threshold=5, reset_timeout=30)
 )
 
 TRANSLATION_BREAKER = CircuitBreaker.get_or_create(
     "translation",
-    CircuitBreakerConfig(failure_threshold=5, recovery_timeout=30)
+    CircuitBreakerConfig(failure_threshold=5, reset_timeout=30)
 )
 
 def get_all_breakers_statues()->Dict[str,dict]:

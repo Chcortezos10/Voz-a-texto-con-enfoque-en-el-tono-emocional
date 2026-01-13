@@ -747,9 +747,14 @@
           }
 
           // Decide endpoint based on diarization toggle
+<<<<<<< HEAD
           const endpoint = enableDiarization
             ? "/transcribe/full-analysis-diarized"
             : "/transcribe/full-analysis";
+=======
+          // NOTE: Always use full-analysis, it handles both
+          const endpoint = "/transcribe/full-analysis"; 
+>>>>>>> main
 
           try {
             const res = await fetch(API_URL + endpoint, {
@@ -831,6 +836,10 @@
         document.getElementById("res-mode").textContent = mode;
 
         // 6. Render Speaker Stats
+<<<<<<< HEAD
+=======
+        // NOTE: The backend needs to return 'speaker_stats' inside 'diarization' object
+>>>>>>> main
         if (hasDiarization && diarization.speaker_stats) {
           renderSpeakerStats(diarization.speaker_stats);
         }
@@ -892,7 +901,11 @@
             stats.label || "Hablante " + (parseInt(sid) + 1)
           }</div>
                     <div class="speaker-meta">
+<<<<<<< HEAD
                         ⏱ ${stats.total_duration}s · ${
+=======
+                        ⏱ ${stats.total_duration.toFixed(1)}s · ${
+>>>>>>> main
             stats.segment_count
           } segmentos
                     </div>
@@ -931,12 +944,34 @@
         }
 
         segments.forEach((seg) => {
+<<<<<<< HEAD
           const speakerId = seg.speaker_id || 0;
           const speakerLabel = seg.speaker_label || `Hablante ${speakerId + 1}`;
           const speakerColor =
             SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
 
           const emotion = seg.emotion || "neutral";
+=======
+           // Handle cases where speaker is a string "speaker_0" or int 0
+          let speakerId = 0;
+          if (typeof seg.speaker === 'string') {
+             speakerId = parseInt(seg.speaker.replace('speaker_', '')) || 0;
+          } else if (typeof seg.speaker === 'number') {
+             speakerId = seg.speaker;
+          }
+          
+          const speakerLabel = `Hablante ${speakerId + 1}`;
+          const speakerColor =
+            SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
+
+          // Determine emotion (fallback priority)
+          let emotion = seg.emotion;
+          if (!emotion && seg.emotions && seg.emotions.fused) {
+              emotion = seg.emotions.fused.top_emotion;
+          }
+          emotion = emotion || "neutral";
+
+>>>>>>> main
           const emoIcon = EMOTION_ICONS[emotion.toLowerCase()] || "😐";
           const emoColor = EMOTION_COLORS[emotion.toLowerCase()] || "#888";
 
@@ -1032,6 +1067,7 @@
         }
 
         sorted.forEach((seg, idx) => {
+<<<<<<< HEAD
           const emo = seg.emotion || "neutral";
           const icon = EMOTION_ICONS[emo.toLowerCase()] || "🎯";
           const color = EMOTION_COLORS[emo.toLowerCase()] || "#888";
@@ -1040,6 +1076,28 @@
           const intensityPct = Math.round(seg.intensity * 100);
           const speakerLabel = seg.speaker_label || "Hablante 1";
           const speakerId = seg.speaker_id || 0;
+=======
+          let emotion = seg.emotion;
+          if (!emotion && seg.emotions && seg.emotions.fused) {
+              emotion = seg.emotions.fused.top_emotion;
+          }
+          emotion = emotion || "neutral";
+          
+          const icon = EMOTION_ICONS[emotion.toLowerCase()] || "🎯";
+          const color = EMOTION_COLORS[emotion.toLowerCase()] || "#888";
+          const time = seg.start ? seg.start.toFixed(1) : "0";
+          const text = seg.text_es || seg.text || "";
+          const intensityPct = Math.round(seg.intensity * 100);
+          
+          let speakerId = 0;
+          if (typeof seg.speaker === 'string') {
+             speakerId = parseInt(seg.speaker.replace('speaker_', '')) || 0;
+          } else if (typeof seg.speaker === 'number') {
+             speakerId = seg.speaker;
+          }
+          
+          const speakerLabel = `Hablante ${speakerId + 1}`;
+>>>>>>> main
           const speakerColor =
             SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
 
@@ -1052,7 +1110,11 @@
                 `;
           card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+<<<<<<< HEAD
                         <span style="font-weight:600; color:${color}">${icon} ${emo.toUpperCase()} (${intensityPct}%)</span>
+=======
+                        <span style="font-weight:600; color:${color}">${icon} ${emotion.toUpperCase()} (${intensityPct}%)</span>
+>>>>>>> main
                         <span style="color:${speakerColor}; font-size:0.85rem;">🎙️ ${speakerLabel}</span>
                         <span style="color:var(--text-muted); font-size:0.85rem;">⏱ ${time}s</span>
                     </div>
@@ -1096,8 +1158,12 @@
           .map(([k]) => k);
 
         const labels = timeline.map((t) => {
+<<<<<<< HEAD
           const speakerLabel = t.speaker_label ? ` (${t.speaker_label})` : "";
           return t.time.toFixed(1) + "s" + speakerLabel;
+=======
+          return t.time.toFixed(1) + "s";
+>>>>>>> main
         });
 
         // Colores por emoción
