@@ -150,3 +150,9 @@ CB_RESET_TIMEOUT = 30.0 #TIEMPO DE RESETEO
 AUDIO_MIN_DURATION_SEC = 0.5
 AUDIO_MAX_FILE_SIZE_MB = 100
 AUDIO_MIN_RMS_THRESHOLD = 0.001 #detecta el silencio
+
+# 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
+# Usuario requiere prácticamente eliminar neutral/other de los resultados
+EMOTION_BOOST_FACTOR = 1.5  # Potenciar emociones FUERTEMENTE 
+EMOTION_NEUTRAL_DAMP = 0.3  # Castigar neutral SEVERAMENTE
+EMOTION_CONFIDENCE_THRESHOLD = 0.20  # Umbral de minimo de confianza

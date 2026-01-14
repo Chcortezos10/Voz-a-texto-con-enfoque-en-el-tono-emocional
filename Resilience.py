@@ -40,7 +40,6 @@ class CircuitBreaker:
         self.name = name
         self.config = config or CircuitBreakerConfig()
         self.state = CircuitBreakerState()
-        self._lock = None
     
     @classmethod
     def get_or_create(cls,
@@ -54,19 +53,19 @@ class CircuitBreaker:
     
     @property
     def is_available(self) -> bool:
-        #retorna true si el circuit breaker esta abierto
+        """Retorna True si el circuit breaker está disponible para llamadas."""
         if self.state.state == CircuitState.CLOSED:
             return True
-        if self.state.state == CircuitState.HALF_OPEN:
-            elapsed = time.time()-self.state.last_failure_time
+        if self.state.state == CircuitState.OPEN:
+            elapsed = time.time() - self.state.last_failure_time
             if elapsed >= self.config.reset_timeout:
                 self.state.state = CircuitState.HALF_OPEN
                 self.state.success_count = 0
                 logger.info(f"CircuitBreaker [{self.name}]: OPEN -> HALF_OPEN")
                 return True
             return False
-        return False
-        return False
+        # HALF_OPEN state
+        return True
 
 
     def record_success(self)->None:
@@ -92,7 +91,7 @@ class CircuitBreaker:
                 logger.info(f"CircuitBreaker [{self.name}]: CLOSED -> OPEN (failed)")
 
     def call(self, func: Callable[..., T], *args, fallback: Optional[Callable[..., T]] = None, **kwargs) -> T:
-        #ejecuta la funcion protegida por el circuit breaker
+        """Ejecuta la función protegida por el circuit breaker."""
         if not self.is_available:
             if fallback:
                 logger.warning(f"CircuitBreaker[{self.name}]: OPEN -> FALLBACK")
@@ -110,37 +109,39 @@ class CircuitBreaker:
                 return fallback(*args, **kwargs)
             raise
 
-        async def call_async(self,func:Callable[...,T],*args,fallback:Optional[Callable[...,T]] = None,**kwargs)->T:
-            #version asincrona de call
-            if not self.is_available:
-                if fallback:
-                    logger.warning(f"CircuitBreaker[{self.name}]: OPEN -> FALLBACK")
-                    if asyncio.iscoroutinefunction(fallback):
-                        return await fallback(*args,**kwargs)
-                    return fallback(*args,**kwargs)
-                raise CircuitBreakerError(f"CircuitBreaker [{self.name}]: Abierto")
-            try:
-                if asyncio.iscoroutinefunction(func):
-                    result = await func(*args,**kwargs)
-                else:
-                    result = func(*args,**kwargs)
-                return result
-            except Exception as e:
-                self.record_failure(e)
-                if fallback:
-                    logger.warning(f"CircuitBreaker [{self.name}]:Error {e}-usando fallback")
-                    if asyncio.iscoroutinefunction(fallback):
-                        return await fallback(*args,**kwargs)
-                    return fallback(*args,**kwargs)
-                raise
+    async def call_async(self, func: Callable[..., T], *args, fallback: Optional[Callable[..., T]] = None, **kwargs) -> T:
+        """Versión asíncrona de call."""
+        if not self.is_available:
+            if fallback:
+                logger.warning(f"CircuitBreaker[{self.name}]: OPEN -> FALLBACK")
+                if asyncio.iscoroutinefunction(fallback):
+                    return await fallback(*args, **kwargs)
+                return fallback(*args, **kwargs)
+            raise CircuitBreakerError(f"CircuitBreaker [{self.name}]: Abierto")
+        try:
+            if asyncio.iscoroutinefunction(func):
+                result = await func(*args, **kwargs)
+            else:
+                result = func(*args, **kwargs)
+            self.record_success()
+            return result
+        except Exception as e:
+            self.record_failure(e)
+            if fallback:
+                logger.warning(f"CircuitBreaker [{self.name}]:Error {e}-usando fallback")
+                if asyncio.iscoroutinefunction(fallback):
+                    return await fallback(*args, **kwargs)
+                return fallback(*args, **kwargs)
+            raise
 
-    def get_status(self)->Dict[str,Any]:
-        #retorna el estado actual del circuit breaker
+
+    def get_status(self) -> Dict[str, Any]:
+        """Retorna el estado actual del circuit breaker."""
         return {
             "name": self.name,
-            "state": self._state.state.value,
-            "failure_count": self._state.failure_count,
-            "is_available": self.is_available   
+            "state": self.state.state.value,
+            "failure_count": self.state.failure_count,
+            "is_available": self.is_available
         }
 
 class CircuitBreakerError(Exception):
@@ -234,9 +235,10 @@ def retry_with_backoff_async(
                     if on_retry:
                         on_retry(attempt+1,e)
                     await asyncio.sleep(delay)
+            if last_exception:
                 raise last_exception
         return wrapper
-    return decorator    
+    return decorator 
 
 @dataclass
 class FallbackChain:
@@ -290,7 +292,7 @@ class GracefulDegradation:
             "degraded": True
     }
     
-    def default_translation(text:str)->str:
+    def default_translation(text:str)->Dict[str,Any]:
         return { "text": "",
             "segments": [],
             "duration": 0,

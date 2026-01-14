@@ -170,13 +170,15 @@ class SegmentValidator:
         return len(issues) == 0, issues
 
     @staticmethod
-    def sanitize_text(start: float,
+    @staticmethod
+    def sanitize_segment(
+        start: float,
         end: float,
         text: str,
         audio_duration: float
     ) -> Tuple[float, float, str]:
-
-    #corregir tiempos
+        """Corrige tiempos y texto de un segmento."""
+        # Corregir tiempos
         start_fixed = max(0.0, start)
         end_fixed = min(audio_duration, max(end, start_fixed + 0.1))
         # Asegurar que end > start

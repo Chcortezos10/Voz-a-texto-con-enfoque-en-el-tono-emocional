@@ -12,24 +12,26 @@ from dataclasses import dataclass, field
 from collections import deque, OrderedDict, Counter
 from concurrent.futures import ThreadPoolExecutor
 
+# Configurar logger primero
+logger = logging.getLogger(__name__)
+
+# Import de librosa con manejo de errores
 try:
     import librosa
     LIBROSA_AVAILABLE = True
 except ImportError:
     LIBROSA_AVAILABLE = False
+    logger.warning("Librosa no está instalado. No se podrá realizar análisis de emociones de audio.")
+
 import torch
 import numpy as np
 from transformers import pipeline
 
-try:
-    import librosa
-    librosa_disponible = True
-except ImportError:
-    librosa_disponible = False
-    logger.warning("Librosa no está instalado No se podr realizar analisis de emociones audio.")
-
 from config import (
     TEXT_EMOTION_MODEL,
+    EMOTION_BOOST_FACTOR,
+    EMOTION_NEUTRAL_DAMP,
+    EMOTION_CONFIDENCE_THRESHOLD,
     AUDIO_EMOTION_MODEL,
     EMOTION_ES_MODEL,
     EMOTION_WEIGHT_TEXT,
@@ -41,8 +43,11 @@ from config import (
     TARGET_SR
 )
 
-
 # MAPEO_EMOCIONAL_EXTENDIDO eliminado en favor de config.EMOTION_MAPPING
+
+# Constantes
+GO_EMOTION_MODEL = "SamLowe/roberta-base-go_emotions"
+PROSODY_WEIGHT = 0.15
 
 
 MODELOS_DE_TEXTO =[
@@ -54,13 +59,6 @@ MODELOS_DE_TEXTO =[
 MODELOS_DE_AUDIO =[
     {"name": AUDIO_EMOTION_MODEL, "weight": 0.25}
 ]
-
-prosody_weight = 0.15
-GO_EMOTION_MODEL = "SamLowe/roberta-base-go_emotions"
-PROSODY_WEIGHT = 0.15
-
-logger = logging.getLogger(__name__)
-
 
 @dataclass
 class EmotionResult:
@@ -92,10 +90,10 @@ class ResultCache:
         with self.lock:
             if key in self.cache:
                 self.cache.move_to_end(key)
-            self.cache[key] = value
-            if len(self.cache) > self.maxsize:
-                self.cache.popitem(last=False)
-            self.cache[key] = value
+            else:
+                self.cache[key] = value
+                if len(self.cache) > self.maxsize:
+                    self.cache.popitem(last=False)
 
     @staticmethod
     def make_key(text: str, model_name: str) -> str:
@@ -829,9 +827,9 @@ def _fuse_weighted_average(
         
     # 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
     # Usuario requiere prácticamente eliminar neutral/other de los resultados
-    BOOST_FACTOR = 2.0  # Potenciar emociones FUERTEMENTE 
-    NEUTRAL_DAMP = 0.1  # Castigar neutral SEVERAMENTE
-    CONFIDENCE_THRESHOLD = 0.15  # Umbral de minimo de confianza
+    BOOST_FACTOR = EMOTION_BOOST_FACTOR
+    NEUTRAL_DAMP = EMOTION_NEUTRAL_DAMP
+    CONFIDENCE_THRESHOLD = EMOTION_CONFIDENCE_THRESHOLD
     
     adjusted_scores = {}
     total_score = 0.0
