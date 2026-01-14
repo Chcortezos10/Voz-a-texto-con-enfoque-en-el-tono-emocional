@@ -57,15 +57,18 @@ from Resilience import (
     retry_with_backoff_async
 )
 from Validators import AudioValidator, ParametersValidator
-# Imports lazy - openai y httpx se importan donde se necesitan
-# from openai import OpenAI
-# import httpx
 import gc
 import psutil
 
-# Configuración de logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("uvicorn.error")
+# Imports para cloud whisper (usados en endpoint /transcribe/cloud-whisper)
+try:
+    from openai import OpenAI
+    import httpx
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    logger.warning("OpenAI y/o httpx no disponibles. El endpoint /transcribe/cloud-whisper no funcionará.")
+
 
 
 # === FUNCIONES DE GESTIÓN DE MEMORIA ===
@@ -99,6 +102,21 @@ _metrics = {
     "requests_failed": 0,
     "total_processing_time": 0.0
 }
+
+def increment_metric(key: str, value: float = 1.0):
+    if key in _metrics:
+        _metrics[key] += value
+increment_metric("requests_total")
+
+def get_metrics() -> Dict[str, Any]:
+    return {
+        "requests_total": _metrics["requests_total"],
+        "requests_success": _metrics["requests_success"],
+        "requests_failed": _metrics["requests_failed"],
+        "success_rate": round(_metrics["requests_success"] / max(1, _metrics["requests_total"]) * 100, 2),
+        "avg_processing_time": round(_metrics["total_processing_time"] / max(1, _metrics["requests_success"]), 2)
+    }
+
 
 app = FastAPI(
     title="Voz-a-Texto Emocional Unified API",
@@ -171,8 +189,14 @@ async def save_upload_to_tempfile(upload_file: UploadFile) -> str:
         raise HTTPException(status_code=500, detail=f"Error al guardar archivo: {e}")
 
 def validate_upload(file: UploadFile):
-    if file.filename.lower().split('.')[-1] not in ["wav", "mp3", "m4a", "mp4"]:
-        pass
+    """Valida que el archivo tenga una extensión permitida."""
+    ext = file.filename.lower().split('.')[-1] if file.filename else ""
+    if ext not in ["wav", "mp3", "m4a", "mp4", "ogg", "flac", "webm"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Formato de archivo no soportado: .{ext}. Use: wav, mp3, m4a, mp4, ogg, flac, webm"
+        )
+
 
 async def validate_request_params(lite_mode: bool, audio_weight: float):
     """Valida parámetros con ParametersValidator"""
@@ -204,13 +228,7 @@ def health_check_detailed():
     return {
         "status": "ok",
         "version": "4.0.0",
-        "metrics": {
-            "requests_total": _metrics["requests_total"],
-            "requests_success": _metrics["requests_success"],
-            "requests_failed": _metrics["requests_failed"],
-            "success_rate": round(_metrics["requests_success"] / max(1, _metrics["requests_total"]) * 100, 2),
-            "avg_processing_time": round(_metrics["total_processing_time"] / max(1, _metrics["requests_success"]), 2)
-        }
+        "metrics": get_metrics()
     }
 
 @retry_with_backoff_async(max_retries=2, base_delay=1.0)
@@ -242,7 +260,7 @@ async def transcribe_full_analysis(
 ):
     validate_upload(file)
     start_time = time.time()
-    _metrics["requests_total"] += 1
+    increment_metric("requests_total")
     
     # Validar parametros
     audio_weight, param_warnings, lite_mode = await validate_request_params(lite_mode, audio_weight)
@@ -508,8 +526,8 @@ async def transcribe_full_analysis(
                     speaker_stats[spk_id]["dominant_emotion"] = "neutral"
 
         processing_time = time.time() - start_time
-        _metrics["requests_success"] += 1
-        _metrics["total_processing_time"] += processing_time
+        increment_metric("requests_success")
+        increment_metric("total_processing_time", processing_time)
 
         return {
             "status": "success",
@@ -537,7 +555,7 @@ async def transcribe_full_analysis(
         }
 
     except Exception as e:
-        _metrics["requests_failed"] += 1
+        increment_metric("requests_failed")
         logger.error(f"Error Gen: {e}\n{traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"error": str(e)})
     finally:
@@ -556,7 +574,7 @@ async def transcribe_with_diarization(
     """Análisis completo con diarización de hablantes."""
     validate_upload(file)
     start_time = time.time()
-    _metrics["requests_total"] += 1
+    increment_metric("requests_total")
     tmp_path = None
     
     try:
@@ -723,8 +741,8 @@ async def transcribe_with_diarization(
         } for s in enriched_segments]
         
         processing_time = time.time() - start_time
-        _metrics["requests_success"] += 1
-        _metrics["total_processing_time"] += processing_time
+        increment_metric("requests_success")
+        increment_metric("total_processing_time", processing_time)
         
         return {
             "status": "success",
@@ -752,7 +770,7 @@ async def transcribe_with_diarization(
     except HTTPException:
         raise
     except Exception as e:
-        _metrics["requests_failed"] += 1
+        increment_metric("requests_failed")
         logger.error(f"Error: {e}\n{traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"error": str(e)})
     finally:
@@ -764,6 +782,7 @@ async def transcribe_with_diarization(
 
 
 @app.post("/transcribe/cloud-whisper", tags=["Cloud"])
+@app.post("/transcribe/cloud-whisper", tags=["Cloud"])
 async def transcribe_with_cloud_whisper(
     file: UploadFile = File(...),
     api_key: str = Form(...),
@@ -772,17 +791,17 @@ async def transcribe_with_cloud_whisper(
     enable_diarization: bool = Form(True),
     num_speakers: Optional[int] = Form(None)
 ):
-    """
-    Transcribe con OpenAI Whisper Cloud (más rápido).
-    Después aplica análisis emocional local.
-    """
+    # Verificar que OpenAI esté disponible
+    if not OPENAI_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="OpenAI Whisper Cloud no disponible. Instale: pip install openai httpx"
+        )
+
     validate_upload(file)
     start_time = time.time()
-    _metrics["requests_total"] += 1
-    
-    audio_weight, param_warnings, lite_mode = await validate_request_params(lite_mode, audio_weight)
-    warnings = param_warnings
-    tmp_path = None
+    increment_metric("requests_total")
+
     
     try:
         # Guardar archivo
@@ -1034,8 +1053,8 @@ async def transcribe_with_cloud_whisper(
                     speaker_stats[spk_id]["dominant_emotion"] = "neutral"
 
         processing_time = time.time() - start_time
-        _metrics["requests_success"] += 1
-        _metrics["total_processing_time"] += processing_time
+        increment_metric("requests_success")
+        increment_metric("total_processing_time", processing_time)
 
         return {
             "status": "success",
@@ -1069,7 +1088,7 @@ async def transcribe_with_cloud_whisper(
     except HTTPException:
         raise
     except Exception as e:
-        _metrics["requests_failed"] += 1
+        increment_metric("requests_failed")
         logger.error(f"Error: {e}\n{traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"error": str(e)})
     finally:
