@@ -1,1221 +1,832 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voz-a-Texto Emocional V4 - Diarización</title>
+    <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-      :root {
-        --bg: #09090b;
-        --surface: #18181b;
-        --surface-hover: #27272a;
-        --border: #3f3f46;
-        --primary: #8b5cf6;
-        --success: #10b981;
-        --text-main: #fafafa;
-        --text-muted: #a1a1aa;
-      }
-
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: var(--bg);
-        color: var(--text-main);
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-
-      /* HEADER */
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 40px;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-      }
-      .brand {
-        font-size: 1.2rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #a78bfa, #f472b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .status-badge {
-        font-size: 0.8rem;
-        padding: 4px 12px;
-        border-radius: 20px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .status-badge.online {
-        border-color: var(--success);
-        color: var(--success);
-      }
-      .status-badge::before {
-        content: "";
-        display: block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: currentColor;
-      }
-
-      /* CONTAINER */
-      .container {
-        max-width: 1400px;
-        margin: 30px auto;
-        width: 95%;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 30px;
-      }
-
-      /* INPUT SECTION */
-      .control-panel {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        background: var(--surface);
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-      }
-
-      .upload-box {
-        border: 2px dashed var(--border);
-        border-radius: 12px;
-        padding: 30px;
-        text-align: center;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .upload-box:hover {
-        border-color: var(--primary);
-        background: rgba(139, 92, 246, 0.05);
-      }
-      .upload-box.active {
-        border-color: var(--success);
-        background: rgba(16, 185, 129, 0.05);
-      }
-
-      .config-box {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-
-      /* BUTTONS & SLIDER */
-      .preset-row {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .btn-preset {
-        flex: 1;
-        padding: 10px;
-        background: var(--surface-hover);
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .btn-preset.active {
-        background: var(--primary);
-        color: white;
-        border-color: var(--primary);
-      }
-
-      .slider-wrapper {
-        text-align: center;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 15px;
-        border-radius: 12px;
-      }
-      input[type="range"] {
-        width: 100%;
-        margin: 15px 0;
-        accent-color: var(--primary);
-      }
-      .percent-large {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: white;
-        line-height: 1;
-      }
-
-      /* DIARIZATION OPTIONS */
-      .diarization-options {
-        background: rgba(139, 92, 246, 0.1);
-        border: 1px solid var(--primary);
-        border-radius: 12px;
-        padding: 15px;
-        margin-top: 15px;
-      }
-      .diarization-options h4 {
-        margin: 0 0 12px 0;
-        font-size: 0.9rem;
-        color: var(--primary);
-      }
-      .diarization-row {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-      }
-      .toggle-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .toggle-switch {
-        position: relative;
-        width: 48px;
-        height: 24px;
-      }
-      .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .toggle-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: var(--surface-hover);
-        transition: 0.3s;
-        border-radius: 24px;
-        border: 1px solid var(--border);
-      }
-      .toggle-slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        transition: 0.3s;
-        border-radius: 50%;
-      }
-      .toggle-switch input:checked + .toggle-slider {
-        background-color: var(--primary);
-        border-color: var(--primary);
-      }
-      .toggle-switch input:checked + .toggle-slider:before {
-        transform: translateX(24px);
-      }
-      .speaker-input {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .speaker-input input {
-        width: 60px;
-        padding: 8px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        color: white;
-        text-align: center;
-      }
-      .speaker-input label {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-      }
-
-      .btn-analyze {
-        width: 100%;
-        padding: 15px;
-        background: linear-gradient(135deg, var(--primary), #7c3aed);
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-top: 20px;
-        cursor: pointer;
-        opacity: 0.5;
-        pointer-events: none;
-        transition: 0.3s;
-      }
-      .btn-analyze.ready {
-        opacity: 1;
-        pointer-events: all;
-      }
-      .btn-analyze:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-      }
-
-      /* RESULTS SECTION */
-      #results-area {
-        display: none;
-        margin-top: 20px;
-        animation: fadeIn 0.5s;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
+        :root {
+            --bg: #0a0a0f;
+            --surface: #16161d;
+            --surface-hover: #1f1f2a;
+            --border: #2a2a3a;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #ec4899;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #16161d 100%);
+            color: var(--text-main);
+            min-height: 100vh;
         }
-      }
 
-      .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-      .metric-card {
-        background: var(--surface);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        text-align: center;
-      }
-      .metric-val {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-        color: white;
-      }
-      .metric-label {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      /* SPEAKER STATS */
-      .speaker-stats {
-        background: var(--surface);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        margin-bottom: 20px;
-      }
-      .speaker-stats h3 {
-        margin: 0 0 15px 0;
-        font-size: 1rem;
-        color: var(--text-main);
-      }
-      .speaker-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-      }
-      .speaker-card {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 10px;
-        padding: 15px;
-        border-left: 4px solid;
-      }
-      .speaker-card .speaker-name {
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 8px;
-      }
-      .speaker-card .speaker-meta {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        margin-bottom: 10px;
-      }
-      .speaker-card .speaker-emotion {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: 600;
-      }
-
-      /* CHARTS & TRANSCRIPT */
-      .chart-container {
-        background: var(--surface);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        height: 400px;
-        margin-bottom: 30px;
-      }
-      .transcript-box {
-        background: var(--surface);
-        padding: 30px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        line-height: 1.8;
-        color: #ddd;
-        font-size: 1rem;
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      .transcript-segment {
-        padding: 12px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.3);
-        border-left: 3px solid var(--border);
-      }
-      .transcript-segment .seg-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        font-size: 0.85rem;
-      }
-      .transcript-segment .speaker-tag {
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.75rem;
-      }
-      .transcript-segment .time-tag {
-        color: var(--text-muted);
-      }
-      .transcript-segment .emotion-tag {
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.75rem;
-      }
-      .transcript-segment .seg-text {
-        color: #ddd;
-      }
-
-      /* LOADING */
-      #loading {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 200;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-      }
-      .spinner {
-        width: 60px;
-        height: 60px;
-        border: 5px solid var(--surface);
-        border-top-color: var(--primary);
-        border-radius: 50%;
-        animation: spin 1s infinite linear;
-        margin-bottom: 20px;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
+        /* HEADER */
+        .header {
+            background: rgba(22, 22, 29, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-      }
 
-      /* SPEAKER COLORS */
-      .speaker-0 {
-        --speaker-color: #8b5cf6;
-      }
-      .speaker-1 {
-        --speaker-color: #10b981;
-      }
-      .speaker-2 {
-        --speaker-color: #f472b6;
-      }
-      .speaker-3 {
-        --speaker-color: #fbbf24;
-      }
-      .speaker-4 {
-        --speaker-color: #3b82f6;
-      }
-      .speaker-5 {
-        --speaker-color: #ef4444;
-      }
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .status-badge.online {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-section {
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-section.active {
+            border-color: var(--success);
+        }
+
+        .config-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .model-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .model-option {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--surface-hover);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .model-option.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active { display: flex; }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .history-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1rem 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--surface-hover);
+            transition: 0.3s;
+            border-radius: 28px;
+            border: 2px solid var(--border);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-hover);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 350px;
+        }
+
+        .transcript-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .transcript-segment {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            background: var(--surface-hover);
+            border-left: 3px solid var(--border);
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <header class="header">
-      <div class="brand">✨ Trascriptor Emocional V4 + Diarización</div>
-      <div id="apiStatus" class="status-badge">Conectando...</div>
+        <div class="brand">🎙️ Transcriptor Emocional Pro V5</div>
+        <div id="apiStatus" class="status-badge">Conectando...</div>
     </header>
 
-    <div id="loading">
-      <div class="spinner"></div>
-      <h2 style="color: white">Procesando...</h2>
-      <p style="color: #888">Analizando Audio, Texto y Hablantes</p>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="font-size: 1.2rem; font-weight: 600; margin-top: 1rem;">Procesando...</div>
     </div>
 
     <div class="container">
-      <!-- CONTROL PANEL -->
-      <div class="control-panel" id="control-panel">
-        <div class="upload-box" id="uploadArea">
-          <div style="font-size: 3rem; margin-bottom: 10px">📂</div>
-          <p>Arrastra archivo o <strong>Haz Click</strong></p>
-          <div
-            id="fileName"
-            style="color: var(--primary); font-weight: 600; margin-top: 10px"
-          ></div>
-          <input type="file" id="fileInput" hidden accept="audio/*,video/*" />
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('analyze')">📊 Análisis</button>
+            <button class="tab" onclick="switchTab('history')">📚 Historial</button>
+            <button class="tab" onclick="switchTab('settings')">⚙️ Configuración</button>
         </div>
 
-        <div class="config-box">
-          <div class="preset-row">
-            <div class="btn-preset" onclick="setPreset('lite')">Lite (TXT)</div>
-            <div class="btn-preset active" onclick="setPreset('standard')">
-              Balanceado
+        <!-- TAB ANALYZE -->
+        <div id="tab-analyze" class="tab-content active">
+            <div class="upload-section" id="uploadArea">
+                <div style="font-size: 4rem;">📂</div>
+                <h2>Arrastra tu archivo de audio aquí</h2>
+                <div id="fileName" style="color: var(--primary); margin-top: 1rem;"></div>
+                <input type="file" id="fileInput" hidden accept="audio/*,video/*" />
             </div>
-            <div class="btn-preset" onclick="setPreset('tone')">
-              Tono (Audio)
+
+            <div class="config-panel">
+                <div class="config-card">
+                    <h3>🤖 Modelo de Transcripción</h3>
+                    <div class="model-selector">
+                        <div class="model-option active" data-model="local">
+                            <strong>Local</strong><br><small>Whisper Local</small>
+                        </div>
+                        <div class="model-option" data-model="cloud">
+                            <strong>Cloud</strong><br><small>OpenAI API (Rápido)</small>
+                        </div>
+                    </div>
+                    <div id="apiKeySection" style="display: none; margin-top: 1rem;">
+                        <input type="password" id="openaiApiKey" placeholder="sk-..." 
+                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: white;" />
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <h3>🎙️ Diarización</h3>
+                    <div class="toggle-container">
+                        <span>Activar</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableDiarization" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Nº Hablantes: <span id="numSpeakersValue">Auto</span></label>
+                        <input type="range" id="numSpeakers" min="0" max="10" value="0" />
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <h3>💭 Análisis Emocional</h3>
+                    <div class="toggle-container">
+                        <span>Modo Lite</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="liteMode" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Peso Audio: <span id="audioWeightValue">40%</span></label>
+                        <input type="range" id="audioWeight" min="0" max="100" value="40" />
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div class="slider-wrapper">
-            <div class="percent-large" id="percentDisplay">40%</div>
-            <div style="color: var(--text-muted); margin-bottom: 10px">
-              Peso del Audio
+            <button class="btn btn-primary" id="analyzeBtn" style="width: 100%; padding: 1.2rem; font-size: 1.1rem;">
+                🚀 Iniciar Análisis
+            </button>
+
+            <div id="resultsSection" style="display: none; margin-top: 3rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                    <h2>📊 Resultados</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="exportData('json')">JSON</button>
+                        <button class="btn btn-secondary" onclick="exportData('csv')">CSV</button>
+                        <button class="btn btn-secondary" onclick="exportData('pdf')">PDF</button>
+                        <button class="btn btn-secondary" onclick="exportData('srt')">SRT</button>
+                        <button class="btn btn-secondary" onclick="exportData('txt')">TXT</button>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricEmotion">-</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Emoción</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricIntensity">-</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Intensidad</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricSpeakers">-</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Hablantes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricDuration">-</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Duración</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📝 Transcripción</h3>
+                    <div class="transcript-box" id="transcriptBox"></div>
+                </div>
             </div>
-            <input
-              type="range"
-              id="weightSlider"
-              min="0"
-              max="100"
-              value="40"
-              oninput="updateSlider(this.value)"
-            />
-          </div>
+        </div>
 
-          <!-- DIARIZATION OPTIONS -->
-          <div class="diarization-options">
-            <h4>🎙️ Diarización de Hablantes</h4>
-            <div class="diarization-row">
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="enableDiarization" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-                <span style="color: var(--text-muted); font-size: 0.85rem"
-                  >Activar</span
-                >
-              </div>
-              <div class="speaker-input">
-                <label>Nº Hablantes:</label>
-                <input
-                  type="number"
-                  id="numSpeakers"
-                  min="1"
-                  max="10"
-                  placeholder="Auto"
-                />
-              </div>
+        <!-- TAB HISTORY -->
+        <div id="tab-history" class="tab-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                <h2>📚 Historial</h2>
+                <button class="btn btn-secondary" onclick="loadHistory()">🔄 Actualizar</button>
             </div>
-          </div>
-
-          <button id="analyzeBtn" class="btn-analyze">INICIAR ANÁLISIS</button>
-        </div>
-      </div>
-
-      <!-- RESULTS -->
-      <div id="results-area">
-        <!-- METRICS LINE -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-val" id="res-emotion">-</div>
-            <div class="metric-label">Emoción Dominante</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" id="res-intensity">-</div>
-            <div class="metric-label">Intensidad Global</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" id="res-speakers">-</div>
-            <div class="metric-label">Hablantes</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" id="res-transitions">-</div>
-            <div class="metric-label">Cambios de Emoción</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" id="res-mode">-</div>
-            <div class="metric-label">Modo</div>
-          </div>
+            <div class="history-grid" id="historyGrid">
+                <p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones</p>
+            </div>
         </div>
 
-        <!-- SPEAKER STATS -->
-        <div
-          class="speaker-stats"
-          id="speaker-stats-section"
-          style="display: none"
-        >
-          <h3>🎙️ Estadísticas por Hablante</h3>
-          <div class="speaker-cards" id="speaker-cards">
-            <!-- Filled by JS -->
-          </div>
+        <!-- TAB SETTINGS -->
+        <div id="tab-settings" class="tab-content">
+            <h2>⚙️ Configuración</h2>
+            <div class="config-panel">
+                <div class="config-card">
+                    <h3>🔑 API Keys</h3>
+                    <label>OpenAI API Key:</label>
+                    <input type="password" id="settingsApiKey" 
+                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: white; margin: 0.5rem 0;" />
+                    <button class="btn btn-primary" onclick="saveApiKey()">💾 Guardar</button>
+                </div>
+                <div class="config-card">
+                    <h3>🗑️ Datos</h3>
+                    <button class="btn btn-secondary" onclick="clearHistory()">Borrar Historial</button>
+                </div>
+            </div>
         </div>
-
-        <!-- CHARTS ROW -->
-        <div
-          style="
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-          "
-        >
-          <!-- TIMELINE CHART -->
-          <div class="chart-container" style="height: 350px">
-            <canvas id="emotionChart"></canvas>
-          </div>
-
-          <!-- DISTRIBUTION CHART -->
-          <div class="chart-container" style="height: 350px">
-            <h3
-              style="
-                margin: 0 0 10px 0;
-                font-size: 0.9rem;
-                color: var(--text-muted);
-              "
-            >
-              📊 Distribución
-            </h3>
-            <canvas id="distributionChart"></canvas>
-          </div>
-        </div>
-
-        <!-- PEAK MOMENTS - Qué genera los picos -->
-        <div
-          style="
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-          "
-        >
-          <h3 style="margin: 0 0 15px 0; color: var(--text-main)">
-            🎯 Momentos de Mayor Intensidad Emocional
-          </h3>
-          <div id="peak-moments" style="display: grid; gap: 12px">
-            <!-- Filled by JS -->
-          </div>
-        </div>
-
-        <!-- TRANSCRIPT WITH SPEAKERS -->
-        <div
-          style="
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-          "
-        >
-          <h3 style="margin: 0 0 15px 0; color: var(--text-main)">
-            📝 Transcripción por Hablante
-          </h3>
-          <div class="transcript-box" id="res-transcript">
-            (La transcripción aparecerá aquí...)
-          </div>
-        </div>
-
-        <button
-          onclick="location.reload()"
-          style="
-            padding: 10px 20px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            margin-top: 20px;
-            cursor: pointer;
-          "
-        >
-          Nuevo Análisis
-        </button>
-      </div>
     </div>
 
     <script>
-      const API_URL = "http://127.0.0.1:8000";
-      let selectedFile = null;
-      let chartInstance = null;
+        const API_URL = 'http://127.0.0.1:8000';
+        let selectedFile = null;
+        let currentResults = null;
 
-      // Speaker colors
-      const SPEAKER_COLORS = [
-        "#8b5cf6",
-        "#10b981",
-        "#f472b6",
-        "#fbbf24",
-        "#3b82f6",
-        "#ef4444",
-      ];
-
-      // --- INIT ---
-      checkAPI();
-      setInterval(checkAPI, 5000);
-
-      async function checkAPI() {
-        const el = document.getElementById("apiStatus");
-        try {
-          await fetch(API_URL + "/health");
-          el.textContent = "Sistema Online";
-          el.classList.add("online");
-        } catch {
-          el.textContent = "Desconectado (Esperando servidor...)";
-          el.classList.remove("online");
+        // Check API
+        async function checkAPI() {
+            try {
+                await fetch(`${API_URL}/health`);
+                document.getElementById('apiStatus').textContent = 'Online';
+                document.getElementById('apiStatus').classList.add('online');
+            } catch {
+                document.getElementById('apiStatus').textContent = 'Offline';
+                document.getElementById('apiStatus').classList.remove('online');
+            }
         }
-      }
+        checkAPI();
+        setInterval(checkAPI, 5000);
 
-      // --- UI LOGIC ---
-      function updateSlider(val) {
-        document.getElementById("percentDisplay").textContent = val + "%";
-      }
+        // Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if (tab === 'history') loadHistory();
+        }
 
-      function setPreset(mode) {
-        const s = document.getElementById("weightSlider");
-        if (mode === "lite") s.value = 0;
-        if (mode === "standard") s.value = 40;
-        if (mode === "tone") s.value = 70;
-        updateSlider(s.value);
+        // Upload
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('active'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
 
-        document
-          .querySelectorAll(".btn-preset")
-          .forEach((b) => b.classList.remove("active"));
-        event.target.classList.add("active");
-      }
+        function handleFile(file) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = `✅ ${file.name}`;
+        }
 
-      // --- FILE ---
-      const drop = document.getElementById("uploadArea");
-      const inp = document.getElementById("fileInput");
-
-      drop.addEventListener("click", () => inp.click());
-      inp.addEventListener("change", (e) => handleFile(e.target.files[0]));
-      drop.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        drop.classList.add("active");
-      });
-      drop.addEventListener("dragleave", () => drop.classList.remove("active"));
-      drop.addEventListener("drop", (e) => {
-        e.preventDefault();
-        drop.classList.remove("active");
-        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-      });
-
-      function handleFile(f) {
-        selectedFile = f;
-        document.getElementById("fileName").textContent = f.name;
-        document.getElementById("analyzeBtn").classList.add("ready");
-      }
-
-      // --- ANALYZE ---
-      document
-        .getElementById("analyzeBtn")
-        .addEventListener("click", async () => {
-          if (!selectedFile) return;
-          document.getElementById("loading").style.display = "flex";
-
-          const formData = new FormData();
-          formData.append("file", selectedFile);
-          const w = parseInt(document.getElementById("weightSlider").value);
-          formData.append("lite_mode", w === 0);
-          formData.append("audio_weight", w / 100.0);
-
-          // Diarization params
-          const enableDiarization =
-            document.getElementById("enableDiarization").checked;
-          const numSpeakersInput = document.getElementById("numSpeakers").value;
-          formData.append("enable_diarization", enableDiarization);
-          if (numSpeakersInput && parseInt(numSpeakersInput) > 0) {
-            formData.append("num_speakers", parseInt(numSpeakersInput));
-          }
-
-          // Decide endpoint based on diarization toggle
-<<<<<<< HEAD
-          const endpoint = enableDiarization
-            ? "/transcribe/full-analysis-diarized"
-            : "/transcribe/full-analysis";
-=======
-          // NOTE: Always use full-analysis, it handles both
-          const endpoint = "/transcribe/full-analysis"; 
->>>>>>> main
-
-          try {
-            const res = await fetch(API_URL + endpoint, {
-              method: "POST",
-              body: formData,
+        // Model Selector
+        document.querySelectorAll('.model-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('apiKeySection').style.display = this.dataset.model === 'cloud' ? 'block' : 'none';
             });
-            if (!res.ok) throw new Error("Error en API");
-            const data = await res.json();
-
-            renderDashboard(data, enableDiarization);
-
-            document.getElementById("control-panel").style.display = "none";
-            document.getElementById("results-area").style.display = "block";
-          } catch (e) {
-            alert("Error: " + e.message);
-          } finally {
-            document.getElementById("loading").style.display = "none";
-          }
         });
 
-      function renderDashboard(data, hasDiarization) {
-        const glob = data.global_emotions;
-        const segments = data.segments || [];
-        const diarization = data.diarization || {};
-
-        // Mapeo de nombres a español completo para métricas
-        const EMOTION_DISPLAY = {
-          feliz: "😊 FELIZ",
-          enojado: "😠 ENOJADO",
-          triste: "😢 TRISTE",
-          neutral: "😐 NEUTRAL",
-          joy: "😊 FELIZ",
-          anger: "😠 ENOJADO",
-          sadness: "😢 TRISTE",
-          fear: "😢 TRISTE",
-          hap: "😊 FELIZ",
-          neu: "😐 NEUTRAL",
-          ang: "😠 ENOJADO",
-          sad: "😢 TRISTE",
-          others: "😐 NEUTRAL",
-        };
-
-        // 1. Dominant Emotion
-        const rawEmotion = glob.top_emotion.toLowerCase();
-        const displayEmotion =
-          EMOTION_DISPLAY[rawEmotion] || glob.top_emotion.toUpperCase();
-        document.getElementById("res-emotion").textContent = displayEmotion;
-
-        // 2. Intensity
-        let intensity = glob.top_score;
-        if (!intensity && glob.emotion_distribution) {
-          intensity = glob.emotion_distribution[glob.top_emotion] || 0;
-        }
-        document.getElementById("res-intensity").textContent =
-          Math.round(intensity * 100) + "%";
-
-        // 3. Number of Speakers
-        const numSpeakers = diarization.num_speakers || 1;
-        document.getElementById("res-speakers").textContent = numSpeakers;
-
-        // 4. Emotion Transitions (cuántas veces cambia de emoción)
-        let transitions = 0;
-        let prevEmo = null;
-        segments.forEach((s) => {
-          const emo =
-            s.emotion ||
-            (s.emotions && s.emotions.fused && s.emotions.fused.top_emotion);
-          if (prevEmo && emo && prevEmo !== emo) transitions++;
-          prevEmo = emo;
+        // Sliders
+        document.getElementById('numSpeakers').addEventListener('input', function() {
+            document.getElementById('numSpeakersValue').textContent = this.value == 0 ? 'Auto' : this.value;
         });
-        document.getElementById("res-transitions").textContent = transitions;
+        document.getElementById('audioWeight').addEventListener('input', function() {
+            document.getElementById('audioWeightValue').textContent = this.value + '%';
+        });
 
-        // 5. Mode
-        const mode = hasDiarization
-          ? "DIARIZADO"
-          : data.metadata.params.lite
-          ? "LITE"
-          : "MULTIMODAL";
-        document.getElementById("res-mode").textContent = mode;
+        // API Key
+        function saveApiKey() {
+            const key = document.getElementById('openaiApiKey').value || document.getElementById('settingsApiKey').value;
+            if (key) {
+                localStorage.setItem('openai_api_key', key);
+                alert('✅ API Key guardada');
+            }
+        }
+        window.addEventListener('load', () => {
+            const key = localStorage.getItem('openai_api_key');
+            if (key) {
+                document.getElementById('openaiApiKey').value = key;
+                document.getElementById('settingsApiKey').value = key;
+            }
+        });
 
-        // 6. Render Speaker Stats
-<<<<<<< HEAD
-=======
-        // NOTE: The backend needs to return 'speaker_stats' inside 'diarization' object
->>>>>>> main
-        if (hasDiarization && diarization.speaker_stats) {
-          renderSpeakerStats(diarization.speaker_stats);
+        // Analyze
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('⚠️ Selecciona un archivo');
+                return;
+            }
+
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            try {
+                const model = document.querySelector('.model-option.active').dataset.model;
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('lite_mode', document.getElementById('liteMode').checked);
+                formData.append('audio_weight', parseInt(document.getElementById('audioWeight').value) / 100);
+                formData.append('enable_diarization', document.getElementById('enableDiarization').checked);
+                const numSpeakers = parseInt(document.getElementById('numSpeakers').value);
+                if (numSpeakers > 0) formData.append('num_speakers', numSpeakers);
+
+                let endpoint = '/transcribe/full-analysis';
+                if (model === 'cloud') {
+                    const apiKey = localStorage.getItem('openai_api_key');
+                    if (!apiKey) {
+                        alert('⚠️ Configura tu API Key de OpenAI');
+                        document.getElementById('loadingOverlay').classList.remove('active');
+                        return;
+                    }
+                    formData.append('api_key', apiKey);
+                    endpoint = '/transcribe/cloud-whisper';
+                }
+
+                const res = await fetch(API_URL + endpoint, { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Error en API');
+                const data = await res.json();
+
+                currentResults = data;
+                await saveToHistory(data, selectedFile.name);
+                displayResults(data);
+                document.getElementById('resultsSection').style.display = 'block';
+
+            } catch (e) {
+                alert('❌ Error: ' + e.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }
+        });
+
+        // Display Results
+        function displayResults(data) {
+            const emotions = { 'feliz': '😊', 'enojado': '😠', 'triste': '😢', 'neutral': '😐' };
+            const top = data.global_emotions?.top_emotion || 'neutral';
+            document.getElementById('metricEmotion').textContent = emotions[top] + ' ' + top.toUpperCase();
+            document.getElementById('metricIntensity').textContent = Math.round((data.global_emotions?.top_score || 0) * 100) + '%';
+            document.getElementById('metricSpeakers').textContent = data.diarization?.num_speakers || 1;
+            document.getElementById('metricDuration').textContent = Math.round(data.metadata?.total_duration || 0) + 's';
+
+            renderCharts(data);
+            renderTranscript(data.segments || []);
         }
 
-        // 7. Charts
-        renderMultiLineChart(
-          data.emotion_timeline,
-          glob.emotion_distribution,
-          segments
-        );
-        renderDistributionChart(glob.emotion_distribution);
+        function renderCharts(data) {
+            // Timeline
+            const timeline = data.emotion_timeline || [];
+            const emotions = [...new Set(timeline.map(t => t.emotion))];
+            const colors = { 'feliz': '#10b981', 'enojado': '#ef4444', 'triste': '#3b82f6', 'neutral': '#a78bfa' };
+            
+            new Chart(document.getElementById('timelineChart'), {
+                type: 'line',
+                data: {
+                    labels: timeline.map(t => t.time.toFixed(1) + 's'),
+                    datasets: emotions.map(e => ({
+                        label: e.toUpperCase(),
+                        data: timeline.map(t => t.all_emotions?.[e] || 0),
+                        borderColor: colors[e],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }))
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
 
-        // 8. Peak Moments (top 3 most intense)
-        renderPeakMoments(segments);
+            // Distribution
+            const dist = data.global_emotions?.emotion_distribution || {};
+            new Chart(document.getElementById('distributionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dist).map(k => k.toUpperCase()),
+                    datasets: [{
+                        data: Object.values(dist),
+                        backgroundColor: Object.keys(dist).map(k => colors[k]),
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
 
-        // 9. Transcript with speakers
-        renderTranscriptWithSpeakers(segments);
-      }
+        function renderTranscript(segments) {
+            const box = document.getElementById('transcriptBox');
+            box.innerHTML = segments.map(seg => `
+                <div class="transcript-segment">
+                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> (${seg.emotion})<br>
+                    ${seg.text_es || seg.text}
+                </div>
+            `).join('');
+        }
 
-      function renderSpeakerStats(speakerStats) {
-        const section = document.getElementById("speaker-stats-section");
-        const container = document.getElementById("speaker-cards");
-        container.innerHTML = "";
+        // History
+        async function saveToHistory(data, filename) {
+            try {
+                await fetch(`${API_URL}/history/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: Date.now().toString(),
+                        filename: filename,
+                        date: new Date().toISOString(),
+                        duration: data.metadata?.total_duration || 0,
+                        num_speakers: data.diarization?.num_speakers || 1,
+                        top_emotion: data.global_emotions?.top_emotion || 'neutral',
+                        mode: data.mode || 'local',
+                        data: data
+                    })
+                });
+            } catch (e) {
+                console.error('Error guardando historial:', e);
+            }
+        }
 
-        const EMOTION_ICONS = {
-          feliz: "😊",
-          enojado: "😠",
-          triste: "😢",
-          neutral: "😐",
-          joy: "😊",
-          anger: "😠",
-          sadness: "😢",
-          fear: "😰",
-          hap: "😊",
-          neu: "😐",
-          ang: "😠",
-          sad: "😢",
-        };
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API_URL}/history/list`);
+                const history = await res.json();
+                const grid = document.getElementById('historyGrid');
+                
+                if (history.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones</p>';
+                    return;
+                }
 
-        const EMOTION_COLORS = {
-          feliz: "#10b981",
-          enojado: "#ef4444",
-          triste: "#3b82f6",
-          neutral: "#a78bfa",
-        };
-
-        Object.entries(speakerStats).forEach(([sid, stats]) => {
-          const speakerColor =
-            SPEAKER_COLORS[parseInt(sid) % SPEAKER_COLORS.length];
-          const dominantEmo = stats.dominant_emotion || "neutral";
-          const emoIcon = EMOTION_ICONS[dominantEmo.toLowerCase()] || "😐";
-          const emoColor = EMOTION_COLORS[dominantEmo.toLowerCase()] || "#888";
-
-          const card = document.createElement("div");
-          card.className = "speaker-card";
-          card.style.borderColor = speakerColor;
-          card.innerHTML = `
-                    <div class="speaker-name" style="color: ${speakerColor}">${
-            stats.label || "Hablante " + (parseInt(sid) + 1)
-          }</div>
-                    <div class="speaker-meta">
-<<<<<<< HEAD
-                        ⏱ ${stats.total_duration}s · ${
-=======
-                        ⏱ ${stats.total_duration.toFixed(1)}s · ${
->>>>>>> main
-            stats.segment_count
-          } segmentos
+                grid.innerHTML = history.map(item => `
+                    <div class="history-item" onclick="loadHistoryItem('${item.id}')">
+                        <strong>🎙️ ${item.filename}</strong><br>
+                        <small>${new Date(item.date).toLocaleString('es-ES')}</small><br>
+                        <small>😊 ${item.top_emotion} · ⏱ ${Math.round(item.duration)}s · 👥 ${item.num_speakers}</small>
+                        <div style="margin-top: 0.5rem;">
+                            <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick="event.stopPropagation(); deleteHistoryItem('${item.id}')">🗑️</button>
+                        </div>
                     </div>
-                    <span class="speaker-emotion" style="background: ${emoColor}22; color: ${emoColor}">
-                        ${emoIcon} ${dominantEmo.toUpperCase()}
-                    </span>
-                `;
-          container.appendChild(card);
-        });
-
-        section.style.display = "block";
-      }
-
-      function renderTranscriptWithSpeakers(segments) {
-        const container = document.getElementById("res-transcript");
-        container.innerHTML = "";
-
-        const EMOTION_COLORS = {
-          feliz: "#10b981",
-          enojado: "#ef4444",
-          triste: "#3b82f6",
-          neutral: "#a78bfa",
-        };
-
-        const EMOTION_ICONS = {
-          feliz: "😊",
-          enojado: "😠",
-          triste: "😢",
-          neutral: "😐",
-        };
-
-        if (segments.length === 0) {
-          container.innerHTML =
-            '<p style="color:var(--text-muted)">No hay segmentos de transcripción.</p>';
-          return;
+                `).join('');
+            } catch (e) {
+                console.error('Error cargando historial:', e);
+            }
         }
 
-        segments.forEach((seg) => {
-<<<<<<< HEAD
-          const speakerId = seg.speaker_id || 0;
-          const speakerLabel = seg.speaker_label || `Hablante ${speakerId + 1}`;
-          const speakerColor =
-            SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
-
-          const emotion = seg.emotion || "neutral";
-=======
-           // Handle cases where speaker is a string "speaker_0" or int 0
-          let speakerId = 0;
-          if (typeof seg.speaker === 'string') {
-             speakerId = parseInt(seg.speaker.replace('speaker_', '')) || 0;
-          } else if (typeof seg.speaker === 'number') {
-             speakerId = seg.speaker;
-          }
-          
-          const speakerLabel = `Hablante ${speakerId + 1}`;
-          const speakerColor =
-            SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
-
-          // Determine emotion (fallback priority)
-          let emotion = seg.emotion;
-          if (!emotion && seg.emotions && seg.emotions.fused) {
-              emotion = seg.emotions.fused.top_emotion;
-          }
-          emotion = emotion || "neutral";
-
->>>>>>> main
-          const emoIcon = EMOTION_ICONS[emotion.toLowerCase()] || "😐";
-          const emoColor = EMOTION_COLORS[emotion.toLowerCase()] || "#888";
-
-          const time = seg.start ? seg.start.toFixed(1) : "0";
-          const text = seg.text_es || seg.text || "";
-
-          const segDiv = document.createElement("div");
-          segDiv.className = "transcript-segment";
-          segDiv.style.borderLeftColor = speakerColor;
-          segDiv.innerHTML = `
-                    <div class="seg-header">
-                        <span class="speaker-tag" style="background: ${speakerColor}33; color: ${speakerColor}">${speakerLabel}</span>
-                        <span class="emotion-tag" style="background: ${emoColor}22; color: ${emoColor}">${emoIcon} ${emotion}</span>
-                        <span class="time-tag">⏱ ${time}s</span>
-                    </div>
-                    <div class="seg-text">${text}</div>
-                `;
-          container.appendChild(segDiv);
-        });
-      }
-
-      function renderDistributionChart(distribution) {
-        const ctx = document
-          .getElementById("distributionChart")
-          .getContext("2d");
-
-        const EMOTION_COLORS = {
-          feliz: "#10b981",
-          enojado: "#ef4444",
-          triste: "#3b82f6",
-          neutral: "#a78bfa",
-        };
-
-        const labels = Object.keys(distribution).map((k) => k.toUpperCase());
-        const values = Object.values(distribution);
-        const colors = Object.keys(distribution).map(
-          (k) => EMOTION_COLORS[k.toLowerCase()] || "#888"
-        );
-
-        new Chart(ctx, {
-          type: "doughnut",
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                data: values,
-                backgroundColor: colors,
-                borderWidth: 0,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: { color: "#ccc", font: { size: 11 } },
-              },
-            },
-          },
-        });
-      }
-
-      function renderPeakMoments(segments) {
-        const container = document.getElementById("peak-moments");
-        container.innerHTML = "";
-
-        // Sort by intensity and get top 3
-        const sorted = [...segments]
-          .filter((s) => s.intensity && s.text_es)
-          .sort((a, b) => b.intensity - a.intensity)
-          .slice(0, 3);
-
-        const EMOTION_COLORS = {
-          feliz: "#10b981",
-          enojado: "#ef4444",
-          triste: "#3b82f6",
-          neutral: "#a78bfa",
-        };
-
-        const EMOTION_ICONS = {
-          feliz: "😊",
-          enojado: "😠",
-          triste: "😢",
-          neutral: "😐",
-        };
-
-        if (sorted.length === 0) {
-          container.innerHTML =
-            '<p style="color:var(--text-muted)">No se detectaron momentos de alta intensidad</p>';
-          return;
+        async function loadHistoryItem(id) {
+            try {
+                const res = await fetch(`${API_URL}/history/get/${id}`);
+                const item = await res.json();
+                currentResults = item.data;
+                displayResults(item.data);
+                document.getElementById('resultsSection').style.display = 'block';
+                switchTab('analyze');
+            } catch (e) {
+                alert('Error cargando transcripción');
+            }
         }
 
-        sorted.forEach((seg, idx) => {
-<<<<<<< HEAD
-          const emo = seg.emotion || "neutral";
-          const icon = EMOTION_ICONS[emo.toLowerCase()] || "🎯";
-          const color = EMOTION_COLORS[emo.toLowerCase()] || "#888";
-          const time = seg.start ? seg.start.toFixed(1) : "0";
-          const text = seg.text_es || seg.text || "";
-          const intensityPct = Math.round(seg.intensity * 100);
-          const speakerLabel = seg.speaker_label || "Hablante 1";
-          const speakerId = seg.speaker_id || 0;
-=======
-          let emotion = seg.emotion;
-          if (!emotion && seg.emotions && seg.emotions.fused) {
-              emotion = seg.emotions.fused.top_emotion;
-          }
-          emotion = emotion || "neutral";
-          
-          const icon = EMOTION_ICONS[emotion.toLowerCase()] || "🎯";
-          const color = EMOTION_COLORS[emotion.toLowerCase()] || "#888";
-          const time = seg.start ? seg.start.toFixed(1) : "0";
-          const text = seg.text_es || seg.text || "";
-          const intensityPct = Math.round(seg.intensity * 100);
-          
-          let speakerId = 0;
-          if (typeof seg.speaker === 'string') {
-             speakerId = parseInt(seg.speaker.replace('speaker_', '')) || 0;
-          } else if (typeof seg.speaker === 'number') {
-             speakerId = seg.speaker;
-          }
-          
-          const speakerLabel = `Hablante ${speakerId + 1}`;
->>>>>>> main
-          const speakerColor =
-            SPEAKER_COLORS[speakerId % SPEAKER_COLORS.length];
+        async function deleteHistoryItem(id) {
+            if (!confirm('¿Eliminar?')) return;
+            try {
+                await fetch(`${API_URL}/history/delete/${id}`, { method: 'DELETE' });
+                loadHistory();
+            } catch (e) {
+                alert('Error eliminando');
+            }
+        }
 
-          const card = document.createElement("div");
-          card.style.cssText = `
-                    background: linear-gradient(135deg, ${color}22, transparent);
-                    border-left: 4px solid ${color};
-                    padding: 15px;
-                    border-radius: 8px;
-                `;
-          card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-<<<<<<< HEAD
-                        <span style="font-weight:600; color:${color}">${icon} ${emo.toUpperCase()} (${intensityPct}%)</span>
-=======
-                        <span style="font-weight:600; color:${color}">${icon} ${emotion.toUpperCase()} (${intensityPct}%)</span>
->>>>>>> main
-                        <span style="color:${speakerColor}; font-size:0.85rem;">🎙️ ${speakerLabel}</span>
-                        <span style="color:var(--text-muted); font-size:0.85rem;">⏱ ${time}s</span>
-                    </div>
-                    <p style="margin:0; color:#ddd; font-style:italic;">"${text}"</p>
-                `;
-          container.appendChild(card);
-        });
-      }
+        async function clearHistory() {
+            if (!confirm('¿Borrar todo el historial?')) return;
+            try {
+                await fetch(`${API_URL}/history/clear`, { method: 'DELETE' });
+                loadHistory();
+                alert('✅ Historial borrado');
+            } catch (e) {
+                alert('Error borrando historial');
+            }
+        }
 
-      function renderMultiLineChart(timeline, distribution) {
-        const ctx = document.getElementById("emotionChart").getContext("2d");
+        // Export
+        async function exportData(format) {
+            if (!currentResults) {
+                alert('⚠️ No hay resultados');
+                return;
+            }
 
-        // Mapeo de nombres a español completo
-        const EMOTION_DISPLAY_NAMES = {
-          feliz: "😊 Feliz",
-          enojado: "😠 Enojado",
-          triste: "😢 Triste",
-          neutral: "😐 Neutral",
-          // Fallbacks para nombres crudos del modelo
-          joy: "😊 Feliz",
-          anger: "😠 Enojado",
-          sadness: "😢 Triste",
-          fear: "😢 Triste",
-          disgust: "😠 Enojado",
-          surprise: "😊 Feliz",
-          hap: "😊 Feliz",
-          neu: "😐 Neutral",
-          ang: "😠 Enojado",
-          sad: "😢 Triste",
-          others: "😐 Neutral",
-        };
+            try {
+                const res = await fetch(`${API_URL}/export/${format}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentResults)
+                });
 
-        const getDisplayName = (key) => {
-          return EMOTION_DISPLAY_NAMES[key.toLowerCase()] || key.toUpperCase();
-        };
-
-        // Find top 3 emotions to plot
-        const sortedEmotions = Object.entries(distribution)
-          .sort(([, a], [, b]) => b - a)
-          .slice(0, 3)
-          .map(([k]) => k);
-
-        const labels = timeline.map((t) => {
-<<<<<<< HEAD
-          const speakerLabel = t.speaker_label ? ` (${t.speaker_label})` : "";
-          return t.time.toFixed(1) + "s" + speakerLabel;
-=======
-          return t.time.toFixed(1) + "s";
->>>>>>> main
-        });
-
-        // Colores por emoción
-        const emotionColors = {
-          feliz: "#10b981", // Verde
-          enojado: "#ef4444", // Rojo
-          triste: "#3b82f6", // Azul
-          neutral: "#a78bfa", // Morado
-          joy: "#10b981",
-          anger: "#ef4444",
-          sadness: "#3b82f6",
-          hap: "#10b981",
-          ang: "#ef4444",
-          neu: "#a78bfa",
-          sad: "#3b82f6",
-        };
-
-        const datasets = sortedEmotions.map((emo, idx) => {
-          const fallbackColors = ["#8b5cf6", "#10b981", "#f472b6"];
-          const color =
-            emotionColors[emo.toLowerCase()] || fallbackColors[idx % 3];
-          return {
-            label: getDisplayName(emo),
-            data: timeline.map((t) =>
-              t.all_emotions ? t.all_emotions[emo] || 0 : 0
-            ),
-            borderColor: color,
-            backgroundColor: "transparent",
-            tension: 0.4,
-            borderWidth: 2,
-          };
-        });
-
-        if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(ctx, {
-          type: "line",
-          data: { labels, datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-              legend: { labels: { color: "#ccc" } },
-              tooltip: { mode: "index", intersect: false },
-            },
-            scales: {
-              y: { grid: { color: "#333" }, ticks: { color: "#888" } },
-              x: { display: false },
-            },
-          },
-        });
-      }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `transcripcion_${Date.now()}.${format}`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Error exportando: ' + e.message);
+            }
+        }
     </script>
-  </body>
+</body>
 </html>

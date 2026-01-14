@@ -10,13 +10,15 @@ import librosa
 import numpy as np
 import traceback
 import time
+import torch
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, Any
-
+from routes.history_routes import router as history_router
+from routes.export_routes import router as export_router
 from core.models import load_whisper_models
 from core.audio_processing import load_audio, write_wav_from_array
 from core.speaker_diarization import diarize_audio, DiarizationResult   
@@ -28,9 +30,7 @@ from core.emotion_analysis import (
     EmotionResult,
     TemporalEmotionAnalyzer
 )
-<<<<<<< HEAD
-from core.speaker_diarization import diarize_audio, DiarizationResult
-=======
+
 from core.diarization import (
     compute_embeddings,
     detect_speaker_changes,
@@ -39,7 +39,7 @@ from core.diarization import (
     format_labeled_transcription
 )
 from resemblyzer import VoiceEncoder
->>>>>>> main
+
 from config import (
     MAX_UPLOAD_SIZE,
     ALLOWED_MIME,
@@ -57,10 +57,34 @@ from Resilience import (
     retry_with_backoff_async
 )
 from Validators import AudioValidator, ParametersValidator
+# Imports lazy - openai y httpx se importan donde se necesitan
+# from openai import OpenAI
+# import httpx
+import gc
+import psutil
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("uvicorn.error")
+
+
+# === FUNCIONES DE GESTIÓN DE MEMORIA ===
+
+def log_memory_usage():
+    """Log del uso actual de memoria"""
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    mem_mb = mem_info.rss / 1024 / 1024
+    logger.info(f"💾 Uso de RAM: {mem_mb:.1f} MB")
+    return mem_mb
+
+
+def cleanup_memory():
+    """Limpia memoria después de procesar"""
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
 
 # Threadpool para no bloquear el loop principal
 executor = ThreadPoolExecutor(max_workers=WORKERS)
@@ -90,6 +114,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(history_router)
+app.include_router(export_router)
 
 # Helpers
 
@@ -190,7 +217,8 @@ def health_check_detailed():
 async def safe_transcribe(model, path):
     # WHISPER_BREAKER.call espera func, *args, fallback, **kwargs
     # Como run_blocking ejecuta func(*args), aqui pasamos WHISPER_BREAKER.call a run_blocking?
-    # No, run_blocking ejecuta en threadpool. WHISPER_BREAKER.call es sincrono (a menos que usemos call_async pero ese no estaba exposed como sync wrapper).
+    # No, run_blocking ejecuta en threadpool. 
+    # WHISPER_BREAKER.call es sincrono (a menos que usemos call_async pero ese no estaba exposed como sync wrapper).
     # Pero transcribe es bloqueante.
     # Asi que mejor ejecutamos WHISPER_BREAKER.call dentro del threadpool, y que el call llame a model.transcribe.
     
@@ -734,5 +762,324 @@ async def transcribe_with_diarization(
             except:
                 pass
 
+
+@app.post("/transcribe/cloud-whisper", tags=["Cloud"])
+async def transcribe_with_cloud_whisper(
+    file: UploadFile = File(...),
+    api_key: str = Form(...),
+    lite_mode: bool = Form(False),
+    audio_weight: float = Form(0.4),
+    enable_diarization: bool = Form(True),
+    num_speakers: Optional[int] = Form(None)
+):
+    """
+    Transcribe con OpenAI Whisper Cloud (más rápido).
+    Después aplica análisis emocional local.
+    """
+    validate_upload(file)
+    start_time = time.time()
+    _metrics["requests_total"] += 1
+    
+    audio_weight, param_warnings, lite_mode = await validate_request_params(lite_mode, audio_weight)
+    warnings = param_warnings
+    tmp_path = None
+    
+    try:
+        # Guardar archivo
+        tmp_path = await save_upload_to_tempfile(file)
+        
+        # Validar
+        validator = AudioValidator()
+        validation_result = validator.validate_audio(tmp_path)
+
+        if not validation_result.is_valid:
+            raise HTTPException(
+                status_code=400, 
+                detail={
+                    "message": "Audio inválido",
+                    "errors": validation_result.errors
+                }
+            )
+        
+        # Transcribir con OpenAI
+        logger.info("🌐 Transcribiendo con OpenAI Whisper Cloud...")
+        
+        try:
+            client = OpenAI(
+                api_key=api_key,
+                timeout=httpx.Timeout(300.0, connect=60.0)
+            )
+            
+            with open(tmp_path, "rb") as audio_file:
+                transcript_response = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                    response_format="verbose_json",
+                    language="es",
+                    timestamp_granularities=["segment"]
+                )
+        except Exception as e:
+            logger.error(f"Error con OpenAI API: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error en OpenAI API: {str(e)}"
+            )
+        
+        # Convertir respuesta
+        segments_raw = []
+        for seg in transcript_response.segments:
+            segments_raw.append({
+                "start": seg.start,
+                "end": seg.end,
+                "text": seg.text
+            })
+        
+        tx_full = transcript_response.text
+        logger.info(f"✅ Transcripción completada: {len(segments_raw)} segmentos")
+        
+        # Traducir
+        segment_texts = [s["text"].strip() for s in segments_raw]
+        translations = []
+        if not lite_mode and segment_texts:
+            logger.info("🔄 Traduciendo segmentos...")
+            translations = await run_blocking(translate_batch, segment_texts)
+        
+        # Cargar audio para análisis
+        audio_data = np.array([])
+        sr = 16000
+        if not lite_mode:
+            y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
+            audio_data = y
+        
+        # Diarización
+        speaker_labels = {}
+        num_speakers_detected = 1
+        if enable_diarization and len(audio_data) > 0:
+            try:
+                logger.info("🎙️ Ejecutando diarización...")
+                encoder = get_voice_encoder()
+                
+                duration = len(audio_data) / sr
+                windows = []
+                t = 0.0
+                while t < duration:
+                    end_t = min(t + WINDOW_SEC, duration)
+                    windows.append((t, end_t))
+                    t += HOP_SEC
+                
+                if len(windows) >= 2:
+                    embeddings, starts = await run_blocking(
+                        compute_embeddings, audio_data, sr, windows, encoder, WINDOW_SEC
+                    )
+                    
+                    if len(embeddings) >= 2:
+                        _, labels = detect_speaker_changes(
+                            embeddings, 
+                            CHANGE_SIM_THRESHOLD,
+                            num_speakers=num_speakers
+                        )
+                        
+                        for i, start_t in enumerate(starts):
+                            end_t = start_t + WINDOW_SEC
+                            speaker_labels[(start_t, end_t)] = int(labels[i])
+                        
+                        num_speakers_detected = len(set(labels))
+                        logger.info(f"✔ Detectados {num_speakers_detected} hablante(s)")
+            except Exception as e_diar:
+                logger.warning(f"Error en diarización: {e_diar}")
+                enable_diarization = False
+        
+        # Análisis emocional
+        enriched_segments = []
+        emotion_analyzer = TemporalEmotionAnalyzer()
+        logger.info("💭 Analizando emociones...")
+
+        for i, seg in enumerate(segments_raw):
+            try:
+                seg_text_es = segment_texts[i] if i < len(segment_texts) else ""
+                seg_text_en = translations[i] if i < len(translations) else ""
+                
+                if not seg_text_es:
+                    continue
+
+                start = float(seg.get("start", 0))
+                end = float(seg.get("end", 0))
+                
+                seg_audio_path = None
+                seg_chunk = None
+                
+                if not lite_mode and len(audio_data) > 0:
+                    try:
+                        start_idx = int(start * sr)
+                        end_idx = int(end * sr)
+                        
+                        start_idx = max(0, min(start_idx, len(audio_data)))
+                        end_idx = max(start_idx, min(end_idx, len(audio_data)))
+                        
+                        if (end_idx - start_idx) > (sr * 0.1):
+                            seg_chunk = audio_data[start_idx:end_idx]
+                            seg_audio_path = await run_blocking(write_wav_from_array, seg_chunk, sr)
+                    except Exception as e_audio:
+                        logger.warning(f"Audio seg {i} failed: {e_audio}")
+
+                emotion_result = emotion_analyzer.analyze_segment(
+                    text_es=seg_text_es,
+                    text_en=seg_text_en,
+                    audio_path=seg_audio_path,
+                    audio_array=seg_chunk,
+                    sr=sr,
+                    audio_weight=audio_weight,
+                    apply_smoothing=True,
+                    use_ensemble=True
+                )
+                
+                if seg_audio_path and os.path.exists(seg_audio_path):
+                    try:
+                        os.remove(seg_audio_path)
+                    except:
+                        pass
+                
+                top_emo = emotion_result.top_emotion
+                top_score = emotion_result.top_score
+                final_emotions = emotion_result.emotions
+
+                speaker = 0
+                if enable_diarization and speaker_labels:
+                    seg_mid = (start + end) / 2
+                    for (win_s, win_e), spk in speaker_labels.items():
+                        if win_s <= seg_mid < win_e:
+                            speaker = spk
+                            break
+
+                enriched_segments.append({
+                    "start": start,
+                    "end": end,
+                    "duration": end - start,
+                    "text_es": seg_text_es,
+                    "text_en": seg_text_en,
+                    "text": seg_text_es,
+                    "emotion": top_emo,
+                    "intensity": round(top_score, 2),
+                    "emotions": {
+                        "fused": {
+                            "top_emotion": top_emo,
+                            "score": round(top_score, 4),
+                            "all_emotions": final_emotions
+                        }
+                    },
+                    "speaker_id": speaker,
+                    "speaker_label": f"Hablante {speaker + 1}",
+                    "speaker": f"speaker_{speaker}"
+                })
+
+            except Exception as e_seg:
+                logger.error(f"Error seg {i}: {e_seg}")
+                continue
+
+        # Estadísticas globales
+        global_emotions = {}
+        for seg in enriched_segments:
+            fused = seg["emotions"]["fused"]["all_emotions"]
+            for k, v in fused.items():
+                global_emotions[k] = global_emotions.get(k, 0.0) + v
+        
+        total_w = sum(global_emotions.values())
+        if total_w > 0:
+            for k in global_emotions:
+                global_emotions[k] = round(global_emotions[k] / total_w, 4)
+
+        top_global = max(global_emotions, key=global_emotions.get) if global_emotions else "neutral"
+
+        # Timeline
+        timeline = []
+        for s in enriched_segments:
+            timeline.append({
+                "time": s["start"],
+                "emotion": s["emotion"],
+                "score": s["emotions"]["fused"]["score"],
+                "all_emotions": s["emotions"]["fused"]["all_emotions"],
+                "speaker_id": s.get("speaker_id", 0),
+                "speaker_label": s.get("speaker_label", "Hablante 1")
+            })
+
+        # Speaker stats
+        speaker_stats = {}
+        if enable_diarization:
+            from collections import Counter
+            
+            for s in enriched_segments:
+                spk_id = s.get("speaker_id", 0)
+                
+                if spk_id not in speaker_stats:
+                    speaker_stats[spk_id] = {
+                        "label": s.get("speaker_label", f"Hablante {spk_id + 1}"),
+                        "total_duration": 0.0,
+                        "segment_count": 0,
+                        "emotions": []
+                    }
+                
+                speaker_stats[spk_id]["total_duration"] += s.get("duration", 0)
+                speaker_stats[spk_id]["segment_count"] += 1
+                
+                emo = s.get("emotion")
+                if emo:
+                    speaker_stats[spk_id]["emotions"].append(emo)
+
+            for spk_id in speaker_stats:
+                emos = speaker_stats[spk_id].pop("emotions")
+                if emos:
+                    c = Counter(emos)
+                    speaker_stats[spk_id]["dominant_emotion"] = c.most_common(1)[0][0]
+                else:
+                    speaker_stats[spk_id]["dominant_emotion"] = "neutral"
+
+        processing_time = time.time() - start_time
+        _metrics["requests_success"] += 1
+        _metrics["total_processing_time"] += processing_time
+
+        return {
+            "status": "success",
+            "mode": "cloud_whisper",
+            "transcription": tx_full,
+            "translation": " ".join(translations) if translations else "",
+            "segments": enriched_segments,
+            "global_emotions": {
+                "top_emotion": top_global,
+                "top_score": global_emotions.get(top_global, 0.0),
+                "emotion_distribution": global_emotions
+            },
+            "emotion_timeline": timeline,
+            "diarization": {
+                "enabled": enable_diarization,
+                "num_speakers": num_speakers_detected,
+                "speaker_stats": speaker_stats
+            },
+            "metadata": {
+                "total_duration": transcript_response.duration,
+                "processing_time": round(processing_time, 2),
+                "params": {
+                    "lite": lite_mode,
+                    "audio_weight": audio_weight,
+                    "diarization": enable_diarization,
+                    "transcription_engine": "openai_whisper_cloud"
+                }
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        _metrics["requests_failed"] += 1
+        logger.error(f"Error: {e}\n{traceback.format_exc()}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except:
+                pass
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
+

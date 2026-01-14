@@ -57,3 +57,6 @@ plotly>=5.18.0
 # Compatibilidad
 # =====================================================
 protobuf>=3.20.0,<4.0.0
+openai>=1.0.0
+reportlab>=4.0.0
+matplotlib>=3.7.0

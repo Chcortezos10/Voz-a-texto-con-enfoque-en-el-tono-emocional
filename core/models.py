@@ -1,127 +1,97 @@
 """
-Gestión y carga de modelos de ML con caché.
+Sistema de carga lazy de modelos para optimizar RAM
 """
-from functools import lru_cache
-from pathlib import Path
-from typing import Dict, Any
+import logging
+import torch
+from typing import Dict, Any, Optional
+import gc
 
-from vosk import Model
-from resemblyzer import VoiceEncoder
+logger = logging.getLogger(__name__)
 
-from config import (
-    MODEL_BASE_DIR,
-    WHISPER_MODEL,
-    TEXT_EMOTION_MODEL,
-    AUDIO_EMOTION_MODEL,
-    SENTIMENT_MODEL
-)
+# Cache global de modelos
+_models_cache: Dict[str, Any] = {}
+_loading_lock = {}
 
 
-def find_vosk_model(base_dir: Path = MODEL_BASE_DIR) -> str:
+def clear_model_cache():
+    """Limpia el cache de modelos y libera memoria"""
+    global _models_cache
+    
+    for model_name in list(_models_cache.keys()):
+        del _models_cache[model_name]
+    
+    _models_cache = {}
+    
+    # Limpiar cache de PyTorch
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    
+    # Garbage collection
+    gc.collect()
+    
+    logger.info("🗑️ Cache de modelos limpiado")
+
+
+def load_whisper_models(model_size: str = "tiny") -> Dict[str, Any]:
     """
-    Busca y retorna la ruta al modelo Vosk.
-
+    Carga Whisper con lazy loading y cache.
+    
     Args:
-        base_dir: Directorio base donde buscar modelos
-
+        model_size: Tamaño del modelo (tiny, base, small, medium, large)
+    
     Returns:
-        Ruta al modelo Vosk
-
-    Raises:
-        FileNotFoundError: Si no se encuentra el modelo
+        Dict con modelo Whisper
     """
-    if not base_dir.exists():
-        raise FileNotFoundError(f"Carpeta base de modelos no encontrada: {base_dir}")
-
-    candidates = [p for p in base_dir.iterdir() if p.is_dir()]
-    if not candidates:
-        raise FileNotFoundError(f"No se encontraron subcarpetas de modelo en: {base_dir}")
-
-    # Buscar carpeta que contenga "vosk" o "model" en el nombre
-    for c in candidates:
-        name = c.name.lower()
-        if "vosk" in name or "model" in name:
-            return str(c)
-
-    # Si no encuentra ninguna, retornar la primera
-    return str(candidates[0])
-
-
-@lru_cache(maxsize=1)
-def load_vosk_model() -> Model:
-    """
-    Carga el modelo Vosk con caché.
-
-    Returns:
-        Modelo Vosk cargado
-
-    Raises:
-        FileNotFoundError: Si no se encuentra el modelo
-    """
-    model_path = find_vosk_model()
-    return Model(model_path)
-
-
-@lru_cache(maxsize=1)
-def load_voice_encoder() -> VoiceEncoder:
-    """
-    Carga el encoder de voz Resemblyzer con caché.
-
-    Returns:
-        VoiceEncoder inicializado
-    """
-    return VoiceEncoder()
+    global _models_cache
+    
+    cache_key = f"whisper_{model_size}"
+    
+    if cache_key in _models_cache:
+        logger.info(f"✅ Usando Whisper en cache: {model_size}")
+        return _models_cache[cache_key]
+    
+    try:
+        logger.info(f"⏳ Cargando Whisper modelo: {model_size}")
+        import whisper
+        
+        # Configurar para bajo uso de memoria
+        device = "cpu"  # Forzar CPU para ahorrar VRAM
+        
+        model = whisper.load_model(
+            model_size,
+            device=device,
+            download_root=None,
+            in_memory=False  # No mantener en memoria si es posible
+        )
+        
+        result = {"whisper": model}
+        _models_cache[cache_key] = result
+        
+        logger.info(f"✅ Whisper cargado: {model_size} en {device}")
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Error cargando Whisper: {e}")
+        raise
 
 
-@lru_cache(maxsize=1)
-def load_whisper_models() -> Dict[str, Any]:
-    """
-    Carga modelos de Whisper y análisis de emociones/sentimientos.
-    Esta función es para la API FastAPI.
-
-    Returns:
-        Diccionario con todos los modelos cargados
-    """
-    import whisper
-    from transformers import pipeline
-    from pysentimiento import create_analyzer
-
-    whisper_model = whisper.load_model(WHISPER_MODEL)
-
-    text_emotion = pipeline(
-        "text-classification",
-        model=TEXT_EMOTION_MODEL,
-        return_all_scores=True
-    )
-
-    audio_emotion = pipeline(
-        "audio-classification",
-        model=AUDIO_EMOTION_MODEL
-    )
-
-    sentiment = pipeline(
-        "text-classification",
-        model=SENTIMENT_MODEL
-    )
-
-    pysentimiento_emotion_es = create_analyzer(task="emotion", lang="es")
-
-    return {
-        "whisper": whisper_model,
-        "text_emotion": text_emotion,
-        "audio_emotion": audio_emotion,
-        "sentiment": sentiment,
-        "pysentimiento_es": pysentimiento_emotion_es
-    }
+def get_whisper_model(model_size: str = "tiny"):
+    """Helper para obtener modelo Whisper"""
+    models = load_whisper_models(model_size)
+    return models["whisper"]
 
 
-@lru_cache(maxsize=1)
-def load_whisper_model():
-    """
-    Carga solo el modelo Whisper (para Streamlit simple).
-
-    Returns:
-        Modelo Whisper cargado
-    """
-    import whisper
-    return whisper.load_model(WHISPER_MODEL)
+def unload_whisper_model():
+    """Descarga el modelo Whisper para liberar memoria"""
+    global _models_cache
+    
+    keys_to_remove = [k for k in _models_cache.keys() if k.startswith("whisper_")]
+    
+    for key in keys_to_remove:
+        del _models_cache[key]
+        logger.info(f"🗑️ Modelo descargado: {key}")
+    
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    
+    gc.collect()
