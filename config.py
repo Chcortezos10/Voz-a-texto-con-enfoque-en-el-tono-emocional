@@ -156,3 +156,24 @@ AUDIO_MIN_RMS_THRESHOLD = 0.001 #detecta el silencio
 EMOTION_BOOST_FACTOR = 1.5  # Potenciar emociones FUERTEMENTE 
 EMOTION_NEUTRAL_DAMP = 0.3  # Castigar neutral SEVERAMENTE
 EMOTION_CONFIDENCE_THRESHOLD = 0.20  # Umbral de minimo de confianza
+
+# Modo de bajo consumo de memoria (desactiva modelos secundarios)
+LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "true").lower() == "true"
+
+# Máximo de modelos de emoción cargados simultáneamente
+MAX_EMOTION_MODELS_LOADED = int(os.getenv("MAX_EMOTION_MODELS_LOADED", "2"))
+
+# TTL del cache de resultados (en segundos, default 30 minutos)
+RESULT_CACHE_TTL = int(os.getenv("RESULT_CACHE_TTL", "1800"))
+
+# Tamaño máximo del cache de resultados
+RESULT_CACHE_SIZE = int(os.getenv("RESULT_CACHE_SIZE", "200"))
+
+# Habilitar modelo GoEmotions (consume +500MB RAM)
+ENABLE_GO_EMOTIONS = os.getenv("ENABLE_GO_EMOTIONS", "false").lower() == "true"
+
+# Habilitar análisis de prosodia
+ENABLE_PROSODY = os.getenv("ENABLE_PROSODY", "true").lower() == "true"
+
+# Agregar al final del archivo para CORS
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")

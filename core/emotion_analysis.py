@@ -10,7 +10,11 @@ from functools import lru_cache
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from collections import deque, OrderedDict, Counter
+from core.model_manager import get_model_manager
 from concurrent.futures import ThreadPoolExecutor
+from cachetools import TTLCache
+from config import RESULT_CACHE_SIZE, RESULT_CACHE_TTL
+import threading
 
 # Configurar logger primero
 logger = logging.getLogger(__name__)
@@ -49,17 +53,6 @@ from config import (
 GO_EMOTION_MODEL = "SamLowe/roberta-base-go_emotions"
 PROSODY_WEIGHT = 0.15
 
-
-MODELOS_DE_TEXTO =[
-    {"name": EMOTION_ES_MODEL, "weight": 0.30, "language": "es"},
-    {"name": TEXT_EMOTION_MODEL, "weight": 0.25, "language": "en"},
-    {"name": "SamLowe/roberta-base-go_emotions", "weight": 0.15, "language": "en"},
-]
-
-MODELOS_DE_AUDIO =[
-    {"name": AUDIO_EMOTION_MODEL, "weight": 0.25}
-]
-
 @dataclass
 class EmotionResult:
     """Resultado de análisis emocional."""
@@ -69,10 +62,9 @@ class EmotionResult:
     confidence: float
     source: str  # 'text', 'audio', 'text_es', 'text_en', 'multimodal'
 
-class ResultCache:
-    def __init__(self,maxsize: int = 500):
-        self.cache = OrderedDict()
-        self.maxsize = maxsize
+class SmartResultCache:
+    def __init__(self, maxsize: int = 200,ttl: int = 1800):
+        self.cache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.lock = threading.Lock()
         self.hits = 0
         self.misses = 0
@@ -80,7 +72,6 @@ class ResultCache:
     def get(self, key: str) -> Optional[EmotionResult]:
         with self.lock:
             if key in self.cache:
-                self.cache.move_to_end(key)
                 self.hits += 1
                 return self.cache[key]
             self.misses += 1
@@ -88,19 +79,22 @@ class ResultCache:
     
     def add(self, key: str, value: EmotionResult) -> None:
         with self.lock:
-            if key in self.cache:
-                self.cache.move_to_end(key)
-            else:
-                self.cache[key] = value
-                if len(self.cache) > self.maxsize:
-                    self.cache.popitem(last=False)
+            self.cache[key] = value
+    
+    def get_stats(self):
+        with self.lock:
+            return {
+                "size": len(self.cache),
+                "maxsize": self.cache.maxsize,
+                "hits": self.hits,
+                "misses": self.misses,
+                "hit_rate": round(self.hits / max(1, self.hits + self.misses) * 100, 2)
+            }
 
     @staticmethod
     def make_key(text: str, model_name: str) -> str:
         content = f"{model_name}:{text[:100]}"
         return hashlib.sha256(content.encode()).hexdigest()
-
-_result_cache = ResultCache(maxsize=500)
 
 @dataclass
 class ProsodyFeatures:
@@ -306,7 +300,7 @@ class TemporalEmotionState:
         self.add(emotions)
     
     def reset(self) -> None:
-        self.history = []
+        self.history.clear()
     
     def get_smoothed(self, current: Dict[str, float], alpha: float = 0.6) -> Dict[str, float]:
         """Retorna las emociones suavizadas con el historial."""
@@ -359,46 +353,64 @@ def load_text_emotion_en():
 
 @lru_cache(maxsize=1)
 def load_text_emotion_es():
-    """Carga modelo de emociones en español (daveni)."""
+    from config import MAX_EMOTION_MODELS_LOADED
     device_num = 0 if get_device() == "cuda" else -1
-    logger.info(f"Cargando modelo de emociones en español...")
-    return pipeline(
-        "text-classification",
-        model=EMOTION_ES_MODEL,
-        top_k=None,
-        device=device_num
-    )
-
+    
+    def _loader():
+        logger.info(f"Cargando modelo de emociones en español...")
+        return pipeline(
+            "text-classification",
+            model=EMOTION_ES_MODEL,
+            top_k=None,
+            device=device_num
+        )
+    
+    manager = get_model_manager(max_models=MAX_EMOTION_MODELS_LOADED)
+    return manager.get_model("text_emotion_es", _loader)    
 
 @lru_cache(maxsize=1)
 def load_audio_emotion():
-    """Carga modelo de emociones en audio (wav2vec2)."""
+    from config import MAX_EMOTION_MODELS_LOADED
     device_num = 0 if get_device() == "cuda" else -1
-    logger.info(f"Cargando modelo de emociones de audio...")
-    return pipeline(
-        "audio-classification",
-        model=AUDIO_EMOTION_MODEL,
-        device=device_num
-    )
+    
+    def _loader():
+        logger.info(f"Cargando modelo de emociones de audio...")
+        return pipeline(
+            "audio-classification",
+            model=AUDIO_EMOTION_MODEL,
+            device=device_num
+        )
+    
+    manager = get_model_manager(max_models=MAX_EMOTION_MODELS_LOADED)
+    return manager.get_model("audio_emotion", _loader)
 
 
 @lru_cache(maxsize=1)
 def load_go_emotion():
-    """Carga modelo GoEmotions para texto (opcional, requiere RAM adicional)."""
+    from config import ENABLE_GO_EMOTIONS, MAX_EMOTION_MODELS_LOADED
+    if not ENABLE_GO_EMOTIONS:
+        logger.info("GoEmotions deshabilitado")
+        return None
+    
     device_num = 0 if get_device() == "cuda" else -1
-    logger.info("Cargando modelo GoEmotions...")
-    try:    
+    
+    def _loader():
+        logger.info(f"Cargando modelo de emociones de GoEmotions...")
         return pipeline(
             "text-classification",
             model=GO_EMOTION_MODEL,
             top_k=None,
             device=device_num
         )
+
+    try:
+        manager = get_model_manager(max_models=MAX_EMOTION_MODELS_LOADED)
+        return manager.get_model("go_emotion", _loader)
     except OSError as e:
-        logger.warning(f"GoEmotions no disponible (RAM insuficiente): {str(e)[:100]}...")
+        logger.error(f"GoEmotions no disponible: {str(e)[:100]}")
         return None
     except Exception as e:
-        logger.warning(f"GoEmotions deshabilitado: {e}")
+        logger.error(f"GoEmotions deshabilitado: {str(e)[:100]}")
         return None
 
 def analyze_text_go_emotions(text: str) -> EmotionResult:
@@ -445,12 +457,11 @@ class EnsembleResult:
     top_score: float
     confidence: float
     source: str
-    individual_results: Dict[str, EmotionResult] = field(default_factory=dict)
+    individual_results: Optional[Dict[str, Any]] = None
     agreement_score: float = 0.0
     prosody_emotion: Optional[str] = None
     prosody_confidence: float = 0.0
     processing_time: float = 0.0
-
 
 class EmotionEnsemble:
     """Ensemble de múltiples modelos para análisis emocional."""
