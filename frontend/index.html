@@ -4,427 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-        :root {
-            --bg: #0a0a0f;
-            --surface: #16161d;
-            --surface-hover: #1f1f2a;
-            --border: #2a2a3a;
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #ec4899;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: "Inter", sans-serif;
-            background: linear-gradient(135deg, #0a0a0f 0%, #16161d 100%);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        /* HEADER */
-        .header {
-            background: rgba(22, 22, 29, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .status-badge {
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-        }
-
-        .status-badge.online {
-            border-color: var(--success);
-            color: var(--success);
-        }
-
-        .status-badge::before {
-            content: "";
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        /* TABS */
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .tab {
-            padding: 1rem 1.5rem;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-
-        .tab-content.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .upload-section {
-            background: var(--surface);
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 3rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 2rem;
-        }
-
-        .upload-section:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .upload-section.active {
-            border-color: var(--success);
-        }
-
-        .config-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .config-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .model-selector {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .model-option {
-            flex: 1;
-            padding: 0.8rem;
-            background: var(--surface-hover);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .model-option.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-light);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--surface);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-        }
-
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 10, 15, 0.95);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-
-        .loading-overlay.active { display: flex; }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--surface);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .history-grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .history-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .history-item:hover {
-            border-color: var(--primary);
-            transform: translateX(5px);
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 1rem 0;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 52px;
-            height: 28px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--surface-hover);
-            transition: 0.3s;
-            border-radius: 28px;
-            border: 2px solid var(--border);
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 2px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .toggle-switch input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--surface-hover);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .metric-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-container {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            min-height: 350px;
-        }
-
-        .transcript-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .transcript-segment {
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            border-radius: 8px;
-            background: var(--surface-hover);
-            border-left: 3px solid var(--border);
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+    <!-- Header -->
     <header class="header">
-        <div class="brand">🎙️ Transcriptor Emocional Pro V5</div>
+        <div class="brand">Transcriptor Emocional Pro V5</div>
         <div id="apiStatus" class="status-badge">Conectando...</div>
     </header>
 
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div style="font-size: 1.2rem; font-weight: 600; margin-top: 1rem;">Procesando...</div>
     </div>
 
+    <!-- Main Container -->
     <div class="container">
+        <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('analyze')">📊 Análisis</button>
-            <button class="tab" onclick="switchTab('history')">📚 Historial</button>
-            <button class="tab" onclick="switchTab('settings')">⚙️ Configuración</button>
+            <button class="tab active" onclick="switchTab('analyze')">Análisis</button>
+            <button class="tab" onclick="switchTab('history')">Historial</button>
+            <button class="tab" onclick="switchTab('settings')">Configuración</button>
         </div>
 
-        <!-- TAB ANALYZE -->
+        <!-- TAB: ANÁLISIS -->
         <div id="tab-analyze" class="tab-content active">
+            <!-- Upload Section -->
             <div class="upload-section" id="uploadArea">
-                <div style="font-size: 4rem;">📂</div>
+                <div style="font-size: 4rem;"></div>
                 <h2>Arrastra tu archivo de audio aquí</h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                    O haz clic para seleccionar un archivo
+                </p>
                 <div id="fileName" style="color: var(--primary); margin-top: 1rem;"></div>
                 <input type="file" id="fileInput" hidden accept="audio/*,video/*" />
             </div>
 
+            <!-- Configuration Panel -->
             <div class="config-panel">
+                <!-- Model Selection -->
                 <div class="config-card">
-                    <h3>🤖 Modelo de Transcripción</h3>
+                    <h3>Modelo de Transcripción</h3>
                     <div class="model-selector">
                         <div class="model-option active" data-model="local">
-                            <strong>Local</strong><br><small>Whisper Local</small>
+                            <strong>Local</strong><br>
+                            <small>Whisper Local</small>
                         </div>
                         <div class="model-option" data-model="cloud">
-                            <strong>Cloud</strong><br><small>OpenAI API (Rápido)</small>
+                            <strong>Cloud</strong><br>
+                            <small>OpenAI API (Rápido)</small>
                         </div>
                     </div>
                     <div id="apiKeySection" style="display: none; margin-top: 1rem;">
                         <input type="password" id="openaiApiKey" placeholder="sk-..." 
-                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: white;" />
+                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
                     </div>
                 </div>
 
+                <!-- Diarization -->
                 <div class="config-card">
-                    <h3>🎙️ Diarización</h3>
+                    <h3>Diarización</h3>
                     <div class="toggle-container">
-                        <span>Activar</span>
+                        <span>Activar detección de hablantes</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="enableDiarization" checked />
                             <span class="toggle-slider"></span>
@@ -436,10 +85,11 @@
                     </div>
                 </div>
 
+                <!-- Emotion Analysis -->
                 <div class="config-card">
-                    <h3>💭 Análisis Emocional</h3>
+                    <h3>Análisis Emocional</h3>
                     <div class="toggle-container">
-                        <span>Modo Lite</span>
+                        <span>Modo Lite (solo texto)</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="liteMode" />
                             <span class="toggle-slider"></span>
@@ -452,381 +102,183 @@
                 </div>
             </div>
 
+            <!-- Analyze Button -->
             <button class="btn btn-primary" id="analyzeBtn" style="width: 100%; padding: 1.2rem; font-size: 1.1rem;">
-                🚀 Iniciar Análisis
+             Iniciar Análisis
             </button>
 
+            <!-- Results Section -->
             <div id="resultsSection" style="display: none; margin-top: 3rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-                    <h2>📊 Resultados</h2>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn btn-secondary" onclick="exportData('json')">JSON</button>
-                        <button class="btn btn-secondary" onclick="exportData('csv')">CSV</button>
-                        <button class="btn btn-secondary" onclick="exportData('pdf')">PDF</button>
-                        <button class="btn btn-secondary" onclick="exportData('srt')">SRT</button>
-                        <button class="btn btn-secondary" onclick="exportData('txt')">TXT</button>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2>Resultados</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="exportData('json')">
+                            <i class="fas fa-file-code"></i> JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('csv')">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('srt')">
+                            <i class="fas fa-closed-captioning"></i> SRT
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('txt')">
+                            <i class="fas fa-file-alt"></i> TXT
+                        </button>
+                        <button class="btn btn-secondary" onclick="transcriptEditor.enableEditMode()">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
                     </div>
                 </div>
 
+                <!-- Metrics -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-value" id="metricEmotion">-</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Emoción</div>
+                        <div class="metric-label">Emoción Dominante</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-value" id="metricIntensity">-</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Intensidad</div>
+                        <div class="metric-label">Intensidad</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-value" id="metricSpeakers">-</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Hablantes</div>
+                        <div class="metric-label">Hablantes</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-value" id="metricDuration">-</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Duración</div>
+                        <div class="metric-label">Duración</div>
                     </div>
                 </div>
 
+                <!-- Charts -->
                 <div class="charts-grid">
                     <div class="chart-container">
+                        <h3>Timeline de Emociones</h3>
                         <canvas id="timelineChart"></canvas>
                     </div>
                     <div class="chart-container">
+                        <h3>Distribución</h3>
                         <canvas id="distributionChart"></canvas>
                     </div>
                 </div>
 
-                <div class="chart-container">
-                    <h3>📝 Transcripción</h3>
+                <!-- Advanced Charts -->
+                <div class="charts-grid" style="margin-top: 2rem;">
+                    <div class="chart-container">
+                        <h3>Intensidad Emocional</h3>
+                        <canvas id="intensityChart"></canvas>
+                        <button class="btn btn-secondary btn-sm" style="margin-top: 1rem;" 
+                                onclick="advancedCharts.exportChart('intensityChart', 'intensidad')">
+                            <i class="fas fa-download"></i> Exportar Gráfico
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Comparación por Hablante</h3>
+                        <canvas id="speakerChart"></canvas>
+                        <button class="btn btn-secondary btn-sm" style="margin-top: 1rem;" 
+                                onclick="advancedCharts.exportChart('speakerChart', 'hablantes')">
+                            <i class="fas fa-download"></i> Exportar Gráfico
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transcript -->
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <h3>Transcripción</h3>
                     <div class="transcript-box" id="transcriptBox"></div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB HISTORY -->
+        <!-- TAB: HISTORIAL -->
         <div id="tab-history" class="tab-content">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-                <h2>📚 Historial</h2>
-                <button class="btn btn-secondary" onclick="loadHistory()">🔄 Actualizar</button>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2>Historial de Análisis</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="statsManager.generateDashboard()">
+                        <i class="fas fa-chart-line"></i> Estadísticas
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadHistory()">
+                        <i class="fas fa-sync"></i> Actualizar
+                    </button>
+                </div>
             </div>
             <div class="history-grid" id="historyGrid">
-                <p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones</p>
+                <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    No hay transcripciones guardadas
+                </p>
             </div>
         </div>
 
-        <!-- TAB SETTINGS -->
+        <!-- TAB: CONFIGURACIÓN -->
         <div id="tab-settings" class="tab-content">
-            <h2>⚙️ Configuración</h2>
+            <h2>Configuración</h2>
             <div class="config-panel">
                 <div class="config-card">
-                    <h3>🔑 API Keys</h3>
+                    <h3>API Keys</h3>
                     <label>OpenAI API Key:</label>
                     <input type="password" id="settingsApiKey" 
-                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: white; margin: 0.5rem 0;" />
-                    <button class="btn btn-primary" onclick="saveApiKey()">💾 Guardar</button>
+                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;" 
+                           placeholder="sk-..." />
+                    <button class="btn btn-primary" onclick="saveApiKey()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
                 </div>
+                
                 <div class="config-card">
-                    <h3>🗑️ Datos</h3>
-                    <button class="btn btn-secondary" onclick="clearHistory()">Borrar Historial</button>
+                    <h3>Datos</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Eliminar todo el historial de análisis guardado
+                    </p>
+                    <button class="btn btn-secondary" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i> Borrar Historial
+                    </button>
+                </div>
+
+                <div class="config-card">
+                    <h3>Información</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Versión:</strong> 5.0.0
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Backend:</strong> <span id="backendUrl">http://127.0.0.1:8000</span>
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">
+                        <strong>Estado:</strong> <span id="connectionStatus">Conectando...</span>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- JavaScript Files -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="js/toast-notifications.js"></script>
+    <script src="js/progress-bar.js"></script>
+    <script src="js/advanced-charts.js"></script>
+    <script src="js/audio-player.js"></script>
+    <script src="js/search-filters.js"></script>
+    <script src="js/transcript-editor.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/main.js"></script>
+
     <script>
-        const API_URL = 'http://127.0.0.1:8000';
-        let selectedFile = null;
-        let currentResults = null;
-
-        // Check API
-        async function checkAPI() {
-            try {
-                await fetch(`${API_URL}/health`);
-                document.getElementById('apiStatus').textContent = 'Online';
-                document.getElementById('apiStatus').classList.add('online');
-            } catch {
-                document.getElementById('apiStatus').textContent = 'Offline';
-                document.getElementById('apiStatus').classList.remove('online');
-            }
-        }
-        checkAPI();
-        setInterval(checkAPI, 5000);
-
-        // Tabs
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            if (tab === 'history') loadHistory();
-        }
-
-        // Upload
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('active'); });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('active');
-            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        // Actualizar URL del backend en configuración
+        document.addEventListener('DOMContentLoaded', () => {
+            const backendUrlEl = document.getElementById('backendUrl');
+            if (backendUrlEl) backendUrlEl.textContent = CONFIG.API_URL;
         });
 
-        function handleFile(file) {
-            selectedFile = file;
-            document.getElementById('fileName').textContent = `✅ ${file.name}`;
-        }
-
-        // Model Selector
-        document.querySelectorAll('.model-option').forEach(opt => {
-            opt.addEventListener('click', function() {
-                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('apiKeySection').style.display = this.dataset.model === 'cloud' ? 'block' : 'none';
-            });
-        });
-
-        // Sliders
-        document.getElementById('numSpeakers').addEventListener('input', function() {
-            document.getElementById('numSpeakersValue').textContent = this.value == 0 ? 'Auto' : this.value;
-        });
-        document.getElementById('audioWeight').addEventListener('input', function() {
-            document.getElementById('audioWeightValue').textContent = this.value + '%';
-        });
-
-        // API Key
-        function saveApiKey() {
-            const key = document.getElementById('openaiApiKey').value || document.getElementById('settingsApiKey').value;
-            if (key) {
-                localStorage.setItem('openai_api_key', key);
-                alert('✅ API Key guardada');
+        // Actualizar estado de conexión
+        setInterval(() => {
+            const statusEl = document.getElementById('connectionStatus');
+            const apiStatusEl = document.getElementById('apiStatus');
+            if (statusEl && apiStatusEl) {
+                statusEl.textContent = apiStatusEl.classList.contains('online') ? 'Conectado ✅' : 'Desconectado ❌';
             }
-        }
-        window.addEventListener('load', () => {
-            const key = localStorage.getItem('openai_api_key');
-            if (key) {
-                document.getElementById('openaiApiKey').value = key;
-                document.getElementById('settingsApiKey').value = key;
-            }
-        });
-
-        // Analyze
-        document.getElementById('analyzeBtn').addEventListener('click', async () => {
-            if (!selectedFile) {
-                alert('⚠️ Selecciona un archivo');
-                return;
-            }
-
-            document.getElementById('loadingOverlay').classList.add('active');
-
-            try {
-                const model = document.querySelector('.model-option.active').dataset.model;
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-                formData.append('lite_mode', document.getElementById('liteMode').checked);
-                formData.append('audio_weight', parseInt(document.getElementById('audioWeight').value) / 100);
-                formData.append('enable_diarization', document.getElementById('enableDiarization').checked);
-                const numSpeakers = parseInt(document.getElementById('numSpeakers').value);
-                if (numSpeakers > 0) formData.append('num_speakers', numSpeakers);
-
-                let endpoint = '/transcribe/full-analysis';
-                if (model === 'cloud') {
-                    const apiKey = localStorage.getItem('openai_api_key');
-                    if (!apiKey) {
-                        alert('⚠️ Configura tu API Key de OpenAI');
-                        document.getElementById('loadingOverlay').classList.remove('active');
-                        return;
-                    }
-                    formData.append('api_key', apiKey);
-                    endpoint = '/transcribe/cloud-whisper';
-                }
-
-                const res = await fetch(API_URL + endpoint, { method: 'POST', body: formData });
-                if (!res.ok) throw new Error('Error en API');
-                const data = await res.json();
-
-                currentResults = data;
-                await saveToHistory(data, selectedFile.name);
-                displayResults(data);
-                document.getElementById('resultsSection').style.display = 'block';
-
-            } catch (e) {
-                alert('❌ Error: ' + e.message);
-            } finally {
-                document.getElementById('loadingOverlay').classList.remove('active');
-            }
-        });
-
-        // Display Results
-        function displayResults(data) {
-            const emotions = { 'feliz': '😊', 'enojado': '😠', 'triste': '😢', 'neutral': '😐' };
-            const top = data.global_emotions?.top_emotion || 'neutral';
-            document.getElementById('metricEmotion').textContent = emotions[top] + ' ' + top.toUpperCase();
-            document.getElementById('metricIntensity').textContent = Math.round((data.global_emotions?.top_score || 0) * 100) + '%';
-            document.getElementById('metricSpeakers').textContent = data.diarization?.num_speakers || 1;
-            document.getElementById('metricDuration').textContent = Math.round(data.metadata?.total_duration || 0) + 's';
-
-            renderCharts(data);
-            renderTranscript(data.segments || []);
-        }
-
-        function renderCharts(data) {
-            // Timeline
-            const timeline = data.emotion_timeline || [];
-            const emotions = [...new Set(timeline.map(t => t.emotion))];
-            const colors = { 'feliz': '#10b981', 'enojado': '#ef4444', 'triste': '#3b82f6', 'neutral': '#a78bfa' };
-            
-            new Chart(document.getElementById('timelineChart'), {
-                type: 'line',
-                data: {
-                    labels: timeline.map(t => t.time.toFixed(1) + 's'),
-                    datasets: emotions.map(e => ({
-                        label: e.toUpperCase(),
-                        data: timeline.map(t => t.all_emotions?.[e] || 0),
-                        borderColor: colors[e],
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        tension: 0.4
-                    }))
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            // Distribution
-            const dist = data.global_emotions?.emotion_distribution || {};
-            new Chart(document.getElementById('distributionChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(dist).map(k => k.toUpperCase()),
-                    datasets: [{
-                        data: Object.values(dist),
-                        backgroundColor: Object.keys(dist).map(k => colors[k]),
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function renderTranscript(segments) {
-            const box = document.getElementById('transcriptBox');
-            box.innerHTML = segments.map(seg => `
-                <div class="transcript-segment">
-                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> (${seg.emotion})<br>
-                    ${seg.text_es || seg.text}
-                </div>
-            `).join('');
-        }
-
-        // History
-        async function saveToHistory(data, filename) {
-            try {
-                await fetch(`${API_URL}/history/save`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: Date.now().toString(),
-                        filename: filename,
-                        date: new Date().toISOString(),
-                        duration: data.metadata?.total_duration || 0,
-                        num_speakers: data.diarization?.num_speakers || 1,
-                        top_emotion: data.global_emotions?.top_emotion || 'neutral',
-                        mode: data.mode || 'local',
-                        data: data
-                    })
-                });
-            } catch (e) {
-                console.error('Error guardando historial:', e);
-            }
-        }
-
-        async function loadHistory() {
-            try {
-                const res = await fetch(`${API_URL}/history/list`);
-                const history = await res.json();
-                const grid = document.getElementById('historyGrid');
-                
-                if (history.length === 0) {
-                    grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones</p>';
-                    return;
-                }
-
-                grid.innerHTML = history.map(item => `
-                    <div class="history-item" onclick="loadHistoryItem('${item.id}')">
-                        <strong>🎙️ ${item.filename}</strong><br>
-                        <small>${new Date(item.date).toLocaleString('es-ES')}</small><br>
-                        <small>😊 ${item.top_emotion} · ⏱ ${Math.round(item.duration)}s · 👥 ${item.num_speakers}</small>
-                        <div style="margin-top: 0.5rem;">
-                            <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick="event.stopPropagation(); deleteHistoryItem('${item.id}')">🗑️</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) {
-                console.error('Error cargando historial:', e);
-            }
-        }
-
-        async function loadHistoryItem(id) {
-            try {
-                const res = await fetch(`${API_URL}/history/get/${id}`);
-                const item = await res.json();
-                currentResults = item.data;
-                displayResults(item.data);
-                document.getElementById('resultsSection').style.display = 'block';
-                switchTab('analyze');
-            } catch (e) {
-                alert('Error cargando transcripción');
-            }
-        }
-
-        async function deleteHistoryItem(id) {
-            if (!confirm('¿Eliminar?')) return;
-            try {
-                await fetch(`${API_URL}/history/delete/${id}`, { method: 'DELETE' });
-                loadHistory();
-            } catch (e) {
-                alert('Error eliminando');
-            }
-        }
-
-        async function clearHistory() {
-            if (!confirm('¿Borrar todo el historial?')) return;
-            try {
-                await fetch(`${API_URL}/history/clear`, { method: 'DELETE' });
-                loadHistory();
-                alert('✅ Historial borrado');
-            } catch (e) {
-                alert('Error borrando historial');
-            }
-        }
-
-        // Export
-        async function exportData(format) {
-            if (!currentResults) {
-                alert('⚠️ No hay resultados');
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_URL}/export/${format}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentResults)
-                });
-
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `transcripcion_${Date.now()}.${format}`;
-                a.click();
-                URL.revokeObjectURL(url);
-            } catch (e) {
-                alert('Error exportando: ' + e.message);
-            }
-        }
+        }, 1000);
     </script>
 </body>
 </html>

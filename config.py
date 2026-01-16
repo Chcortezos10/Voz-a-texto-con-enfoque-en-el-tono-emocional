@@ -43,11 +43,13 @@ WORKERS = int(os.getenv("WORKERS", "2"))
 
 # Configuracion de CORS - incluye wildcard para desarrollo y archivos locales
 CORS_ORIGINS = [
-    "*",  # Permitir todos los orígenes (para desarrollo)
+    "*",  # Wildcard para permitir cualquier origen (desarrollo)
     "http://localhost:8501",
     "http://127.0.0.1:8501",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://localhost:5500",  # Live Server VSCode
+    "http://127.0.0.1:5500",
     "null",  # Para archivos locales (file://)
 ]
 
@@ -175,5 +177,9 @@ ENABLE_GO_EMOTIONS = os.getenv("ENABLE_GO_EMOTIONS", "false").lower() == "true"
 # Habilitar análisis de prosodia
 ENABLE_PROSODY = os.getenv("ENABLE_PROSODY", "true").lower() == "true"
 
-# Agregar al final del archivo para CORS
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# Configurar ALLOWED_ORIGINS basado en CORS_ORIGINS
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    ALLOWED_ORIGINS = env_origins.split(",")
+else:
+    ALLOWED_ORIGINS = CORS_ORIGINS

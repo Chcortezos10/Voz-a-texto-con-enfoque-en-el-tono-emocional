@@ -168,19 +168,14 @@ app = FastAPI(
     version="5.0.0"
 )
 
-# CORS - Importar desde config si está disponible
-try:
-    from config import ALLOWED_ORIGINS
-    cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS != ["*"] else ["*"]
-except ImportError:
-    cors_origins = ["*"]
-
+# CORS - Configuración permisiva para desarrollo
+# Nota: allow_credentials=True no funciona con wildcard "*"
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_origins=["*"],  # Permitir cualquier origen
+    allow_credentials=False,  # Debe ser False cuando se usa "*"
+    allow_methods=["*"],  # Permitir todos los métodos
+    allow_headers=["*"],  # Permitir todos los headers
 )
 
 # Incluir routers

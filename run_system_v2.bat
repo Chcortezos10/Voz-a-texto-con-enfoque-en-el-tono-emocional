@@ -42,10 +42,18 @@ echo ===================================================
 echo.
 echo      API:       http://127.0.0.1:8000
 echo      Docs:      http://127.0.0.1:8000/docs
-echo      Dashboard: dashboard.html
+echo      Dashboard: frontend\index.html
 echo.
-echo [*] Abriendo Dashboard en el navegador...
-start dashboard.html
+echo [*] Iniciando servidor frontend (Puerto 5500)...
+if exist "frontend\index.html" (
+    start /min cmd /k "cd frontend && python -m http.server 5500"
+    timeout /t 2 /nobreak >nul
+    echo [*] Abriendo Dashboard en el navegador...
+    start http://127.0.0.1:5500
+) else (
+    echo [!] No se encontro frontend\index.html
+    echo     Por favor abrelo manualmente desde la carpeta frontend
+)
 
 echo.
 echo Presiona cualquier tecla para cerrar este mensaje...
