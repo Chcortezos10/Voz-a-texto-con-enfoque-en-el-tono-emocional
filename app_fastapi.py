@@ -96,7 +96,7 @@ def log_memory_usage() -> float:
     """Retorna el uso actual de memoria en MB."""
     process = psutil.Process()
     mem_mb = process.memory_info().rss / 1024 / 1024
-    logger.info(f"💾 RAM: {mem_mb:.1f} MB")
+    logger.info(f"RAM: {mem_mb:.1f} MB")
     return mem_mb
 
 def cleanup_memory():

@@ -9,6 +9,35 @@ from fastapi.responses import JSONResponse
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
+import json
+from pathlib import Path
+
+history_file = Path("data/analysis_history.json")
+
+def load_history() -> List[Dict[str, Any]]:
+    """
+    Carga el historial desde el archivo JSON.
+    """
+    try:
+        if history_file.exists():
+            with open(history_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error cargando historial: {e}")
+        return []
+
+def save_history(history: List[Dict[str, Any]]):
+    """
+    Guarda el historial en el archivo JSON.
+    """
+    try:
+        history_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump(history, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"Error guardando historial: {e}")
+
+_analysis_history:list[Dict[str,Any]] = load_history()
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +70,7 @@ async def save_to_history(data: Dict[str, Any]):
     """
     try:
         entry = {
-            "id": len(_analysis_history) + 1,
+            "id": str(uuid.uuid4()),
             "timestamp": datetime.now().isoformat(),
             "filename": data.get("filename", "unknown"),
             "dominant_emotion": data.get("global_emotions", {}).get("top_emotion", "neutral"),
@@ -55,6 +84,8 @@ async def save_to_history(data: Dict[str, Any]):
         # Mantener solo los últimos 50 análisis
         if len(_analysis_history) > 50:
             _analysis_history.pop(0)
+
+        save_history(_analysis_history)
         
         return {"status": "success", "saved_id": entry["id"]}
     except Exception as e:
@@ -69,4 +100,5 @@ async def clear_history():
     """
     global _analysis_history
     _analysis_history = []
+    save_history(_analysis_history)
     return {"status": "success", "message": "Historial limpiado"}

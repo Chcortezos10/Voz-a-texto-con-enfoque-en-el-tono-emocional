@@ -157,8 +157,10 @@ async def export_str(segments: str = Form(...),
         raise HTTPException(status_code=400, detail="Formato de segmentos inválido")
 
     exporter = get_export_manager()
-    content = exporter.export_str(segments_list, include_emotions, include_speaker)
 
+    data_dict = {"segments":segments_list}
+    content = exporter.export_str(data_dict)
+    
     return Response(content=content, media_type="text/plain",headers={"Content-Disposition": f"attachment; filename={filename}.str"})
 
 @router.post("/export/vtt", tags=["export"])
@@ -179,7 +181,9 @@ async def export_vtt(
         raise HTTPException(status_code=400, detail="Formato de segmentos inválido")
 
     exporter = get_export_manager()
-    content = exporter.export_vtt(segments_list, include_emotions, include_speaker)
+
+    data_dict = {"segments":segments_list}
+    content = exporter.export_vtt(data_dict)
 
     return Response(content=content, media_type="text/vtt",headers={"Content-Disposition": f"attachment; filename={filename}.vtt"})
 
@@ -199,66 +203,87 @@ async def export_csv(
         raise HTTPException(status_code=400, detail="Formato de segmentos inválido")
 
     exporter = get_export_manager()
-    content = exporter.export_csv(segments_list, include_all_emotions)
+
+    data_dict = {"segments":segments_list}
+    content = exporter.export_csv(data_dict)
 
     return Response(content=content, media_type="text/csv",headers={"Content-Disposition": f"attachment; filename={filename}.csv"})
 
-@router.post("/export/excel", tags=["export"])
-async def export_excel(
-    segments: str = Form(...),
-    global_emotions: str = Form("{}"),
-    speaker_stats: str = Form("{}"),
-    metadata: str = Form("{}"),
-    filename: str = Form("analisis_emocional")
-) -> Response:
+@staticmethod
+def export_pdf(data: 'ExportData') -> bytes:
     """
-    Exporta los segmentos de la transcripción en formato Excel.
+    Exporta transcripción a formato PDF.
+    Requiere instalar: pip install reportlab
+    
+    Args:
+        data: Objeto ExportData con todos los datos
+        
+    Returns:
+        Bytes del archivo PDF
     """
-
     try:
-        data= ExportData(
-            segments=json.loads(segments),
-            global_emotions=json.loads(global_emotions),
-            speaker_stats=json.loads(speaker_stats),
-            metadata=json.loads(metadata),
-            filename=filename
-        )
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Formato de segmentos inválido")
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib import colors
+        from io import BytesIO
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Título
+        title = Paragraph("Analisis de Transcripcion con Emociones", styles['Title'])
+        elements.append(title)
+        elements.append(Spacer(1, 12))
+        
+        # Resumen
+        summary_data = [
+            ["Duracion Total", f"{data.metadata.get('total_duration', 0):.2f}s"],
+            ["Emocion Dominante", data.global_emotions.get("top_emotion", "neutral")],
+            ["Segmentos", str(len(data.segments))]
+        ]
+        
+        summary_table = Table(summary_data)
+        summary_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.lightgrey),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        elements.append(summary_table)
+        elements.append(Spacer(1, 20))
+        
+        # Segmentos
+        seg_data = [["Tiempo", "Hablante", "Emoción", "Texto"]]
+        for seg in data.segments[:50]:  # Limitar a 50 para no saturar
+            seg_data.append([
+                f"{seg.get('start', 0):.1f}s",
+                seg.get("speaker_label", "")[:15],
+                seg.get("emotion", "")[:10],
+                seg.get("text_es", "")[:60]
+            ])
+        
+        seg_table = Table(seg_data)
+        seg_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8)
+        ]))
+        elements.append(seg_table)
+        
+        doc.build(elements)
+        buffer.seek(0)
+        
+        return buffer.read()
+        
+    except ImportError:
+        logger.error("reportlab no instalado Ejecutar: pip install reportlab")
+        raise
+    except Exception as e:
+        logger.error(f"Error exportando PDF: {e}")
+        raise
 
-    exporter = get_export_manager()
-    content = exporter.export_excel(data)
-
-    return Response(content=content, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    ,headers={"Content-Disposition": f"attachment; filename={filename}.xlsx"})
-
-@router.post("/export/pdf", tags=["export"])
-async def export_pdf(
-    segments: str = Form(...),
-    global_emotions: str = Form("{}"),
-    speaker_stats: str = Form("{}"),
-    metadata: str = Form("{}"),
-    filename: str = Form("analisis_emocional")
-) -> Response:
-    """
-    Exporta los segmentos de la transcripción en formato PDF.
-    """
-
-    try:
-        data= ExportData(
-            segments=json.loads(segments),
-            global_emotions=json.loads(global_emotions),
-            speaker_stats=json.loads(speaker_stats),
-            metadata=json.loads(metadata),
-            filename=filename
-        )
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Formato de segmentos inválido")
-
-    exporter = get_export_manager()
-    content = exporter.export_pdf(data)
-
-    return Response(content=content, media_type="application/pdf",headers={"Content-Disposition": f"attachment; filename={filename}.pdf"})
 
 @router.post("/export/json", tags=["export"])
 async def export_json(
