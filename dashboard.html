@@ -1125,9 +1125,9 @@
     <div class="container">
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('analyze')">Análisis</button>
-            <button class="tab" onclick="switchTab('history')">Historial</button>
-            <button class="tab" onclick="switchTab('settings')">Configuración</button>
+            <button class="tab active" onclick="switchTab('analyze', event)">Análisis</button>
+            <button class="tab" onclick="switchTab('history', event)">Historial</button>
+            <button class="tab" onclick="switchTab('settings', event)">Configuración</button>
         </div>
 
         <!-- TAB: ANÁLISIS -->
@@ -1588,10 +1588,16 @@
         // ============================================
         // TABS
         // ============================================
-        function switchTab(tab) {
+        function switchTab(tab, evt) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            } else {
+                const tabs = document.querySelectorAll('.tab');
+                const tabIndex = tab === 'analyze' ? 0 : tab === 'history' ? 1 : 2;
+                if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+            }
             document.getElementById(`tab-${tab}`).classList.add('active');
             if (tab === 'history') loadHistory();
         }
@@ -1900,14 +1906,17 @@
         async function loadHistoryItem(id) {
             try {
                 const res = await fetch(`${CONFIG.API_URL}/history/${id}`);
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
                 const data = await res.json();
                 currentResults = data;
                 displayResults(data);
                 document.getElementById('resultsSection').style.display = 'block';
-                switchTab('analyze');
-                document.querySelectorAll('.tab')[0].click();
+                switchTab('analyze', null);
                 toast.success('Análisis cargado del historial');
             } catch (e) {
+                console.error('Error cargando item:', e);
                 toast.error('Error cargando del historial');
             }
         }

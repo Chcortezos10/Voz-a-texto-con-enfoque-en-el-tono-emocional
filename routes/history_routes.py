@@ -1,4 +1,3 @@
-# routes/history_routes.py
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from typing import Dict, Any, List, Optional
@@ -31,12 +30,11 @@ def save_history_to_file(history: List[Dict[str, Any]]):
     except Exception as e:
         logger.error(f"Error guardando historial: {e}")
 
-_analysis_history: List[Dict[str, Any]] = load_history()
-
 @router.get("/")
 async def get_history(limit: int = 50):
     try:
-        sorted_history = sorted(_analysis_history, key=lambda x: x.get("timestamp", ""), reverse=True)
+        history = load_history()
+        sorted_history = sorted(history, key=lambda x: x.get("timestamp", ""), reverse=True)
         return sorted_history[:limit]
     except Exception as e:
         logger.error(f"Error obteniendo historial: {e}")
@@ -45,7 +43,8 @@ async def get_history(limit: int = 50):
 @router.get("/{item_id}")
 async def get_history_item(item_id: str):
     try:
-        for item in _analysis_history:
+        history = load_history()
+        for item in history:
             if item.get("id") == item_id:
                 return item
         raise HTTPException(status_code=404, detail="Item no encontrado")
@@ -58,24 +57,43 @@ async def get_history_item(item_id: str):
 @router.post("/save")
 async def save_to_history(data: Dict[str, Any]):
     try:
+        history = load_history()
+        
+        dominant_emotion = (
+            data.get("dominant_emotion") or 
+            data.get("global_emotions", {}).get("top_emotion") or
+            "neutral"
+        )
+        
+        duration = (
+            data.get("duration") or 
+            data.get("metadata", {}).get("total_duration") or
+            data.get("metadata", {}).get("audio_duration") or
+            0
+        )
+        
         entry = {
             "id": str(uuid.uuid4()),
             "timestamp": data.get("timestamp", datetime.now().isoformat()),
             "filename": data.get("filename", "unknown"),
-            "dominant_emotion": data.get("dominant_emotion", data.get("global_emotions", {}).get("top_emotion", "neutral")),
+            "dominant_emotion": dominant_emotion,
             "num_segments": data.get("num_segments", len(data.get("segments", []))),
-            "duration": data.get("duration", data.get("metadata", {}).get("total_duration", 0)),
+            "duration": duration,
             "global_emotions": data.get("global_emotions", {}),
             "segments": data.get("segments", []),
-            "transcription": data.get("transcription", "")
+            "transcription": data.get("transcription", ""),
+            "diarization": data.get("diarization", {}),
+            "metadata": data.get("metadata", {}),
+            "emotion_timeline": data.get("emotion_timeline", []),
+            "speaker_stats": data.get("speaker_stats", {})
         }
         
-        _analysis_history.append(entry)
+        history.append(entry)
         
-        if len(_analysis_history) > 100:
-            _analysis_history.pop(0)
+        if len(history) > 100:
+            history.pop(0)
 
-        save_history_to_file(_analysis_history)
+        save_history_to_file(history)
         logger.info(f"Historial guardado: {entry['id']} - {entry['filename']}")
         
         return {"status": "success", "saved_id": entry["id"]}
@@ -85,7 +103,26 @@ async def save_to_history(data: Dict[str, Any]):
 
 @router.delete("/clear")
 async def clear_history():
-    global _analysis_history
-    _analysis_history = []
-    save_history_to_file(_analysis_history)
+    save_history_to_file([])
+    logger.info("Historial limpiado")
     return {"status": "success", "message": "Historial limpiado"}
+
+@router.delete("/{item_id}")
+async def delete_history_item(item_id: str):
+    try:
+        history = load_history()
+        initial_count = len(history)
+        history = [item for item in history if item.get("id") != item_id]
+        
+        if len(history) == initial_count:
+            raise HTTPException(status_code=404, detail="Item no encontrado")
+        
+        save_history_to_file(history)
+        logger.info(f"Item eliminado del historial: {item_id}")
+        
+        return {"status": "success", "message": "Item eliminado"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error eliminando item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

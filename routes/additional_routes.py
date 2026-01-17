@@ -141,16 +141,12 @@ async def get_providers() -> Dict[str, Any]:
 
 #exportacion de datos
 
-@router.post("/export/str", tags=["export"])
-async def export_str(segments: str = Form(...),
+@router.post("/export/srt", tags=["export"])
+async def export_srt_form(segments: str = Form(...),
     include_emotions: bool = Form(True),
     include_speaker: bool = Form(True),
     filename: str = Form("subtitulos")
 ) -> Response:
-    """
-    Exporta los segmentos de la transcripción en formato STR.
-    """
-
     try:
         segments_list = json.loads(segments)
     except json.JSONDecodeError:
@@ -159,9 +155,9 @@ async def export_str(segments: str = Form(...),
     exporter = get_export_manager()
 
     data_dict = {"segments":segments_list}
-    content = exporter.export_str(data_dict)
+    content = exporter.export_srt(data_dict)
     
-    return Response(content=content, media_type="text/plain",headers={"Content-Disposition": f"attachment; filename={filename}.str"})
+    return Response(content=content, media_type="text/plain",headers={"Content-Disposition": f"attachment; filename={filename}.srt"})
 
 @router.post("/export/vtt", tags=["export"])
 async def export_vtt(
