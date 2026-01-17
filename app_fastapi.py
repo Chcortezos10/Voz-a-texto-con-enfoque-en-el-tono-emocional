@@ -152,7 +152,7 @@ def get_voice_encoder() -> VoiceEncoder:
     if _voice_encoder is None:
         logger.info("Cargando VoiceEncoder para diarización...")
         _voice_encoder = VoiceEncoder()
-        logger.info("✔ VoiceEncoder cargado")
+        logger.info("VoiceEncoder cargado")
     return _voice_encoder
 
 async def run_blocking(func, *args, **kwargs):
@@ -201,7 +201,7 @@ async def startup_event():
     
     # Precargar solo Whisper
     load_models() 
-    logger.info("✔ Whisper cargado")
+    logger.info("Whisper cargado")
     
     # Modelos de emoción se cargarán bajo demanda
     logger.info("ℹ Modelos de emoción: Carga bajo demanda")
@@ -307,7 +307,7 @@ async def perform_diarization(
             speaker_labels[(start_t, end_t)] = int(labels[i])
         
         num_speakers_detected = len(set(labels))
-        logger.info(f"✔ Detectados {num_speakers_detected} hablante(s)")
+        logger.info(f"Detectados {num_speakers_detected} hablante(s)")
         
         return speaker_labels, num_speakers_detected
         
