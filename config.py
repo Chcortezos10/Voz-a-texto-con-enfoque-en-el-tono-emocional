@@ -22,10 +22,10 @@ VAD_MODE = 2  # 0-3 (0 menos agresivo, 3 mas agresivo)
 VAD_FRAME_MS = 30  # Frame size en ms (10, 20, 30)
 
 # Configuracion de embeddings y diarizacion
-WINDOW_SEC = 1.5  # Ventana para embeddings (segundos) - Reducido para mejor resolución
-HOP_SEC = 0.5  # Salto entre ventanas (segundos)
-CHANGE_SIM_THRESHOLD = 0.82  # Similitud coseno minima para considerar "misma voz"
-MIN_SEG_SEC = 0.25  # Ignorar segmentos muy cortos (segundos)
+WINDOW_SEC = 2.5  # Ventana para embeddings (segundos) - Reducido para mejor resolución
+HOP_SEC = 0.75  # Salto entre ventanas (segundos)
+CHANGE_SIM_THRESHOLD = 0.015  # Similitud coseno minima para considerar "misma voz"
+MIN_SEG_SEC = 0.10  # Ignorar segmentos muy cortos (segundos)
 
 # Configuracion de API FastAPI
 MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 50 * 1024 * 1024))  # 50 MB default
@@ -54,8 +54,9 @@ CORS_ORIGINS = [
 ]
 
 # Configuracion de modelos
-# Usar modelo 'small' por defecto para mejor precision con RTX 4060
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")  # tiny, base, small, medium, large
+# Usar modelo 'medium' por defecto para mejor precisión con RTX 4050 (6GB VRAM)
+# Opciones: tiny (~1GB), base (~1GB), small (~2GB), medium (~5GB), large-v3 (~10GB)
+WHISPER_MODEL = os.getenv("WHISPER_MODEL", "medium")  # RTX 4050 puede correr medium cómodamente
 
 # Modelos de HuggingFace para analisis emocional
 TEXT_EMOTION_MODEL = "j-hartmann/emotion-english-distilroberta-base"  # Inglés (7 emociones)
@@ -136,13 +137,13 @@ EMOTION_MAPPING = {
 
 #suavizado temporal 
 TEMPORAL_SMOOTHING_ENABLED = True
-TEMPORAL_SMOOTHING_WINDOW = 3 #ventana de segmentos
-TEMPORAL_SMOOTHING_ALPHA = 0.6 #peso del segmento actual vs el historico
+TEMPORAL_SMOOTHING_WINDOW = 5 #ventana de segmentos
+TEMPORAL_SMOOTHING_ALPHA = 0.5 #peso del segmento actual vs el historico
 
 #supresion nutral (mas agresiva)
-NEUTRAL_SUPPRESSION_FACTOR = 0.15 #REDUCIR NEUTRAL SEVERAMENTE
-ACTIVE_EMOTION_BOOST= 1.8 #POTENCIAR EMOCIONES ACTIVAS
-MIN_EMOTION_TO_PROMOTE = 0.05 #MINIMO PARA PROMOVER SOBRE NEUTRAL
+NEUTRAL_SUPPRESSION_FACTOR = 0.5 #REDUCIR NEUTRAL SEVERAMENTE
+ACTIVE_EMOTION_BOOST= 1.2 #POTENCIAR EMOCIONES ACTIVAS
+MIN_EMOTION_TO_PROMOTE = 0.15 #MINIMO PARA PROMOVER SOBRE NEUTRAL
 
 #CIRCUIT BREAKERS
 CB_FAILURE_THRESHOLD = 5 #UMBRAL DE FALLA
@@ -155,9 +156,9 @@ AUDIO_MIN_RMS_THRESHOLD = 0.001 #detecta el silencio
 
 # 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
 # Usuario requiere prácticamente eliminar neutral/other de los resultados
-EMOTION_BOOST_FACTOR = 1.5  # Potenciar emociones FUERTEMENTE 
-EMOTION_NEUTRAL_DAMP = 0.3  # Castigar neutral SEVERAMENTE
-EMOTION_CONFIDENCE_THRESHOLD = 0.20  # Umbral de minimo de confianza
+EMOTION_BOOST_FACTOR = 1.15  # Potenciar emociones FUERTEMENTE 
+EMOTION_NEUTRAL_DAMP = 0.6  # Castigar neutral SEVERAMENTE
+EMOTION_CONFIDENCE_THRESHOLD = 0.25  # Umbral de minimo de confianza
 
 # Modo de bajo consumo de memoria (desactiva modelos secundarios)
 LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "true").lower() == "true"

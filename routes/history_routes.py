@@ -1,35 +1,29 @@
 # routes/history_routes.py
-"""
-Módulo para gestión del historial de análisis.
-Permite consultar y gestionar sesiones de análisis previas.
-"""
-
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
 import json
+import uuid
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/history", tags=["History"])
 
 history_file = Path("data/analysis_history.json")
 
 def load_history() -> List[Dict[str, Any]]:
-    """
-    Carga el historial desde el archivo JSON.
-    """
     try:
         if history_file.exists():
             with open(history_file, "r", encoding="utf-8") as f:
                 return json.load(f)
     except Exception as e:
         logger.error(f"Error cargando historial: {e}")
-        return []
+    return []
 
-def save_history(history: List[Dict[str, Any]]):
-    """
-    Guarda el historial en el archivo JSON.
-    """
+def save_history_to_file(history: List[Dict[str, Any]]):
     try:
         history_file.parent.mkdir(parents=True, exist_ok=True)
         with open(history_file, "w", encoding="utf-8") as f:
@@ -37,68 +31,61 @@ def save_history(history: List[Dict[str, Any]]):
     except Exception as e:
         logger.error(f"Error guardando historial: {e}")
 
-_analysis_history:list[Dict[str,Any]] = load_history()
-
-logger = logging.getLogger(__name__)
-
-router = APIRouter(prefix="/history", tags=["History"])
-
-# Almacenamiento en memoria para el historial (en producción usar DB)
-_analysis_history: List[Dict[str, Any]] = []
-
+_analysis_history: List[Dict[str, Any]] = load_history()
 
 @router.get("/")
-async def get_history(limit: int = 10):
-    """
-    Obtiene el historial de análisis recientes.
-    """
+async def get_history(limit: int = 50):
     try:
-        return {
-            "status": "success",
-            "count": len(_analysis_history),
-            "history": _analysis_history[-limit:][::-1]  # Más recientes primero
-        }
+        sorted_history = sorted(_analysis_history, key=lambda x: x.get("timestamp", ""), reverse=True)
+        return sorted_history[:limit]
     except Exception as e:
         logger.error(f"Error obteniendo historial: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/{item_id}")
+async def get_history_item(item_id: str):
+    try:
+        for item in _analysis_history:
+            if item.get("id") == item_id:
+                return item
+        raise HTTPException(status_code=404, detail="Item no encontrado")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error obteniendo item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/save")
 async def save_to_history(data: Dict[str, Any]):
-    """
-    Guarda un análisis en el historial.
-    """
     try:
         entry = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": data.get("timestamp", datetime.now().isoformat()),
             "filename": data.get("filename", "unknown"),
-            "dominant_emotion": data.get("global_emotions", {}).get("top_emotion", "neutral"),
-            "num_segments": len(data.get("segments", [])),
-            "duration": data.get("metadata", {}).get("total_duration", 0),
-            "summary": data.get("transcription", "")[:200] + "..." if len(data.get("transcription", "")) > 200 else data.get("transcription", "")
+            "dominant_emotion": data.get("dominant_emotion", data.get("global_emotions", {}).get("top_emotion", "neutral")),
+            "num_segments": data.get("num_segments", len(data.get("segments", []))),
+            "duration": data.get("duration", data.get("metadata", {}).get("total_duration", 0)),
+            "global_emotions": data.get("global_emotions", {}),
+            "segments": data.get("segments", []),
+            "transcription": data.get("transcription", "")
         }
         
         _analysis_history.append(entry)
         
-        # Mantener solo los últimos 50 análisis
-        if len(_analysis_history) > 50:
+        if len(_analysis_history) > 100:
             _analysis_history.pop(0)
 
-        save_history(_analysis_history)
+        save_history_to_file(_analysis_history)
+        logger.info(f"Historial guardado: {entry['id']} - {entry['filename']}")
         
         return {"status": "success", "saved_id": entry["id"]}
     except Exception as e:
         logger.error(f"Error guardando en historial: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @router.delete("/clear")
 async def clear_history():
-    """
-    Limpia todo el historial de análisis.
-    """
     global _analysis_history
     _analysis_history = []
-    save_history(_analysis_history)
+    save_history_to_file(_analysis_history)
     return {"status": "success", "message": "Historial limpiado"}

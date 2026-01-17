@@ -46,7 +46,7 @@ from core.emotion_analysis import (
     TemporalEmotionAnalyzer
 )
 from core.diarization import (
-    compute_embeddings,
+    compute_embeddings_with_vad,
     detect_speaker_changes,
     merge_consecutive_same_speaker,
     format_labeled_transcription
@@ -88,6 +88,8 @@ try:
 except ImportError:
     OPENAI_AVAILABLE = False
     logger.warning("OpenAI no disponible. /transcribe/cloud-whisper no funcionará.")
+
+from fastapi.responses import HTMLResponse
 
 # GESTIÓN DE MEMORIA
 
@@ -184,6 +186,11 @@ app.include_router(export_router)
 
 if ADDITIONAL_ROUTES_AVAILABLE:
     app.include_router(additional_router)
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard():
+    with open("dashboard.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 @app.on_event("startup")
 async def startup_event():
@@ -282,7 +289,7 @@ async def perform_diarization(
             return speaker_labels, 1
         
         embeddings, starts = await run_blocking(
-            compute_embeddings, audio_data, sr, windows, encoder, WINDOW_SEC
+            compute_embeddings_with_vad, audio_data, sr, windows, encoder, WINDOW_SEC
         )
         
         if len(embeddings) < 2:

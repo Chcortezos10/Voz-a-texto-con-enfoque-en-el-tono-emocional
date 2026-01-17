@@ -9,63 +9,73 @@ from sklearn.preprocessing import normalize
 
 from config import WINDOW_SEC, CHANGE_SIM_THRESHOLD, MIN_SEG_SEC
 import logging
+import webrtcvad
 
 logger = logging.getLogger(__name__)
 
 
-def compute_embeddings(
+def compute_embeddings_with_vad(
     audio: np.ndarray,
     sr: int,
     windows: List[Tuple[float, float]],
     encoder: VoiceEncoder,
-    window_sec: float = WINDOW_SEC
+    window_sec: float = WINDOW_SEC,
+    vad_aggressiveness: int = 2  # 0-3 (3 más agresivo)
 ) -> Tuple[np.ndarray, List[float]]:
     """
-    Calcula embeddings de voz para ventanas de audio, ignorando silencio.
-
-    Args:
-        audio: Array de audio
-        sr: Sample rate
-        windows: Lista de tuplas (start, end) de ventanas
-        encoder: VoiceEncoder de Resemblyzer
-        window_sec: Tamaño de ventana en segundos
-
-    Returns:
-        Tuple de (embeddings normalizados, lista de starts validos)
+    Version mejorada con WebRTC VAD para mejor deteccion de voz
     """
     embeddings = []
     starts = []
-    win_len_samples = int(round(window_sec * sr))
     
-    # Umbral de energía RMS para considerar que hay voz
-    # Valores típicos: 0.005 a 0.02 dependiendo de normalización
-    RMS_THRESHOLD = 0.005 
-
+    # Inicializar VAD
+    vad = webrtcvad.Vad(vad_aggressiveness)
+    
+    # WebRTC VAD requiere 16kHz y frames de 10/20/30ms
+    frame_duration_ms = 30
+    frame_size = int(sr * frame_duration_ms / 1000)
+    
     for (s, e) in windows:
         start_idx = int(round(s * sr))
         end_idx = int(round(e * sr))
         seg = audio[start_idx:end_idx]
-
-        # Si segmento más corto que ventana, pad con ceros
-        if len(seg) < win_len_samples:
-            pad = np.zeros(win_len_samples - len(seg), dtype=seg.dtype)
-            seg = np.concatenate([seg, pad])
-            
-        # Chequeo de energía (RMS)
-        rms = np.sqrt(np.mean(seg**2))
-        if rms < RMS_THRESHOLD:
-            continue # Saltar silencio
-
-        emb = encoder.embed_utterance(seg)
-        embeddings.append(emb)
-        starts.append(s)
-
+        
+        # Convertir a 16-bit PCM para VAD
+        seg_int16 = (seg * 32767).astype(np.int16)
+        
+        # Verificar actividad de voz en múltiples frames
+        num_frames = len(seg_int16) // frame_size
+        voiced_frames = 0
+        
+        for i in range(num_frames):
+            frame = seg_int16[i * frame_size:(i + 1) * frame_size]
+            if len(frame) == frame_size:
+                try:
+                    is_speech = vad.is_speech(frame.tobytes(), sr)
+                    if is_speech:
+                        voiced_frames += 1
+                except:
+                    pass
+        
+        # Requerir al menos 50% de frames con voz
+        voice_ratio = voiced_frames / max(1, num_frames)
+        if voice_ratio < 0.5:
+            continue
+        
+        # Calcular embedding
+        try:
+            emb = encoder.embed_utterance(seg)
+            embeddings.append(emb)
+            starts.append(s)
+        except Exception as e:
+            logger.warning(f"Error embedding segmento {s}-{e}: {e}")
+    
     if not embeddings:
         return np.array([]), []
-
+    
     embeddings = np.vstack(embeddings)
     embeddings = normalize(embeddings)
-
+    
     return embeddings, starts
 
 
@@ -75,8 +85,8 @@ from sklearn.metrics import silhouette_score
 def cluster_speakers(
     embeddings: np.ndarray,
     num_speakers: int = None,
-    min_speakers: int = 2,
-    max_speakers: int = 6
+    min_speakers: int = 1,
+    max_speakers: int = 7
 ) -> np.ndarray:
     """
     Agrupa embeddings por hablante usando Agglomerative Clustering.
@@ -95,7 +105,9 @@ def cluster_speakers(
     # Si tenemos pocos embeddings, devolvemos todo 0
     if N < 2:
         logger.debug(f"[DBG] N < 2, retornando todos 0")
-        return np.zeros(N, dtype=int)
+        labels = np.zeros(N, dtype=int)
+        labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+        return labels
         
     try:
         # Modo Manual: K fijo (verifica que num_speakers sea un int > 0)
@@ -107,7 +119,9 @@ def cluster_speakers(
                 metric='cosine',
                 linkage='average'
             )
-            return clustering.fit_predict(embeddings)
+            labels = clustering.fit_predict(embeddings)
+            labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+            return labels
             
         # Modo Auto: Iterar K y buscar mejor Silhouette Score
         best_k = 1
@@ -117,7 +131,9 @@ def cluster_speakers(
         # Limitar rango de búsqueda
         search_max = min(max_speakers, N)
         if search_max < 2:
-             return np.zeros(N, dtype=int)
+             labels = np.zeros(N, dtype=int)
+             labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+             return labels
 
         # Probamos K desde min_speakers (o 2) hasta search_max
         # Si el usuario no especificó nada, asumimos que intenta buscar diferencias
@@ -146,27 +162,31 @@ def cluster_speakers(
                 best_k = k
                 best_labels = labels
         
-        # Umbral mínimo de calidad para aceptar múltiples hablantes
-        # Si el score es muy bajo, probablemente sea un solo hablante con ruido
-        # Reducido a 0.01 (en v4.1) para ser mas permisivo con voces similares
-        MIN_SCORE_THRESHOLD = 0.01 
+        # Umbral mínimo de calidad para aceptar múltiples hablantes1
+        MIN_SCORE_THRESHOLD = 0.05 
         
         if best_score > MIN_SCORE_THRESHOLD:
             logger.info(f"✔ Auto-clustering seleccionado: {best_k} hablantes (Score: {best_score:.4f})")
+            best_labels = smooth_speaker_labels(best_labels, window_size=5, min_segment_length=3)
             return best_labels
         else:
             logger.warning(f"⚠ Score máximo ({best_score:.4f}) bajo. Fallback: intentando separar al menos 2 si score > 0.")
             # Fallback agresivo: si score positivo y detectó >1, úsalos
             if best_score > 0 and best_k > 1:
                  logger.info(f"  -> Forzando {best_k} hablantes por fallback (Score positivo).")
+                 best_labels = smooth_speaker_labels(best_labels, window_size=5, min_segment_length=3)
                  return best_labels
             
-            return np.zeros(N, dtype=int)
+            labels = np.zeros(N, dtype=int)
+            labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+            return labels
 
     except Exception as e:
         logger.error(f"Error en clustering: {e}. Fallback a todos 0.", exc_info=True)
         # import traceback; traceback.print_exc() -> handled by exc_info=True
-        return np.zeros(N, dtype=int)
+        labels = np.zeros(N, dtype=int)
+        labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+        return labels
 
 
 def detect_speaker_changes(
@@ -276,3 +296,33 @@ def format_labeled_transcription(segments: List[Dict]) -> str:
         if text:
             lines.append(f"[Hablante {int(spk)+1}]: {text}")
     return " ".join(lines)
+
+def smooth_speaker_labels(labels: np.ndarray,
+    window_size: int = 5,
+    min_segment_length: int = 3
+) -> np.ndarray:
+     
+     if len(labels) < window_size:
+         return labels
+         
+     smoothed = labels.copy()
+     
+     #filtro de mediana para eliminar los cambios puntuales 
+     from scipy.signal import medfilt
+     smoothed = medfilt(smoothed.astype(float), kernel_size=window_size).astype(int)
+
+     i=0
+     while i < len(smoothed):
+        current_label = smoothed[i]
+        start = i
+        while i+1 < len(smoothed) and smoothed[i+1] == current_label:
+            i+=1
+
+        segment_length = i - start + 1
+        if segment_length < min_segment_length:
+            prev_label = smoothed[start - 1] if start > 0 else current_label
+            next_label = smoothed[i] if i < len(smoothed) else current_label
+            majority_label = prev_label if prev_label == next_label else current_label
+            smoothed[start:i] = majority_label
+
+        return smoothed

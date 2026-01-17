@@ -5,6 +5,12 @@ import logging
 import torch
 from typing import Dict, Any, Optional
 import gc
+import sys
+import os
+
+# Añadir parent al path para imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import WHISPER_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +38,54 @@ def clear_model_cache():
     logger.info("🗑️ Cache de modelos limpiado")
 
 
-def load_whisper_models(model_size: str = "tiny") -> Dict[str, Any]:
+def get_optimal_device() -> str:
+    """
+    Detecta el mejor dispositivo disponible (GPU/CPU).
+    
+    Returns:
+        'cuda' si hay GPU disponible, 'cpu' en caso contrario
+    """
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name(0)
+        vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        logger.info(f"GPU detectada: {gpu_name} ({vram_gb:.1f} GB VRAM)")
+        return "cuda"
+    else:
+        logger.info("No se detectó GPU, usando CPU")
+        return "cpu"
+
+
+def get_recommended_model_for_vram() -> str:
+    """
+    Recomienda el modelo óptimo según la VRAM disponible.
+    
+    RTX 4050 (~6GB): puede correr hasta medium cómodamente
+    """
+    if not torch.cuda.is_available():
+        return "small"  # CPU: modelo conservador
+    
+    vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+    
+    if vram_gb >= 10:
+        return "large-v3"  # 10GB+ → large
+    elif vram_gb >= 5:
+        return "medium"    # 5-10GB → medium (ideal para RTX 4050)
+    elif vram_gb >= 2:
+        return "small"     # 2-5GB → small
+    else:
+        return "base"      # <2GB → base
+
+
+def load_whisper_models(model_size: str = None) -> Dict[str, Any]:
+    # Usar config si no se especifica
+    if model_size is None:
+        model_size = WHISPER_MODEL
     """
     Carga Whisper con lazy loading y cache.
+    Usa GPU automáticamente si está disponible.
     
     Args:
-        model_size: Tamaño del modelo (tiny, base, small, medium, large)
+        model_size: Tamaño del modelo (tiny, base, small, medium, large, large-v3)
     
     Returns:
         Dict con modelo Whisper
@@ -47,35 +95,40 @@ def load_whisper_models(model_size: str = "tiny") -> Dict[str, Any]:
     cache_key = f"whisper_{model_size}"
     
     if cache_key in _models_cache:
-        logger.info(f"✅ Usando Whisper en cache: {model_size}")
+        logger.info(f"Usando Whisper en cache: {model_size}")
         return _models_cache[cache_key]
     
     try:
-        logger.info(f"⏳ Cargando Whisper modelo: {model_size}")
+        logger.info(f"Cargando Whisper modelo: {model_size}")
         import whisper
         
-        # Configurar para bajo uso de memoria
-        device = "cpu"  # Forzar CPU para ahorrar VRAM
+        # Detectar automáticamente el mejor dispositivo
+        device = get_optimal_device()
+        
+        # Info de VRAM si es GPU
+        if device == "cuda":
+            recommended = get_recommended_model_for_vram()
+            logger.info(f"Modelo recomendado para tu GPU: {recommended}")
         
         model = whisper.load_model(
             model_size,
             device=device,
             download_root=None,
-            in_memory=False  # No mantener en memoria si es posible
+            in_memory=True  # Mantener en memoria GPU para velocidad
         )
         
-        result = {"whisper": model}
+        result = {"whisper": model, "device": device}
         _models_cache[cache_key] = result
         
-        logger.info(f"✅ Whisper cargado: {model_size} en {device}")
+        logger.info(f"Whisper cargado: {model_size} en {device}")
         return result
         
     except Exception as e:
-        logger.error(f"❌ Error cargando Whisper: {e}")
+        logger.error(f"Error cargando Whisper: {e}")
         raise
 
 
-def get_whisper_model(model_size: str = "tiny"):
+def get_whisper_model(model_size: str = None):
     """Helper para obtener modelo Whisper"""
     models = load_whisper_models(model_size)
     return models["whisper"]

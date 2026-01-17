@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
 echo ===================================================
-echo   INICIANDO SISTEMA VOZ-A-TEXTO EMOCIONAL (V4)
-echo   Con Gestión Optimizada de Memoria
+echo   INICIANDO SISTEMA VOZ-A-TEXTO EMOCIONAL (V5)
+echo   Dashboard Monolitico + API FastAPI
 echo ===================================================
 echo.
 
@@ -18,7 +18,8 @@ if errorlevel 1 (
 
 echo.
 echo [*] Iniciando API Unificada (Puerto 8000)...
-echo     Modelo Whisper: tiny (bajo consumo de RAM)
+echo     Modelo Whisper: medium (GPU RTX 4050)
+echo.
 echo.
 
 REM Iniciar servidor con optimizaciones de memoria
@@ -42,17 +43,16 @@ echo ===================================================
 echo.
 echo      API:       http://127.0.0.1:8000
 echo      Docs:      http://127.0.0.1:8000/docs
-echo      Dashboard: frontend\index.html
+echo      Dashboard: dashboard.html
 echo.
-echo [*] Iniciando servidor frontend (Puerto 5500)...
-if exist "frontend\index.html" (
-    start /min cmd /k "cd frontend && python -m http.server 5500"
-    timeout /t 2 /nobreak >nul
-    echo [*] Abriendo Dashboard en el navegador...
-    start http://127.0.0.1:5500
+
+REM Abrir dashboard monolitico directamente en el navegador
+echo [*] Abriendo Dashboard en el navegador...
+if exist "dashboard.html" (
+    start "" "%~dp0dashboard.html"
 ) else (
-    echo [!] No se encontro frontend\index.html
-    echo     Por favor abrelo manualmente desde la carpeta frontend
+    echo [!] No se encontro dashboard.html
+    echo     Por favor verifica que el archivo existe
 )
 
 echo.

@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Embedded Styles -->
+    <style>
+        /* VARIABLES Y RESET */
+        :root {
+            --bg: #0a0a0f;
+            --surface: #16161d;
+            --surface-hover: #1f1f2a;
+            --border: #2a2a3a;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #ec4899;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #16161d 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(22, 22, 29, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .status-badge.online {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .theme-toggle-btn {
+            padding: 0.6rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--surface-hover);
+            transform: scale(1.1);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover {
+            color: var(--primary-light);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* UPLOAD SECTION */
+        .upload-section {
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-section.active {
+            border-color: var(--success);
+        }
+
+        /* CONFIG PANEL */
+        .config-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .config-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .model-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .model-option {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--surface-hover);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .model-option.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .model-option:hover {
+            border-color: var(--primary-light);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* LOADING OVERLAY */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-bar-wrapper {
+            width: 400px;
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            width: 0%;
+        }
+
+        .progress-percentage {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .progress-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            min-height: 1.2rem;
+        }
+
+        /* TOGGLE SWITCH */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1rem 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--surface-hover);
+            transition: 0.3s;
+            border-radius: 28px;
+            border: 2px solid var(--border);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* SLIDERS */
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-hover);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+        }
+
+        /* METRICS */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+        }
+
+        .chart-wrapper canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* TRANSCRIPT */
+        .transcript-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .transcript-segment {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            background: var(--surface-hover);
+            border-left: 3px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .transcript-segment:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .transcript-segment.active-segment {
+            background: rgba(99, 102, 241, 0.15);
+            border-left-color: var(--primary);
+            border-left-width: 4px;
+            transform: scale(1.02);
+        }
+
+        /* HISTORY */
+        .history-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* AUDIO PLAYER */
+        .audio-player {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .player-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-btn:hover {
+            background: var(--primary-light);
+            transform: scale(1.1);
+        }
+
+        .time-display {
+            margin-left: auto;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .player-progress {
+            margin-bottom: 1rem;
+        }
+
+        #seekBar {
+            width: 100%;
+            height: 8px;
+        }
+
+        .player-extras {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .speed-control,
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-control select {
+            padding: 0.4rem 0.8rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .volume-control input {
+            width: 100px;
+        }
+
+        .segment-info {
+            margin-left: auto;
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .segment-speaker {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .segment-emotion {
+            color: var(--text-muted);
+        }
+
+        /* FILTERS */
+        .filters-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-input {
+            padding: 0.75rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background: var(--surface-hover);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--primary);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* EDITOR */
+        .editable-segment {
+            padding: 1.5rem;
+        }
+
+        .segment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .segment-time {
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .speaker-input, .emotion-select {
+            padding: 0.4rem 0.8rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+        }
+
+        .speaker-input:focus, .emotion-select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .segment-text {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .segment-text:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .segment-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.6rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .edit-counter {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .edited-badge {
+            font-size: 0.75rem;
+            color: var(--warning);
+            margin-top: 0.5rem;
+        }
+
+        /* STATISTICS PANEL */
+        .stats-panel {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .global-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card-large {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .chart-container-stats h3 {
+            margin-bottom: 1rem;
+        }
+
+        .recent-analyses {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .emotion-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .emotion-badge.feliz { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .emotion-badge.enojado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .emotion-badge.triste { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .emotion-badge.neutral { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+
+        /* TOAST */
+        #toastContainer {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            max-width: 400px;
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(20px);
+            color: var(--text-main);
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: auto;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .stats-charts-grid { grid-template-columns: 1fr; }
+            .header { padding: 1rem; }
+            .container { padding: 0 1rem; }
+        }
+
+        /* DIARIZATION TIMELINE */
+        .diarization-timeline {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: var(--surface-hover);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .timeline-segment {
+            position: absolute;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timeline-segment:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.1);
+        }
+
+        .timeline-segment.active {
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+            filter: brightness(1.3);
+            border: 2px solid white;
+        }
+
+        /* CURRENT SEGMENT PANEL */
+        .current-segment-panel {
+            background: linear-gradient(135deg, var(--surface), var(--surface-hover));
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .panel-speaker {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .panel-emotion {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+        }
+
+        #currentEmotionIcon {
+            font-size: 2rem;
+        }
+
+        .panel-text {
+            grid-column: 1 / -1;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ADVANCED CHARTS MODAL */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-close {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .modal-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .btn-advanced-charts {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-advanced-charts:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">Transcriptor Emocional Pro V5</div>
+        <div id="apiStatus" class="status-badge">Conectando...</div>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="progress-container">
+            <div class="spinner"></div>
+            <div style="font-size: 1.2rem; font-weight: 600; margin-top: 1rem;" id="progressText">Procesando...</div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+            </div>
+            <div class="progress-details" id="progressDetails">Iniciando análisis...</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('analyze')">Análisis</button>
+            <button class="tab" onclick="switchTab('history')">Historial</button>
+            <button class="tab" onclick="switchTab('settings')">Configuración</button>
+        </div>
+
+        <!-- TAB: ANÁLISIS -->
+        <div id="tab-analyze" class="tab-content active">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadArea">
+                <div style="font-size: 4rem;">🎙️</div>
+                <h2>Arrastra tu archivo de audio aquí</h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">O haz clic para seleccionar un archivo</p>
+                <div id="fileName" style="color: var(--primary); margin-top: 1rem;"></div>
+                <input type="file" id="fileInput" hidden accept="audio/*,video/*" />
+            </div>
+
+            <!-- Configuration Panel -->
+            <div class="config-panel">
+                <!-- Model Selection -->
+                <div class="config-card">
+                    <h3>Modelo de Transcripción</h3>
+                    <div class="model-selector">
+                        <div class="model-option active" data-model="local">
+                            <strong>Local</strong><br>
+                            <small>Whisper Local</small>
+                        </div>
+                        <div class="model-option" data-model="cloud">
+                            <strong>Cloud</strong><br>
+                            <small>OpenAI API (Rápido)</small>
+                        </div>
+                    </div>
+                    <div id="apiKeySection" style="display: none; margin-top: 1rem;">
+                        <input type="password" id="openaiApiKey" placeholder="sk-..." 
+                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
+                    </div>
+                </div>
+
+                <!-- Diarization -->
+                <div class="config-card">
+                    <h3>Diarización</h3>
+                    <div class="toggle-container">
+                        <span>Activar detección de hablantes</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableDiarization" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Nº Hablantes: <span id="numSpeakersValue">Auto</span></label>
+                        <input type="range" id="numSpeakers" min="0" max="10" value="0" />
+                    </div>
+                </div>
+
+                <!-- Emotion Analysis -->
+                <div class="config-card">
+                    <h3>Análisis Emocional</h3>
+                    <div class="toggle-container">
+                        <span>Modo Lite (solo texto)</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="liteMode" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Peso Audio: <span id="audioWeightValue">40%</span></label>
+                        <input type="range" id="audioWeight" min="0" max="100" value="40" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyze Button -->
+            <button class="btn btn-primary" id="analyzeBtn" style="width: 100%; padding: 1.2rem; font-size: 1.1rem;">
+                🚀 Iniciar Análisis
+            </button>
+
+            <!-- Results Section -->
+            <div id="resultsSection" style="display: none; margin-top: 3rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2>📊 Resultados</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="exportData('json')">
+                            <i class="fas fa-file-code"></i> JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('csv')">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('srt')">
+                            <i class="fas fa-closed-captioning"></i> SRT
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData('txt')">
+                            <i class="fas fa-file-alt"></i> TXT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricEmotion">-</div>
+                        <div class="metric-label">Emoción Dominante</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricIntensity">-</div>
+                        <div class="metric-label">Intensidad</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricSpeakers">-</div>
+                        <div class="metric-label">Hablantes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricDuration">-</div>
+                        <div class="metric-label">Duración</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Timeline de Emociones</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Distribución</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Charts Button -->
+                <div style="text-align: center; margin: 1.5rem 0;">
+                    <button class="btn-advanced-charts" onclick="showAdvancedCharts()">
+                        📊 Ver Gráficos Avanzados
+                    </button>
+                </div>
+
+                <!-- Audio Player with Diarization Timeline -->
+                <div class="audio-player" id="audioPlayerSection" style="display: none;">
+                    <h3 style="margin-bottom: 1rem;">🎧 Reproductor con Diarización</h3>
+                    <audio id="audioElement" style="display: none;"></audio>
+                    
+                    <!-- Player Controls -->
+                    <div class="player-controls">
+                        <button class="player-btn" onclick="audioPlayer.toggle()" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="player-btn" onclick="audioPlayer.skip(-10)" style="background: var(--surface-hover);">
+                            <i class="fas fa-backward"></i>
+                        </button>
+                        <button class="player-btn" onclick="audioPlayer.skip(10)" style="background: var(--surface-hover);">
+                            <i class="fas fa-forward"></i>
+                        </button>
+                        <div class="time-display">
+                            <span id="currentTimeDisplay">0:00</span>
+                            <span>/</span>
+                            <span id="totalTimeDisplay">0:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Seek Bar -->
+                    <div class="player-progress">
+                        <input type="range" id="seekBar" min="0" max="100" value="0" 
+                               oninput="audioPlayer.seek(this.value)">
+                    </div>
+                    
+                    <!-- Diarization Timeline -->
+                    <div class="diarization-timeline" id="diarizationTimeline">
+                        <!-- Timeline segments will be generated dynamically -->
+                    </div>
+                    
+                    <!-- Current Segment Panel -->
+                    <div class="current-segment-panel" id="currentSegmentPanel">
+                        <div class="panel-speaker">
+                            <i class="fas fa-user"></i>
+                            <span id="currentSpeaker">Hablante 1</span>
+                        </div>
+                        <div class="panel-emotion">
+                            <span id="currentEmotionIcon">😐</span>
+                            <span id="currentEmotion">Neutral</span>
+                            <span id="currentIntensity" style="color: var(--text-muted);">--</span>
+                        </div>
+                        <div class="panel-text" id="currentText">
+                            Selecciona o reproduce un segmento para ver su contenido aquí...
+                        </div>
+                    </div>
+                    
+                    <!-- Player Extras -->
+                    <div class="player-extras" style="margin-top: 1rem;">
+                        <div class="speed-control">
+                            <span>Velocidad:</span>
+                            <select onchange="audioPlayer.setSpeed(this.value)">
+                                <option value="0.5">0.5x</option>
+                                <option value="0.75">0.75x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                            </select>
+                        </div>
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" min="0" max="100" value="100" 
+                                   oninput="audioPlayer.setVolume(this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transcript -->
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <h3>Transcripción</h3>
+                    <div class="transcript-box" id="transcriptBox"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: HISTORIAL -->
+        <div id="tab-history" class="tab-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2>📁 Historial de Análisis</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" onclick="loadHistory()">
+                        <i class="fas fa-sync"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    No hay transcripciones guardadas
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB: CONFIGURACIÓN -->
+        <div id="tab-settings" class="tab-content">
+            <h2>⚙️ Configuración</h2>
+            <div class="config-panel">
+                <div class="config-card">
+                    <h3>API Keys</h3>
+                    <label>OpenAI API Key:</label>
+                    <input type="password" id="settingsApiKey" 
+                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;" 
+                           placeholder="sk-..." />
+                    <button class="btn btn-primary" onclick="saveApiKey()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+                
+                <div class="config-card">
+                    <h3>Datos</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Eliminar todo el historial de análisis guardado
+                    </p>
+                    <button class="btn btn-secondary" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i> Borrar Historial
+                    </button>
+                </div>
+
+                <div class="config-card">
+                    <h3>Información</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Versión:</strong> 5.0.0
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Backend:</strong> <span id="backendUrl">http://127.0.0.1:8000</span>
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">
+                        <strong>Estado:</strong> <span id="connectionStatus">Conectando...</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Charts Modal -->
+    <div id="advancedChartsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Gráficos Avanzados</h2>
+                <button class="modal-close" onclick="hideAdvancedCharts()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-charts-grid">
+                <div class="chart-container-stats">
+                    <h3>📈 Intensidad Emocional por Tiempo</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="intensityChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container-stats">
+                    <h3>👥 Comparación por Hablante</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="speakerComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const CONFIG = {
+            API_URL: "http://127.0.0.1:8000",
+            ENDPOINTS: {
+                HEALTH: '/health',
+                TRANSCRIBE_LOCAL: '/transcribe/full-analysis',
+                TRANSCRIBE_CLOUD: '/transcribe/cloud-whisper',
+                HISTORY_LIST: '/history/',
+                HISTORY_SAVE: '/history/save',
+                HISTORY_CLEAR: '/history/clear',
+                EXPORT: '/export'
+            },
+            EMOTIONS: {
+                'feliz': '😊',
+                'enojado': '😠',
+                'triste': '😢',
+                'neutral': '😐'
+            },
+            EMOTION_COLORS: {
+                'feliz': '#10b981',
+                'enojado': '#ef4444',
+                'triste': '#3b82f6',
+                'neutral': '#a78bfa'
+            }
+        };
+
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let selectedFile = null;
+        let currentResults = null;
+        let timelineChartInstance = null;
+        let distributionChartInstance = null;
+
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        const Utils = {
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            },
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString('es-EC', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            },
+            formatDuration(seconds) {
+                if (seconds < 60) return `${Math.floor(seconds)}s`;
+                if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s`;
+                return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+            }
+        };
+
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
+        const toast = {
+            show(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('toastContainer');
+                const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
+                const icons = { 
+                    success: 'fa-check-circle', error: 'fa-times-circle', 
+                    warning: 'fa-exclamation-triangle', info: 'fa-info-circle' 
+                };
+                
+                const toastEl = document.createElement('div');
+                toastEl.className = 'toast';
+                toastEl.style.borderLeft = `4px solid ${colors[type]}`;
+                toastEl.innerHTML = `
+                    <div style="color: ${colors[type]}; font-size: 20px;"><i class="fas ${icons[type]}"></i></div>
+                    <div style="flex: 1; font-weight: 500;">${message}</div>
+                    <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                `;
+                
+                container.appendChild(toastEl);
+                setTimeout(() => toastEl.classList.add('show'), 10);
+                setTimeout(() => {
+                    toastEl.classList.remove('show');
+                    setTimeout(() => toastEl.remove(), 300);
+                }, duration);
+            },
+            success(msg) { this.show(msg, 'success'); },
+            error(msg) { this.show(msg, 'error'); },
+            warning(msg) { this.show(msg, 'warning'); },
+            info(msg) { this.show(msg, 'info'); }
+        };
+
+        // ============================================
+        // PROGRESS BAR
+        // ============================================
+        const progressBar = {
+            show(text = 'Procesando...') {
+                document.getElementById('loadingOverlay').classList.add('active');
+                document.getElementById('progressText').textContent = text;
+                this.setProgress(0);
+            },
+            hide() {
+                document.getElementById('loadingOverlay').classList.remove('active');
+            },
+            setProgress(percent, details = '') {
+                document.getElementById('progressBarFill').style.width = percent + '%';
+                document.getElementById('progressPercentage').textContent = Math.round(percent) + '%';
+                if (details) document.getElementById('progressDetails').textContent = details;
+            },
+            simulate(duration = 10000) {
+                const steps = [
+                    { p: 10, text: 'Cargando archivo...', details: 'Preparando audio' },
+                    { p: 30, text: 'Transcribiendo audio...', details: 'Procesando con Whisper' },
+                    { p: 50, text: 'Detectando hablantes...', details: 'Aplicando diarización' },
+                    { p: 70, text: 'Analizando emociones...', details: 'Analizando sentimientos' },
+                    { p: 90, text: 'Generando resultados...', details: 'Finalizando' }
+                ];
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i >= steps.length) { clearInterval(interval); return; }
+                    document.getElementById('progressText').textContent = steps[i].text;
+                    this.setProgress(steps[i].p, steps[i].details);
+                    i++;
+                }, duration / steps.length);
+                return interval;
+            }
+        };
+
+        // ============================================
+        // API CHECK
+        // ============================================
+        async function checkAPI() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/health`);
+                const statusEl = document.getElementById('apiStatus');
+                const connEl = document.getElementById('connectionStatus');
+                if (response.ok) {
+                    statusEl.textContent = '🟢 Online';
+                    statusEl.classList.add('online');
+                    if (connEl) connEl.textContent = 'Conectado ✅';
+                } else {
+                    statusEl.textContent = '🔴 Error';
+                    statusEl.classList.remove('online');
+                    if (connEl) connEl.textContent = 'Error ❌';
+                }
+            } catch (e) {
+                const statusEl = document.getElementById('apiStatus');
+                const connEl = document.getElementById('connectionStatus');
+                statusEl.textContent = '🔴 Offline';
+                statusEl.classList.remove('online');
+                if (connEl) connEl.textContent = 'Desconectado ❌';
+            }
+        }
+        checkAPI();
+        setInterval(checkAPI, 5000);
+
+        // ============================================
+        // TABS
+        // ============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if (tab === 'history') loadHistory();
+        }
+
+        // ============================================
+        // FILE UPLOAD
+        // ============================================
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('active'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file) return;
+            selectedFile = file;
+            document.getElementById('fileName').textContent = `✅ ${file.name}`;
+            toast.success('Archivo cargado: ' + file.name);
+        }
+
+        // ============================================
+        // MODEL SELECTOR
+        // ============================================
+        document.querySelectorAll('.model-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('apiKeySection').style.display = this.dataset.model === 'cloud' ? 'block' : 'none';
+            });
+        });
+
+        // ============================================
+        // SLIDERS
+        // ============================================
+        document.getElementById('numSpeakers').addEventListener('input', function() {
+            document.getElementById('numSpeakersValue').textContent = this.value == 0 ? 'Auto' : this.value;
+        });
+        document.getElementById('audioWeight').addEventListener('input', function() {
+            document.getElementById('audioWeightValue').textContent = this.value + '%';
+        });
+
+        // ============================================
+        // API KEY
+        // ============================================
+        function saveApiKey() {
+            const key = document.getElementById('settingsApiKey').value || document.getElementById('openaiApiKey').value;
+            if (key) {
+                localStorage.setItem('openai_api_key', key);
+                toast.success('API Key guardada');
+            }
+        }
+
+        // Load saved API key
+        window.addEventListener('load', () => {
+            const key = localStorage.getItem('openai_api_key');
+            if (key) {
+                const el1 = document.getElementById('openaiApiKey');
+                const el2 = document.getElementById('settingsApiKey');
+                if (el1) el1.value = key;
+                if (el2) el2.value = key;
+            }
+        });
+
+        // ============================================
+        // ANALYZE
+        // ============================================
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            if (!selectedFile) {
+                toast.warning('Selecciona un archivo primero');
+                return;
+            }
+
+            progressBar.show('Iniciando análisis...');
+            const simInterval = progressBar.simulate(30000);
+
+            try {
+                const model = document.querySelector('.model-option.active')?.dataset.model || 'local';
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('lite_mode', document.getElementById('liteMode').checked);
+                formData.append('audio_weight', parseInt(document.getElementById('audioWeight').value) / 100);
+                formData.append('enable_diarization', document.getElementById('enableDiarization').checked);
+                
+                const numSpeakers = parseInt(document.getElementById('numSpeakers').value);
+                if (numSpeakers > 0) formData.append('num_speakers', numSpeakers);
+
+                let endpoint = CONFIG.ENDPOINTS.TRANSCRIBE_LOCAL;
+                if (model === 'cloud') {
+                    const apiKey = localStorage.getItem('openai_api_key');
+                    if (!apiKey) {
+                        toast.warning('Configura tu API Key de OpenAI primero');
+                        clearInterval(simInterval);
+                        progressBar.hide();
+                        return;
+                    }
+                    formData.append('api_key', apiKey);
+                    endpoint = CONFIG.ENDPOINTS.TRANSCRIBE_CLOUD;
+                }
+
+                const res = await fetch(CONFIG.API_URL + endpoint, { method: 'POST', body: formData });
+                
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || errData.error || 'Error en API');
+                }
+                
+                const data = await res.json();
+
+                clearInterval(simInterval);
+                progressBar.setProgress(100, 'Completado');
+
+                setTimeout(() => {
+                    currentResults = data;
+                    saveToHistory(data, selectedFile.name);
+                    displayResults(data);
+                    document.getElementById('resultsSection').style.display = 'block';
+                    progressBar.hide();
+                    toast.success('Análisis completado exitosamente');
+                }, 500);
+
+            } catch (e) {
+                clearInterval(simInterval);
+                progressBar.hide();
+                toast.error('Error: ' + e.message);
+                console.error(e);
+            }
+        });
+
+        // ============================================
+        // DISPLAY RESULTS
+        // ============================================
+        function displayResults(data) {
+            const top = data.global_emotions?.top_emotion || 'neutral';
+            const emoji = CONFIG.EMOTIONS[top] || '😐';
+            
+            document.getElementById('metricEmotion').textContent = emoji + ' ' + top.toUpperCase();
+            document.getElementById('metricIntensity').textContent = Math.round((data.global_emotions?.top_score || 0) * 100) + '%';
+            document.getElementById('metricSpeakers').textContent = data.diarization?.num_speakers || 1;
+            document.getElementById('metricDuration').textContent = Math.round(data.metadata?.total_duration || 0) + 's';
+
+            renderCharts(data);
+            renderTranscript(data.segments || []);
+            
+            // Initialize audio player with the file and segments
+            if (selectedFile) {
+                audioPlayer.init(selectedFile, data.segments || [], data.metadata?.total_duration || 0);
+            }
+        }
+
+        function renderCharts(data) {
+            const timeline = data.emotion_timeline || [];
+            const emotions = [...new Set(timeline.map(t => t.emotion))];
+            
+            if (timelineChartInstance) timelineChartInstance.destroy();
+            if (distributionChartInstance) distributionChartInstance.destroy();
+
+            const timelineCtx = document.getElementById('timelineChart');
+            if (timelineCtx && timeline.length > 0) {
+                const step = Math.max(1, Math.floor(timeline.length / 20));
+                const sampledTimeline = timeline.filter((_, i) => i % step === 0);
+                
+                timelineChartInstance = new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledTimeline.map(t => t.time.toFixed(0) + 's'),
+                        datasets: emotions.map(e => ({
+                            label: e.toUpperCase(),
+                            data: sampledTimeline.map(t => (t.all_emotions?.[e] || 0) * 100),
+                            borderColor: CONFIG.EMOTION_COLORS[e] || '#a78bfa',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        }))
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { duration: 500 },
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                min: 0,
+                                max: 100,
+                                ticks: { color: '#94a3b8', callback: v => v + '%' },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            },
+                            x: { 
+                                ticks: { color: '#94a3b8', maxRotation: 0 },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const dist = data.global_emotions?.emotion_distribution || {};
+            const distCtx = document.getElementById('distributionChart');
+            if (distCtx && Object.keys(dist).length > 0) {
+                distributionChartInstance = new Chart(distCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(dist).map(k => k.toUpperCase()),
+                        datasets: [{
+                            data: Object.values(dist).map(v => (v * 100).toFixed(1)),
+                            backgroundColor: Object.keys(dist).map(k => CONFIG.EMOTION_COLORS[k] || '#a78bfa'),
+                            borderWidth: 2,
+                            borderColor: '#16161d'
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { duration: 500 },
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderTranscript(segments) {
+            const box = document.getElementById('transcriptBox');
+            if (!box) return;
+            
+            box.innerHTML = segments.map((seg, idx) => `
+                <div class="transcript-segment" data-index="${idx}">
+                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
+                    <span style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
+                        (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
+                    </span>
+                    <br>
+                    ${seg.text_es || seg.text}
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // HISTORY
+        // ============================================
+        async function saveToHistory(data, filename) {
+            try {
+                await fetch(`${CONFIG.API_URL}/history/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        timestamp: new Date().toISOString(),
+                        duration: data.metadata?.total_duration || 0,
+                        num_segments: (data.segments || []).length,
+                        dominant_emotion: data.global_emotions?.top_emotion || 'neutral',
+                        global_emotions: data.global_emotions,
+                        segments: data.segments,
+                        transcription: data.transcription
+                    })
+                });
+            } catch (e) {
+                console.error('Error guardando historial:', e);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/history/`);
+                const history = await res.json();
+                const grid = document.getElementById('historyGrid');
+                
+                if (!Array.isArray(history) || history.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones guardadas</p>';
+                    return;
+                }
+
+                grid.innerHTML = history.map(item => `
+                    <div class="history-item" onclick="loadHistoryItem('${item.id}')">
+                        <strong>🎙️ ${item.filename || 'Sin nombre'}</strong><br>
+                        <small>${Utils.formatDate(item.timestamp)}</small><br>
+                        <small>
+                            ${CONFIG.EMOTIONS[item.dominant_emotion] || '😐'} ${item.dominant_emotion || 'neutral'} · 
+                            ⏱ ${Utils.formatDuration(item.duration || 0)} · 
+                            📝 ${item.num_segments || 0} segmentos
+                        </small>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Error cargando historial:', e);
+            }
+        }
+
+        async function loadHistoryItem(id) {
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/history/${id}`);
+                const data = await res.json();
+                currentResults = data;
+                displayResults(data);
+                document.getElementById('resultsSection').style.display = 'block';
+                switchTab('analyze');
+                document.querySelectorAll('.tab')[0].click();
+                toast.success('Análisis cargado del historial');
+            } catch (e) {
+                toast.error('Error cargando del historial');
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm('¿Borrar todo el historial?')) return;
+            try {
+                await fetch(`${CONFIG.API_URL}/history/clear`, { method: 'DELETE' });
+                loadHistory();
+                toast.success('Historial borrado');
+            } catch (e) {
+                toast.error('Error borrando historial');
+            }
+        }
+
+        // ============================================
+        // EXPORT
+        // ============================================
+        async function exportData(format) {
+            if (!currentResults) {
+                toast.warning('No hay resultados para exportar');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/export/${format}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentResults)
+                });
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `transcripcion_${Date.now()}.${format}`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                toast.success(`Exportado a ${format.toUpperCase()}`);
+            } catch (e) {
+                toast.error('Error exportando: ' + e.message);
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.getElementById('backendUrl').textContent = CONFIG.API_URL;
+
+        // ============================================
+        // AUDIO PLAYER
+        // ============================================
+        const audioPlayer = {
+            audio: null,
+            segments: [],
+            duration: 0,
+            currentSegmentIndex: -1,
+            
+            init(audioFile, segments, duration) {
+                this.audio = document.getElementById('audioElement');
+                this.segments = segments || [];
+                this.duration = duration || 0;
+                
+                if (audioFile) {
+                    this.audio.src = URL.createObjectURL(audioFile);
+                    document.getElementById('audioPlayerSection').style.display = 'block';
+                    
+                    this.audio.addEventListener('loadedmetadata', () => {
+                        this.duration = this.audio.duration;
+                        document.getElementById('totalTimeDisplay').textContent = Utils.formatTime(this.duration);
+                        buildDiarizationTimeline(this.segments, this.duration);
+                    });
+                    
+                    this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+                }
+            },
+            
+            toggle() {
+                if (!this.audio) return;
+                const btn = document.getElementById('playPauseBtn');
+                if (this.audio.paused) {
+                    this.audio.play();
+                    btn.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    this.audio.pause();
+                    btn.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            },
+            
+            skip(seconds) {
+                if (!this.audio) return;
+                this.audio.currentTime = Math.max(0, Math.min(this.audio.currentTime + seconds, this.duration));
+            },
+            
+            seek(percent) {
+                if (!this.audio) return;
+                this.audio.currentTime = (percent / 100) * this.duration;
+            },
+            
+            seekToTime(time) {
+                if (!this.audio) return;
+                this.audio.currentTime = time;
+                if (this.audio.paused) this.toggle();
+            },
+            
+            setSpeed(speed) {
+                if (this.audio) this.audio.playbackRate = parseFloat(speed);
+            },
+            
+            setVolume(volume) {
+                if (this.audio) this.audio.volume = volume / 100;
+            },
+            
+            onTimeUpdate() {
+                const currentTime = this.audio.currentTime;
+                document.getElementById('currentTimeDisplay').textContent = Utils.formatTime(currentTime);
+                document.getElementById('seekBar').value = (currentTime / this.duration) * 100;
+                this.updateCurrentSegment(currentTime);
+            },
+            
+            updateCurrentSegment(currentTime) {
+                let segmentIndex = -1;
+                
+                for (let i = 0; i < this.segments.length; i++) {
+                    const seg = this.segments[i];
+                    if (currentTime >= seg.start && currentTime < seg.end) {
+                        segmentIndex = i;
+                        break;
+                    }
+                }
+                
+                // Update transcript highlighting
+                document.querySelectorAll('.transcript-segment').forEach((el, idx) => {
+                    el.classList.toggle('active-segment', idx === segmentIndex);
+                });
+                
+                // Highlight segment in the timeline
+                document.querySelectorAll('.timeline-segment').forEach(seg => {
+                    seg.classList.remove('active');
+                });
+                
+                if (segmentIndex >= 0) {
+                    const timelineSegments = document.querySelectorAll('.timeline-segment');
+                    if (timelineSegments[segmentIndex]) {
+                        timelineSegments[segmentIndex].classList.add('active');
+                    }
+                    
+                    // Update current segment panel
+                    const seg = this.segments[segmentIndex];
+                    const emotion = seg.emotion || 'neutral';
+                    const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
+                    const intensity = seg.emotion_score || seg.intensity || 0;
+                    
+                    document.getElementById('currentSpeaker').textContent = seg.speaker_label || 'Hablante 1';
+                    document.getElementById('currentEmotionIcon').textContent = emotionIcon;
+                    document.getElementById('currentEmotion').textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+                    document.getElementById('currentIntensity').textContent = Math.round(intensity * 100) + '%';
+                    document.getElementById('currentText').textContent = seg.text_es || seg.text || '';
+                    
+                    this.currentSegmentIndex = segmentIndex;
+                }
+            }
+        };
+
+        // ============================================
+        // DIARIZATION TIMELINE
+        // ============================================
+        const SPEAKER_COLORS = {
+            'Hablante 1': '#10b981',
+            'Hablante 2': '#ef4444',
+            'Hablante 3': '#3b82f6',
+            'Hablante 4': '#f59e0b',
+            'Hablante 5': '#8b5cf6',
+            'Hablante 6': '#ec4899'
+        };
+
+        function buildDiarizationTimeline(segments, audioDuration) {
+            const timeline = document.getElementById('diarizationTimeline');
+            if (!timeline || !segments || segments.length === 0) return;
+            
+            timeline.innerHTML = '';
+            
+            segments.forEach((seg, idx) => {
+                const startPercent = (seg.start / audioDuration) * 100;
+                const widthPercent = ((seg.end - seg.start) / audioDuration) * 100;
+                const speaker = seg.speaker_label || 'Hablante 1';
+                const emotion = seg.emotion || 'neutral';
+                const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
+                
+                const segmentDiv = document.createElement('div');
+                segmentDiv.className = 'timeline-segment';
+                segmentDiv.style.left = startPercent + '%';
+                segmentDiv.style.width = Math.max(widthPercent, 0.5) + '%';
+                segmentDiv.style.background = SPEAKER_COLORS[speaker] || '#a78bfa';
+                segmentDiv.innerHTML = `<span>${emotionIcon}</span>`;
+                segmentDiv.title = `${speaker} - ${emotion} (${seg.start.toFixed(1)}s - ${seg.end.toFixed(1)}s)`;
+                segmentDiv.dataset.index = idx;
+                
+                // Click to jump to segment
+                segmentDiv.onclick = () => audioPlayer.seekToTime(seg.start);
+                
+                timeline.appendChild(segmentDiv);
+            });
+        }
+
+        // ============================================
+        // ADVANCED CHARTS MODAL
+        // ============================================
+        let intensityChartInstance = null;
+        let speakerComparisonChartInstance = null;
+
+        function showAdvancedCharts() {
+            if (!currentResults) {
+                toast.warning('No hay datos para mostrar');
+                return;
+            }
+            
+            document.getElementById('advancedChartsModal').style.display = 'flex';
+            renderAdvancedCharts(currentResults);
+        }
+
+        function hideAdvancedCharts() {
+            document.getElementById('advancedChartsModal').style.display = 'none';
+        }
+
+        function renderAdvancedCharts(data) {
+            const segments = data.segments || [];
+            
+            // Destroy previous chart instances
+            if (intensityChartInstance) intensityChartInstance.destroy();
+            if (speakerComparisonChartInstance) speakerComparisonChartInstance.destroy();
+            
+            // Intensity Chart
+            const intensityCtx = document.getElementById('intensityChart');
+            if (intensityCtx && segments.length > 0) {
+                intensityChartInstance = new Chart(intensityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: segments.map(s => s.start.toFixed(1) + 's'),
+                        datasets: [{
+                            label: 'Intensidad Emocional',
+                            data: segments.map(s => (s.emotion_score || s.intensity || 0.5) * 100),
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#f8fafc' } }
+                        },
+                        scales: {
+                            y: { 
+                                min: 0, 
+                                max: 100,
+                                ticks: { color: '#94a3b8', callback: v => v + '%' }
+                            },
+                            x: { ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+            }
+            
+            // Speaker Comparison Chart
+            const speakerCtx = document.getElementById('speakerComparisonChart');
+            if (speakerCtx && segments.length > 0) {
+                // Aggregate emotions by speaker
+                const speakerData = {};
+                segments.forEach(seg => {
+                    const speaker = seg.speaker_label || 'Hablante 1';
+                    if (!speakerData[speaker]) {
+                        speakerData[speaker] = { feliz: 0, enojado: 0, triste: 0, neutral: 0, count: 0 };
+                    }
+                    const emotion = seg.emotion || 'neutral';
+                    if (speakerData[speaker][emotion] !== undefined) {
+                        speakerData[speaker][emotion]++;
+                    }
+                    speakerData[speaker].count++;
+                });
+                
+                const speakers = Object.keys(speakerData);
+                const emotions = ['feliz', 'enojado', 'triste', 'neutral'];
+                
+                speakerComparisonChartInstance = new Chart(speakerCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: speakers,
+                        datasets: emotions.map(emotion => ({
+                            label: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+                            data: speakers.map(s => speakerData[s][emotion] || 0),
+                            backgroundColor: CONFIG.EMOTION_COLORS[emotion]
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#f8fafc' } }
+                        },
+                        scales: {
+                            y: { ticks: { color: '#94a3b8' } },
+                            x: { ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('advancedChartsModal')?.addEventListener('click', function(e) {
+            if (e.target === this) hideAdvancedCharts();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') hideAdvancedCharts();
+        });
+    </script>
+</body>
+</html>
