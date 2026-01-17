@@ -1,21 +1,22 @@
 # =====================================================
 # Docker Compose - Voz a Texto con Enfoque en Tono Emocional
+# Versión: 5.0.0
 # =====================================================
 # Uso:
 #   docker-compose up --build        # Construir e iniciar
 #   docker-compose up -d             # Iniciar en segundo plano
 #   docker-compose down              # Detener
 #   docker-compose logs -f           # Ver logs en tiempo real
+#   docker-compose restart           # Reiniciar servicio
 # =====================================================
-
-version: "3.8"
 
 services:
   transcriptor-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transcriptor-emocional
+    container_name: transcriptor-emocional-v5
+    image: transcriptor-emocional:5.0.0
 
     # Habilitar GPU NVIDIA (comentar si no tienes GPU)
     deploy:
@@ -32,30 +33,61 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - CUDA_VISIBLE_DEVICES=0
+      # Optimizaciones de memoria para PyTorch
+      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+      - OMP_NUM_THREADS=4
+      # Variables de la aplicación
+      - LOG_LEVEL=INFO
 
     volumes:
       # Persistir modelos descargados (evita re-descargar en cada reinicio)
       - whisper_models:/root/.cache/whisper
       - huggingface_cache:/root/.cache/huggingface
-      # Carpetas de datos y salida (opcional)
+      - torch_cache:/root/.cache/torch
+      # Carpetas de datos, salida e historial
       - ./data:/app/data
       - ./output:/app/output
+      - ./history:/app/history
+      # Dashboard HTML (hot-reload en desarrollo)
+      - ./dashboard.html:/app/dashboard.html:ro
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s # Tiempo para cargar modelos grandes
+      timeout: 15s
+      retries: 5
+      start_period: 180s # Tiempo extendido para cargar modelos grandes
 
     restart: unless-stopped
 
-    # Límites de memoria (ajustar según tu sistema)
-    # mem_limit: 8g
-    # memswap_limit: 10g
+    # Límites de recursos (ajustar según tu sistema)
+    # Descomenta para limitar recursos:
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 10G
+    #     reservations:
+    #       memory: 4G
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+    # Red interna (opcional para microservicios)
+    networks:
+      - transcriptor-network
+
+networks:
+  transcriptor-network:
+    driver: bridge
+    name: transcriptor-net
 
 volumes:
   whisper_models:
     name: transcriptor_whisper_cache
   huggingface_cache:
     name: transcriptor_hf_cache
+  torch_cache:
+    name: transcriptor_torch_cache

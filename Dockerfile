@@ -1,5 +1,6 @@
 # =====================================================
 # Dockerfile - Voz a Texto con Enfoque en Tono Emocional
+# Versión: 5.0.0 (Optimizada con gestión de memoria)
 # =====================================================
 
 # Base image con soporte CUDA para GPU (RTX 4060 compatible)
@@ -9,7 +10,7 @@ FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 # Metadatos
 LABEL maintainer="Christian"
 LABEL description="API de transcripción de voz a texto con análisis emocional"
-LABEL version="4.0.0"
+LABEL version="5.0.0"
 
 # Evitar prompts interactivos durante instalación
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,7 +19,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    # Optimizaciones de memoria
+    PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512 \
+    OMP_NUM_THREADS=4 \
+    # Configuración del servidor
+    HOST=0.0.0.0 \
+    PORT=8000
 
 # Directorio de trabajo
 WORKDIR /app
@@ -32,6 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender-dev \
     build-essential \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -39,21 +47,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 
 # Instalar dependencias de Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir httpx psutil
 
 # Copiar el código fuente del proyecto
 COPY . .
 
 # Crear directorios necesarios
-RUN mkdir -p /app/data /app/output /app/model
+RUN mkdir -p /app/data /app/output /app/models /app/history
+
+# Establecer permisos
+RUN chmod -R 755 /app
 
 # Puerto de la API FastAPI
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+# Health check optimizado
+HEALTHCHECK --interval=30s --timeout=30s --start-period=120s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Comando para ejecutar la aplicación
 # Usar workers=1 para evitar problemas con modelos grandes en memoria
-CMD ["uvicorn", "app_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "app_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "120"]
