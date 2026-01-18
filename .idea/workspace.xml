@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92bf1b38-f887-4281-bc95-d99220d09702" name="Changes" comment="Se anade archivos docker" />
+    <list default="true" id="92bf1b38-f887-4281-bc95-d99220d09702" name="Changes" comment="se actualiza el git ignore" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -64,22 +64,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.streamlit_app.executor&quot;: &quot;Run&quot;,
-    &quot;Python.streamlit_viewer.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.google.cloudcode.ide_session_index&quot;: &quot;20260107_0000&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.streamlit_app.executor": "Run",
+    "Python.streamlit_viewer.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.google.cloudcode.ide_session_index": "20260118_0000",
+    "git-widget-placeholder": "experimentacion",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -105,6 +105,7 @@
       <workItem from="1766984330484" duration="129000" />
       <workItem from="1767725977606" duration="621000" />
       <workItem from="1767837753765" duration="124000" />
+      <workItem from="1768747013365" duration="53000" />
     </task>
     <task id="LOCAL-00001" summary="se actualiza los requeriments">
       <option name="closed" value="true" />
@@ -130,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766984457039</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="se actualiza el git ignore">
+      <option name="closed" value="true" />
+      <created>1768747058425</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1768747058425</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,7 +172,8 @@
     <MESSAGE value="se actualiza los requeriments" />
     <MESSAGE value="se anadio la clase temporalemotionanalyzer  a emotion_analysis.py para el seguimiento de emociones por segmentos                 se integra el analizador en el end point de app_fastapi.py                          se corrige la elimincacion prematura de archivos audio que provocaba el FileNotFoundError                          Elimina el import datetime                 se simplifica la estructura formatted_emotions para utilizar emotion_result como consolidado             se anadio valdiate_audio_basic() para la validacion de audio antes del procesamiento                               CAMBIOS IMPORTANTES: Lose desgloses de las emociones individuales(spanish_analysis,english_analysis,audio_analysis) ahora se simplifica en al estructura de respuesta" />
     <MESSAGE value="Se anade archivos docker" />
-    <option name="LAST_COMMIT_MESSAGE" value="Se anade archivos docker" />
+    <MESSAGE value="se actualiza el git ignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="se actualiza el git ignore" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/trascriptor_uide$streamlit_app.coverage" NAME="streamlit_app Coverage Results" MODIFIED="1766631395643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
