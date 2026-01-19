@@ -44,8 +44,116 @@ from config import (
     FUSION_MODE,
     DEVICE,
     EMOTION_MAPPING,
-    TARGET_SR
+    TARGET_SR,
+    SAD_BOOST_FACTOR,
+    NEUTRAL_SUPPRESSION_FACTOR,
+    ACTIVE_EMOTION_BOOST,
+    HAPPY_SUPPRESSION_FACTOR
 )
+
+# Diccionario de palabras clave para reforzar detección emocional en español
+# Estas palabras/frases sobrescriben la clasificación del modelo cuando hay confusión
+LEXICON_TRISTE = {
+    # Frases de malestar
+    "me pone mal", "pone mal", "me duele", "me afecta", "me entristece",
+    "qué pena", "que pena", "qué lástima", "que lastima", "qué tristeza",
+    "me da pena", "me da tristeza", "me da lástima",
+    # Palabras de disculpa/arrepentimiento
+    "perdón", "perdon", "perdona", "perdóname", "lo siento", "disculpa",
+    "lamentablemente", "desafortunadamente", "por desgracia",
+    # Palabras de sufrimiento
+    "pobres", "pobreza", "sufren", "sufriendo", "sufrimiento",
+    "dolor", "doloroso", "llorar", "lloro", "llorando", "lágrimas",
+    "triste", "tristeza", "deprimido", "angustia", "angustiado",
+    "desesperado", "desesperación", "soledad", "solo", "sola",
+    # Palabras de dificultad
+    "difícil", "dificil", "complicado", "terrible", "horrible",
+    "mal", "peor", "fatal", "desgracia", "tragedia",
+    # Negaciones emocionales
+    "no puedo", "no soporto", "no aguanto", "me cuesta",
+}
+
+LEXICON_ENOJADO = {
+    "rabia", "ira", "furia", "furioso", "enojado", "molesto",
+    "indignado", "indignación", "injusto", "injusticia",
+    "odio", "detesto", "me irrita", "irritante", "harto", "harta",
+    "que asco", "qué asco", "asqueroso", "repugnante",
+    "maldito", "maldita", "maldición",
+}
+
+LEXICON_FELIZ = {
+    "feliz", "felicidad", "alegría", "alegre", "contento", "contenta",
+    "genial", "maravilloso", "fantástico", "excelente", "increíble",
+    "me encanta", "qué bien", "qué bueno", "perfecto",
+    "amo", "adoro", "hermoso", "hermosa", "lindo", "linda",
+    "celebrar", "celebración", "fiesta", "éxito",
+    "jaja", "jajaja", "jajajaja", "jeje", "jejeje", "risa", "risas",
+    "riendo", "carcajada", "gracioso", "divertido", "divertida",
+    "me rio", "me reí", "qué risa", "que chistoso", "qué chistoso",
+    "buenísimo", "espectacular", "súper", "super", "wow", "guau",
+}
+
+def analyze_lexicon(text: str) -> Dict[str, float]:
+    """
+    Analiza el texto buscando palabras clave emocionales.
+    Retorna un diccionario con scores basados en coincidencias lexicográficas.
+    """
+    text_lower = text.lower()
+    scores = {"triste": 0.0, "enojado": 0.0, "feliz": 0.0, "neutral": 0.0}
+    
+    # Buscar coincidencias en cada lexicón
+    for palabra in LEXICON_TRISTE:
+        if palabra in text_lower:
+            scores["triste"] += 0.3  # Cada coincidencia suma 0.3
+    
+    for palabra in LEXICON_ENOJADO:
+        if palabra in text_lower:
+            scores["enojado"] += 0.3
+    
+    for palabra in LEXICON_FELIZ:
+        if palabra in text_lower:
+            scores["feliz"] += 0.3
+    
+    # Normalizar si hay coincidencias
+    total = sum(scores.values())
+    if total > 0:
+        scores = {k: min(1.0, v) for k, v in scores.items()}  # Cap at 1.0
+    else:
+        scores["neutral"] = 0.1  # Sin coincidencias = ligeramente neutral
+    
+    return scores
+
+def apply_lexicon_correction(emotions: Dict[str, float], text: str) -> Dict[str, float]:
+    lexicon_scores = analyze_lexicon(text)
+    text_lower = text.lower()
+    
+    has_laugh = any(x in text_lower for x in ["jaja", "jeje", "risa", "risas", "jajaja", "jejeje", "riendo", "carcajada"])
+    
+    if lexicon_scores["triste"] >= 0.15 and lexicon_scores["feliz"] < 0.15:
+        feliz_score = emotions.get("feliz", 0.0)
+        if feliz_score > 0.15:
+            transfer = feliz_score * 0.85
+            emotions["feliz"] = feliz_score - transfer
+            emotions["triste"] = emotions.get("triste", 0.0) + transfer + 0.15
+        else:
+            emotions["triste"] = emotions.get("triste", 0.0) + 0.25
+    
+    if lexicon_scores["enojado"] >= 0.15 and lexicon_scores["feliz"] < 0.15:
+        feliz_score = emotions.get("feliz", 0.0)
+        if feliz_score > 0.15:
+            transfer = feliz_score * 0.85
+            emotions["feliz"] = feliz_score - transfer
+            emotions["enojado"] = emotions.get("enojado", 0.0) + transfer + 0.15
+        else:
+            emotions["enojado"] = emotions.get("enojado", 0.0) + 0.25
+    
+    if lexicon_scores["feliz"] >= 0.15 or has_laugh:
+        if lexicon_scores["triste"] < 0.15 and lexicon_scores["enojado"] < 0.15:
+            emotions["feliz"] = emotions.get("feliz", 0.0) + 0.35
+            if has_laugh:
+                emotions["feliz"] = emotions.get("feliz", 0.0) + 0.25
+    
+    return emotions
 
 # MAPEO_EMOCIONAL_EXTENDIDO eliminado en favor de config.EMOTION_MAPPING
 
@@ -618,22 +726,27 @@ class EmotionEnsemble:
         return {"emotions": fused, "top_emotion": top_emotion, "top_score": fused[top_emotion]}
     
     def _apply_sensitivity(self, emotions: Dict[str, float]) -> Dict[str, float]:
-        """Aplica supresión de neutral y boost de emociones activas."""
+        """Aplica ajustes de sensibilidad balanceados."""
         adjusted = {}
         
         for emo, score in emotions.items():
-            if emo.lower() in ["neutral", "other", "others", "neu"]:
-                adjusted[emo] = score * self.neutral_suppression
+            emo_lower = emo.lower()
+            if emo_lower in ["neutral", "other", "others", "neu"]:
+                adjusted[emo] = score * NEUTRAL_SUPPRESSION_FACTOR
+            elif emo_lower in ["triste", "sad", "sadness", "tristeza"]:
+                adjusted[emo] = score * ACTIVE_EMOTION_BOOST * SAD_BOOST_FACTOR
+            elif emo_lower in ["feliz", "happy", "joy", "happiness"]:
+                adjusted[emo] = score * HAPPY_SUPPRESSION_FACTOR
             else:
-                adjusted[emo] = score * self.active_boost
+                adjusted[emo] = score * ACTIVE_EMOTION_BOOST
         
         if adjusted:
             top = max(adjusted, key=adjusted.get)
             if top.lower() in ["neutral", "other", "others"]:
-                candidates = {k: v for k, v in adjusted.items() if k.lower() not in ["neutral", "other", "others"] and v > 0.08}
+                candidates = {k: v for k, v in adjusted.items() if k.lower() not in ["neutral", "other", "others"] and v > 0.12}
                 if candidates:
                     best = max(candidates, key=candidates.get)
-                    adjusted[best] *= 1.4
+                    adjusted[best] *= 1.15
         
         return adjusted
     
@@ -687,7 +800,7 @@ def analyze_text_emotion_en(text: str) -> EmotionResult:
     
     try:
         classifier = load_text_emotion_en()
-        results = classifier(text[:512])[0]  # Limitar longitud
+        results = classifier(text[:512])[0]  
         
         emotions = {}
         for r in results:
@@ -738,12 +851,22 @@ def analyze_text_emotion_es(text: str) -> EmotionResult:
             label = normalize_emotion_label(r["label"])
             emotions[label] = float(r["score"])
         
-        top = max(results, key=lambda x: x["score"])
+        # APLICAR CORRECCIÓN LEXICOGRÁFICA para evitar confusión feliz/triste
+        emotions = apply_lexicon_correction(emotions, text)
+        
+        # Recalcular top_emotion después de la corrección
+        if emotions:
+            top_emotion = max(emotions, key=emotions.get)
+            top_score = emotions[top_emotion]
+        else:
+            top_emotion = normalize_emotion_label(max(results, key=lambda x: x["score"])["label"])
+            top_score = float(max(results, key=lambda x: x["score"])["score"])
+        
         return EmotionResult(
             emotions=emotions,
-            top_emotion=normalize_emotion_label(top["label"]),
-            top_score=float(top["score"]),
-            confidence=float(top["score"]),
+            top_emotion=top_emotion,
+            top_score=top_score,
+            confidence=top_score,
             source="text_es"
         )
     except OSError as e:
@@ -1163,13 +1286,21 @@ class TemporalEmotionAnalyzer:
         )
     
     def _apply_sensitivity_adjustments(self, emotions: Dict[str, float]) -> Dict[str, float]:
-        """Aplica ajustes de sensibilidad para suprimir neutral."""
+        """Aplica ajustes de sensibilidad (BALANCEADO - permite neutral genuino)."""
         adjusted = {}
         for emo, score in emotions.items():
-            if emo.lower() in ["neutral", "other", "others"]:
-                adjusted[emo] = score * 0.15
+            emo_lower = emo.lower()
+            if emo_lower in ["neutral", "other", "others"]:
+                # Menos supresión de neutral (subido de 0.15)
+                adjusted[emo] = score * NEUTRAL_SUPPRESSION_FACTOR
+            elif emo_lower in ["triste", "sad", "sadness", "tristeza"]:
+                # Boost específico para tristeza
+                adjusted[emo] = score * ACTIVE_EMOTION_BOOST * SAD_BOOST_FACTOR
+            elif emo_lower in ["feliz", "happy", "joy", "happiness"]:
+                # PENALIZACIÓN para feliz (evitar falsos positivos)
+                adjusted[emo] = score * HAPPY_SUPPRESSION_FACTOR
             else:
-                adjusted[emo] = score * 1.8
+                adjusted[emo] = score * ACTIVE_EMOTION_BOOST
         return adjusted
     
     def reset(self):

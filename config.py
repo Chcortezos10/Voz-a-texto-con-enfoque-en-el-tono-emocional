@@ -15,20 +15,21 @@ DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
 # Configuración de audio
-TARGET_SR = 16000  # Sample rate objetivo en Hz
+TARGET_SR = 16000
 
-# Configuracion de VAD (Voice Activity Detection)
-VAD_MODE = 2  # 0-3 (0 menos agresivo, 3 mas agresivo)
-VAD_FRAME_MS = 30  # Frame size en ms (10, 20, 30)
+VAD_MODE = 0
+VAD_FRAME_MS = 30
 
-# Configuracion de embeddings y diarizacion
-WINDOW_SEC = 2.5  # Ventana para embeddings (segundos) - Reducido para mejor resolución
-HOP_SEC = 0.75  # Salto entre ventanas (segundos)
-CHANGE_SIM_THRESHOLD = 0.015  # Similitud coseno minima para considerar "misma voz"
-MIN_SEG_SEC = 0.10  # Ignorar segmentos muy cortos (segundos)
+WINDOW_SEC = 1.5
+WINDOW_OVERLAP = 0.5
+HOP_SEC = 0.5
+CHANGE_SIM_THRESHOLD = 0.012
+MIN_SEG_SEC = 0.08
+VOICE_RATIO_THRESHOLD = 0.10
+DIARIZATION_SMOOTH_WINDOW = 3
+DIARIZATION_MIN_SEGMENT = 2
 
-# Configuracion de API FastAPI
-MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 50 * 1024 * 1024))  # 50 MB default
+MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 50 * 1024 * 1024))
 ALLOWED_MIME: Set[str] = {
     "audio/wav",
     "audio/x-wav",
@@ -73,7 +74,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 # Constantes para conversion de audio
 PCM16_MAX = 32767  # Valor maximo para audio PCM de 16 bits
 VOSK_CHUNK_FRAMES = 4000  # Numero de frames por iteracion en Vosk
-VAD_MERGE_GAP_SEC = 0.2  # Gap máximo para fusionar regiones VAD (segundos)
+VAD_MERGE_GAP_SEC = 0.5
 
 # Límites de seguridad
 MAX_AUDIO_DURATION_SEC = int(os.getenv("MAX_AUDIO_DURATION", 600))  # 10 minutos por defecto
@@ -140,10 +141,16 @@ TEMPORAL_SMOOTHING_ENABLED = True
 TEMPORAL_SMOOTHING_WINDOW = 5 #ventana de segmentos
 TEMPORAL_SMOOTHING_ALPHA = 0.5 #peso del segmento actual vs el historico
 
-#supresion nutral (mas agresiva)
-NEUTRAL_SUPPRESSION_FACTOR = 0.5 #REDUCIR NEUTRAL SEVERAMENTE
-ACTIVE_EMOTION_BOOST= 1.2 #POTENCIAR EMOCIONES ACTIVAS
-MIN_EMOTION_TO_PROMOTE = 0.15 #MINIMO PARA PROMOVER SOBRE NEUTRAL
+#supresion neutral (AJUSTADA - mucho menos agresiva para periodistas)
+NEUTRAL_SUPPRESSION_FACTOR = 0.85
+ACTIVE_EMOTION_BOOST = 1.3  # Aumentado para potenciar emociones activas
+MIN_EMOTION_TO_PROMOTE = 0.20  # Reducido para detectar emociones más sutiles
+
+#BOOST PARA TRISTEZA (MUY POTENCIADO para corregir confusión con feliz)
+SAD_BOOST_FACTOR = 2.0
+
+#PENALIZACION PARA FELIZ (BALANCEADA - corrección contextual maneja falsos positivos)
+HAPPY_SUPPRESSION_FACTOR = 0.65
 
 #CIRCUIT BREAKERS
 CB_FAILURE_THRESHOLD = 5 #UMBRAL DE FALLA
@@ -154,11 +161,10 @@ AUDIO_MIN_DURATION_SEC = 0.5
 AUDIO_MAX_FILE_SIZE_MB = 100
 AUDIO_MIN_RMS_THRESHOLD = 0.001 #detecta el silencio
 
-# 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
-# Usuario requiere prácticamente eliminar neutral/other de los resultados
-EMOTION_BOOST_FACTOR = 1.15  # Potenciar emociones FUERTEMENTE 
-EMOTION_NEUTRAL_DAMP = 0.6  # Castigar neutral SEVERAMENTE
-EMOTION_CONFIDENCE_THRESHOLD = 0.25  # Umbral de minimo de confianza
+# 2. Ajuste de Sensibilidad (OPTIMIZADO para periodistas/tono profesional)
+EMOTION_BOOST_FACTOR = 1.0
+EMOTION_NEUTRAL_DAMP = 0.9
+EMOTION_CONFIDENCE_THRESHOLD = 0.30
 
 # Modo de bajo consumo de memoria (desactiva modelos secundarios)
 LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "true").lower() == "true"
