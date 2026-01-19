@@ -6,15 +6,18 @@ Sistema avanzado de transcripción y análisis emocional de audio con interfaz v
 
 ## ✨ Características Principales
 
-| Característica               | Descripción                                          |
-| ---------------------------- | ---------------------------------------------------- |
-| 🎤 **Transcripción**         | OpenAI Whisper en español con soporte GPU            |
-| 😊 **Análisis Emocional**    | 4 categorías: Feliz, Enojado, Triste, Neutral        |
-| 🔀 **Análisis Multi-Modal**  | Combina análisis de texto y tono de voz              |
-| 📊 **Dashboard Interactivo** | Métricas, gráficos Timeline y momentos destacados    |
-| 🐳 **Docker Ready**          | Despliegue containerizado con soporte GPU NVIDIA     |
-| 🛡️ **Resiliencia**           | Circuit Breaker, Retry Logic y Graceful Degradation  |
-| ✅ **Validación**            | Validación completa de audio, segmentos y parámetros |
+| Característica               | Descripción                                            |
+| ---------------------------- | ------------------------------------------------------ |
+| 🎤 **Transcripción**         | OpenAI Whisper local + Cloud (OpenAI, Groq) en español |
+| 😊 **Análisis Emocional**    | 4 categorías: Feliz, Enojado, Triste, Neutral          |
+| 🔀 **Análisis Multi-Modal**  | Combina análisis de texto y tono de voz                |
+| 👥 **Diarización**           | Identificación automática de múltiples hablantes       |
+| 📊 **Dashboard Interactivo** | Métricas, gráficos Timeline y momentos destacados      |
+| 📁 **Historial**             | Almacenamiento persistente de análisis anteriores      |
+| 📤 **Exportación**           | JSON, CSV, SRT, VTT, TXT                               |
+| 🐳 **Docker Ready**          | Despliegue containerizado con soporte GPU NVIDIA       |
+| 🛡️ **Resiliencia**           | Circuit Breaker, Retry Logic y Graceful Degradation    |
+| ✅ **Validación**            | Validación completa de audio, segmentos y parámetros   |
 
 ---
 
@@ -74,6 +77,8 @@ El dashboard HTML5 incluye:
 | **Gráfico Distribución** | Pie chart con % de cada emoción                   |
 | **Momentos Destacados**  | Top 3 picos emocionales con texto exacto          |
 | **Métricas**             | Emoción dominante, intensidad, cambios de emoción |
+| **Historial**            | Acceso a análisis anteriores con búsqueda         |
+| **Exportación**          | Descarga en múltiples formatos                    |
 
 ---
 
@@ -84,9 +89,17 @@ El dashboard HTML5 incluye:
 │   ├── emotion_analysis.py        # Análisis emocional multi-modal
 │   ├── translation.py             # Traducción ES→EN (Helsinki-NLP)
 │   ├── audio_processing.py        # Procesamiento de audio
-│   ├── transcription.py           # Transcripción con Whisper
+│   ├── transcription.py           # Transcripción local con Whisper
+│   ├── transcription_cloud.py     # Transcripción cloud (OpenAI, Groq)
 │   ├── diarization.py             # Diarización de hablantes
+│   ├── model_manager.py           # Gestión centralizada de modelos
+│   ├── export_manager.py          # Exportación a múltiples formatos
 │   └── models.py                  # Carga de modelos Whisper
+│
+├── routes/                        # Rutas API modulares
+│   ├── history_routes.py          # Historial de análisis
+│   ├── export_routes.py           # Exportación de datos
+│   └── additional_routes.py       # Transcripción cloud y sesiones
 │
 ├── app_fastapi.py                 # API REST unificada (puerto 8000)
 ├── config.py                      # Configuración y mapeo de emociones
@@ -101,40 +114,77 @@ El dashboard HTML5 incluye:
 ├── docker-compose.yml             # Orquestación de contenedores
 ├── requirements.txt               # Dependencias Python
 │
-├── model/                         # Modelos descargados
-├── data/                          # Archivos de datos
-└── output/                        # Archivos de salida
+├── data/                          # Archivos de datos e historial
+├── history/                       # Almacenamiento de historial
+├── output/                        # Archivos de salida
+└── pruebas/                       # Archivos de prueba
 ```
 
 ---
 
 ## 🔌 API Endpoints
 
-### Análisis Completo
+### Transcripción y Análisis
 
-```bash
-POST /transcribe/full-analysis
+| Método | Endpoint                    | Descripción                            |
+| ------ | --------------------------- | -------------------------------------- |
+| POST   | `/transcribe/full-analysis` | Análisis completo con emociones        |
+| POST   | `/transcribe/with-provider` | Transcripción con proveedor específico |
+| GET    | `/providers`                | Lista proveedores disponibles          |
+| POST   | `/api-key`                  | Configura clave API para cloud         |
+| POST   | `/validate-api-key`         | Valida clave API                       |
+| GET    | `/estimate-cost`            | Estima costo de transcripción cloud    |
 
-# Parámetros:
-# - file: archivo de audio (mp3, wav, m4a)
-# - lite_mode: true/false (solo texto si true)
-# - audio_weight: 0.0-1.0 (peso del análisis de tono)
-```
+### Historial
 
-**Ejemplo:**
+| Método | Endpoint             | Descripción                       |
+| ------ | -------------------- | --------------------------------- |
+| GET    | `/history`           | Obtiene lista de análisis previos |
+| GET    | `/history/{item_id}` | Obtiene un análisis específico    |
+| POST   | `/history/save`      | Guarda nuevo análisis             |
+| DELETE | `/history/{item_id}` | Elimina un análisis               |
+| DELETE | `/history/clear`     | Limpia todo el historial          |
+
+### Exportación
+
+| Método | Endpoint          | Descripción                 |
+| ------ | ----------------- | --------------------------- |
+| POST   | `/export/json`    | Exporta a JSON              |
+| POST   | `/export/csv`     | Exporta a CSV               |
+| POST   | `/export/srt`     | Exporta subtítulos SRT      |
+| POST   | `/export/vtt`     | Exporta subtítulos VTT      |
+| POST   | `/export/txt`     | Exporta transcripción TXT   |
+| POST   | `/export/summary` | Genera resumen del análisis |
+
+### Sesiones
+
+| Método | Endpoint                | Descripción                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/session/store`        | Almacena nueva sesión      |
+| GET    | `/session/{session_id}` | Obtiene sesión por ID      |
+| PUT    | `/session/{session_id}` | Actualiza sesión existente |
+| DELETE | `/session/{session_id}` | Elimina sesión             |
+| GET    | `/sessions`             | Lista todas las sesiones   |
+| PUT    | `/segment/update`       | Actualiza segmento         |
+| POST   | `/speakers/merge`       | Fusiona hablantes          |
+
+### Sistema
+
+| Método | Endpoint             | Descripción                      |
+| ------ | -------------------- | -------------------------------- |
+| GET    | `/health`            | Estado básico del servidor       |
+| GET    | `/health/detailed`   | Estado detallado con métricas    |
+| POST   | `/admin/cleanup`     | Limpieza manual de memoria       |
+| GET    | `/admin/model-stats` | Estadísticas de modelos cargados |
+
+### Ejemplo de uso
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/transcribe/full-analysis" \
   -F "file=@audio.mp3" \
   -F "audio_weight=0.4" \
-  -F "lite_mode=false"
-```
-
-### Health Check
-
-```bash
-GET /health           # Estado básico
-GET /health/detailed  # Estado detallado con métricas
+  -F "lite_mode=false" \
+  -F "enable_diarization=true"
 ```
 
 ---
@@ -206,12 +256,23 @@ El proyecto incluye soporte completo para Docker con:
 
 ## 📋 Modelos Utilizados
 
-| Modelo                                        | Propósito                         |
-| --------------------------------------------- | --------------------------------- |
-| OpenAI Whisper (small)                        | Transcripción de audio en español |
-| Helsinki-NLP/opus-mt-es-en                    | Traducción español → inglés       |
-| daveni/twitter-xlm-roberta-emotion-es         | Análisis emocional en español     |
-| j-hartmann/emotion-english-distilroberta-base | Análisis emocional en inglés      |
+| Modelo                                        | Propósito                          |
+| --------------------------------------------- | ---------------------------------- |
+| OpenAI Whisper (small)                        | Transcripción de audio en español  |
+| Helsinki-NLP/opus-mt-es-en                    | Traducción español → inglés        |
+| daveni/twitter-xlm-roberta-emotion-es         | Análisis emocional en español      |
+| j-hartmann/emotion-english-distilroberta-base | Análisis emocional en inglés       |
+| Resemblyzer VoiceEncoder                      | Embeddings de voz para diarización |
+
+---
+
+## 🔊 Proveedores de Transcripción
+
+| Proveedor  | Descripción                           | Requiere API Key |
+| ---------- | ------------------------------------- | ---------------- |
+| **local**  | Whisper local (gratuito, usa GPU/CPU) | No               |
+| **openai** | OpenAI Whisper API (cloud)            | Sí               |
+| **groq**   | Groq API (cloud, rápido)              | Sí               |
 
 ---
 
@@ -220,6 +281,8 @@ El proyecto incluye soporte completo para Docker con:
 1. **Primera ejecución**: Descarga ~1-2GB de modelos automáticamente
 2. **Audio mínimo**: 2-3 segundos para análisis correcto
 3. **GPU**: Detecta CUDA automáticamente para acelerar procesamiento
+4. **Historial**: Se almacena en `data/analysis_history.json` (máximo 100 entradas)
+5. **CORS**: Configurado para desarrollo local, ajustar para producción
 
 ---
 
