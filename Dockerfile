@@ -3,9 +3,9 @@
 # Versión: 5.0.0 (Optimizada con gestión de memoria)
 # =====================================================
 
-# Base image con soporte CUDA para GPU (RTX 4060 compatible)
-# Usar python:3.11-slim si no necesitas GPU
-FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+# Base image ligera para CPU (compatible con AMD Ryzen, Intel, etc.)
+# Para GPU NVIDIA, usar: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+FROM python:3.11-slim
 
 # Metadatos
 LABEL maintainer="Christian"
@@ -15,13 +15,12 @@ LABEL version="5.0.0"
 # Evitar prompts interactivos durante instalación
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Variables de entorno del proyecto
+# Variables de entorno del proyecto (optimizado para CPU)
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    # Optimizaciones de memoria
-    PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512 \
+    # Optimizaciones para CPU
     OMP_NUM_THREADS=4 \
     # Configuración del servidor
     HOST=0.0.0.0 \

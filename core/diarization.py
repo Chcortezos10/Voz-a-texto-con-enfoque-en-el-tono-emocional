@@ -7,7 +7,7 @@ import numpy as np
 from resemblyzer import VoiceEncoder
 from sklearn.preprocessing import normalize
 
-from config import WINDOW_SEC, CHANGE_SIM_THRESHOLD, MIN_SEG_SEC
+from config import WINDOW_SEC, CHANGE_SIM_THRESHOLD, MIN_SEG_SEC, VOICE_RATIO_THRESHOLD, DIARIZATION_SMOOTH_WINDOW, DIARIZATION_MIN_SEGMENT
 import logging
 import webrtcvad
 
@@ -20,7 +20,7 @@ def compute_embeddings_with_vad(
     windows: List[Tuple[float, float]],
     encoder: VoiceEncoder,
     window_sec: float = WINDOW_SEC,
-    vad_aggressiveness: int = 2  # 0-3 (3 más agresivo)
+    vad_aggressiveness: int = 2
 ) -> Tuple[np.ndarray, List[float]]:
     """
     Version mejorada con WebRTC VAD para mejor deteccion de voz
@@ -57,9 +57,8 @@ def compute_embeddings_with_vad(
                 except:
                     pass
         
-        # Requerir al menos 50% de frames con voz
         voice_ratio = voiced_frames / max(1, num_frames)
-        if voice_ratio < 0.5:
+        if voice_ratio < VOICE_RATIO_THRESHOLD:
             continue
         
         # Calcular embedding
@@ -106,7 +105,7 @@ def cluster_speakers(
     if N < 2:
         logger.debug(f"[DBG] N < 2, retornando todos 0")
         labels = np.zeros(N, dtype=int)
-        labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+        labels = smooth_speaker_labels(labels, window_size=DIARIZATION_SMOOTH_WINDOW, min_segment_length=DIARIZATION_MIN_SEGMENT)
         return labels
         
     try:
@@ -120,7 +119,7 @@ def cluster_speakers(
                 linkage='average'
             )
             labels = clustering.fit_predict(embeddings)
-            labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+            labels = smooth_speaker_labels(labels, window_size=DIARIZATION_SMOOTH_WINDOW, min_segment_length=DIARIZATION_MIN_SEGMENT)
             return labels
             
         # Modo Auto: Iterar K y buscar mejor Silhouette Score
@@ -132,7 +131,7 @@ def cluster_speakers(
         search_max = min(max_speakers, N)
         if search_max < 2:
              labels = np.zeros(N, dtype=int)
-             labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+             labels = smooth_speaker_labels(labels, window_size=DIARIZATION_SMOOTH_WINDOW, min_segment_length=DIARIZATION_MIN_SEGMENT)
              return labels
 
         # Probamos K desde min_speakers (o 2) hasta search_max
@@ -163,7 +162,7 @@ def cluster_speakers(
                 best_labels = labels
         
         # Umbral mínimo de calidad para aceptar múltiples hablantes1
-        MIN_SCORE_THRESHOLD = 0.05 
+        MIN_SCORE_THRESHOLD = 0.02
         
         if best_score > MIN_SCORE_THRESHOLD:
             logger.info(f"✔ Auto-clustering seleccionado: {best_k} hablantes (Score: {best_score:.4f})")
@@ -178,14 +177,14 @@ def cluster_speakers(
                  return best_labels
             
             labels = np.zeros(N, dtype=int)
-            labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+            labels = smooth_speaker_labels(labels, window_size=DIARIZATION_SMOOTH_WINDOW, min_segment_length=DIARIZATION_MIN_SEGMENT)
             return labels
 
     except Exception as e:
         logger.error(f"Error en clustering: {e}. Fallback a todos 0.", exc_info=True)
         # import traceback; traceback.print_exc() -> handled by exc_info=True
         labels = np.zeros(N, dtype=int)
-        labels = smooth_speaker_labels(labels, window_size=5, min_segment_length=3)
+        labels = smooth_speaker_labels(labels, window_size=DIARIZATION_SMOOTH_WINDOW, min_segment_length=DIARIZATION_MIN_SEGMENT)
         return labels
 
 

@@ -13,7 +13,7 @@ import soundfile as sf
 from scipy.signal import resample_poly
 import webrtcvad
 
-from config import TARGET_SR, VAD_MODE, VAD_FRAME_MS, WINDOW_SEC, HOP_SEC, VAD_MERGE_GAP_SEC, PCM16_MAX
+from config import TARGET_SR, VAD_MODE, VAD_FRAME_MS, WINDOW_SEC, HOP_SEC, VAD_MERGE_GAP_SEC, PCM16_MAX, WINDOW_OVERLAP
 
 
 def load_audio(
@@ -215,6 +215,97 @@ def get_voiced_regions(
             else:
                 merged.append([s, e])
 
+    return [(float(s), float(e)) for s, e in merged]
+
+
+def get_voiced_regions_energy(
+    audio: np.ndarray,
+    sr: int,
+    energy_threshold: float = 0.02,
+    frame_ms: int = 30,
+    min_duration_ms: int = 100
+) -> List[Tuple[float, float]]:
+    frame_samples = int(sr * frame_ms / 1000)
+    num_frames = len(audio) // frame_samples
+    
+    energies = []
+    for i in range(num_frames):
+        start = i * frame_samples
+        end = start + frame_samples
+        frame = audio[start:end]
+        rms = np.sqrt(np.mean(frame ** 2))
+        energies.append(rms)
+    
+    if not energies:
+        return []
+    
+    adaptive_threshold = max(energy_threshold, np.mean(energies) * 0.3)
+    
+    voiced_flags = [e > adaptive_threshold for e in energies]
+    
+    regions = []
+    cur_state = voiced_flags[0] if voiced_flags else False
+    cur_start = 0.0
+    
+    for i, flag in enumerate(voiced_flags):
+        t = i * (frame_ms / 1000.0)
+        if flag != cur_state:
+            if cur_state:
+                regions.append((cur_start, t))
+            cur_state = flag
+            cur_start = t
+    
+    end_t = num_frames * (frame_ms / 1000.0)
+    if cur_state:
+        regions.append((cur_start, end_t))
+    
+    min_duration_sec = min_duration_ms / 1000.0
+    regions = [(s, e) for s, e in regions if (e - s) >= min_duration_sec]
+    
+    merged = []
+    for s, e in regions:
+        if not merged:
+            merged.append([s, e])
+        else:
+            prev_s, prev_e = merged[-1]
+            if s - prev_e <= VAD_MERGE_GAP_SEC:
+                merged[-1][1] = e
+            else:
+                merged.append([s, e])
+    
+    return [(float(s), float(e)) for s, e in merged]
+
+
+def get_voiced_regions_hybrid(
+    audio: np.ndarray,
+    sr: int,
+    vad_mode: int = VAD_MODE,
+    frame_ms: int = VAD_FRAME_MS
+) -> List[Tuple[float, float]]:
+    try:
+        webrtc_regions = get_voiced_regions(audio, sr, vad_mode, frame_ms)
+    except Exception:
+        webrtc_regions = []
+    
+    energy_regions = get_voiced_regions_energy(audio, sr)
+    
+    all_regions = webrtc_regions + energy_regions
+    all_regions.sort(key=lambda x: x[0])
+    
+    if not all_regions:
+        return []
+    
+    merged = []
+    for s, e in all_regions:
+        if not merged:
+            merged.append([s, e])
+        else:
+            prev_s, prev_e = merged[-1]
+            if s <= prev_e + VAD_MERGE_GAP_SEC:
+                merged[-1][1] = max(prev_e, e)
+            else:
+                merged.append([s, e])
+    
     return [(float(s), float(e)) for s, e in merged]
 
 

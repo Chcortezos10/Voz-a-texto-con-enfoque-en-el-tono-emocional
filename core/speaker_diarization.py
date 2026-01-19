@@ -118,7 +118,7 @@ class SpeakerDiarizer:
             best_labels = None
             best_score = -1
             
-            for n in range(2, min(self.max_speakers + 1, len(embeddings))):
+            for n in range(1, min(self.max_speakers + 1, len(embeddings))):
                 try:
                     clustering = AgglomerativeClustering(
                         n_clusters=n,
@@ -139,7 +139,7 @@ class SpeakerDiarizer:
             if best_labels is not None:
                 return best_labels
             
-            n_clusters = 2
+            n_clusters = 1
         
         clustering = AgglomerativeClustering(
             n_clusters=n_clusters,
