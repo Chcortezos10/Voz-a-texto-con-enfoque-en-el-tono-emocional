@@ -20,14 +20,14 @@ TARGET_SR = 16000
 VAD_MODE = 0
 VAD_FRAME_MS = 30
 
-WINDOW_SEC = 1.5
+WINDOW_SEC = 0.9
 WINDOW_OVERLAP = 0.5
-HOP_SEC = 0.5
-CHANGE_SIM_THRESHOLD = 0.012
-MIN_SEG_SEC = 0.08
-VOICE_RATIO_THRESHOLD = 0.10
-DIARIZATION_SMOOTH_WINDOW = 3
-DIARIZATION_MIN_SEGMENT = 2
+HOP_SEC = 0.25
+CHANGE_SIM_THRESHOLD = 0.03
+MIN_SEG_SEC = 0.4
+VOICE_RATIO_THRESHOLD = 0.05
+DIARIZATION_SMOOTH_WINDOW = 1
+DIARIZATION_MIN_SEGMENT = 1
 
 MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 50 * 1024 * 1024))
 ALLOWED_MIME: Set[str] = {
@@ -54,10 +54,28 @@ CORS_ORIGINS = [
     "null",  # Para archivos locales (file://)
 ]
 
-# Configuracion de modelos
-# Usar modelo 'medium' por defecto para mejor precisión con RTX 4050 (6GB VRAM)
-# Opciones: tiny (~1GB), base (~1GB), small (~2GB), medium (~5GB), large-v3 (~10GB)
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "medium")  # RTX 4050 puede correr medium cómodamente
+# Configuracion de modelos - Detección automática de GPU
+def _get_default_whisper_model() -> str:
+    """Selecciona modelo Whisper automáticamente según hardware disponible."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+            if vram_gb >= 10:
+                return "large-v3"  # 10GB+ VRAM → large
+            elif vram_gb >= 5:
+                return "medium"   # 5-10GB VRAM → medium
+            elif vram_gb >= 2:
+                return "small"    # 2-5GB VRAM → small
+            else:
+                return "base"     # <2GB VRAM → base
+        else:
+            return "small"  # Sin GPU → small (bajo RAM)
+    except Exception:
+        return "small"  # Error → conservative default
+
+# WHISPER_MODEL: env var tiene prioridad, sino detección automática
+WHISPER_MODEL = os.getenv("WHISPER_MODEL") or _get_default_whisper_model()
 
 # Modelos de HuggingFace para analisis emocional
 TEXT_EMOTION_MODEL = "j-hartmann/emotion-english-distilroberta-base"  # Inglés (7 emociones)

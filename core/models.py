@@ -69,7 +69,7 @@ def get_recommended_model_for_vram() -> str:
     if vram_gb >= 10:
         return "large-v3"  # 10GB+ → large
     elif vram_gb >= 5:
-        return "medium"    # 5-10GB → medium (ideal para RTX 4050)
+        return "medium"    # 5-10GB → medium (ideal para RTX)
     elif vram_gb >= 2:
         return "small"     # 2-5GB → small
     else:

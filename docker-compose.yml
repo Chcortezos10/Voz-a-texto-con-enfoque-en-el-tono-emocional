@@ -18,24 +18,19 @@ services:
     container_name: transcriptor-emocional-v5
     image: transcriptor-emocional:5.0.0
 
-    # Habilitar GPU NVIDIA (comentar si no tienes GPU)
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # Configuración para CPU (sin GPU NVIDIA)
+    # Si tienes GPU NVIDIA, descomenta la sección deploy
 
     ports:
       - "8000:8000"
 
     environment:
       - PYTHONUNBUFFERED=1
-      - CUDA_VISIBLE_DEVICES=0
-      # Optimizaciones de memoria para PyTorch
-      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-      - OMP_NUM_THREADS=4
+      # Optimizaciones para CPU
+      - OMP_NUM_THREADS=4  # Ajustado para 4 núcleos de CPU (Ryzen 5)
+      # Modelo Whisper se detecta automáticamente según GPU disponible
+      # Para forzar un modelo específico, descomenta la siguiente línea:
+      # - WHISPER_MODEL=small  # Opciones: base, small, medium, large-v3
       # Variables de la aplicación
       - LOG_LEVEL=INFO
 

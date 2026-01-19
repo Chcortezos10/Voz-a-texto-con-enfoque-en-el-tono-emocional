@@ -20,7 +20,7 @@ def compute_embeddings_with_vad(
     windows: List[Tuple[float, float]],
     encoder: VoiceEncoder,
     window_sec: float = WINDOW_SEC,
-    vad_aggressiveness: int = 0
+    vad_aggressiveness: int = 2
 ) -> Tuple[np.ndarray, List[float]]:
     """
     Version mejorada con WebRTC VAD para mejor deteccion de voz
@@ -162,7 +162,7 @@ def cluster_speakers(
                 best_labels = labels
         
         # Umbral mínimo de calidad para aceptar múltiples hablantes1
-        MIN_SCORE_THRESHOLD = 0.05 
+        MIN_SCORE_THRESHOLD = 0.02
         
         if best_score > MIN_SCORE_THRESHOLD:
             logger.info(f"✔ Auto-clustering seleccionado: {best_k} hablantes (Score: {best_score:.4f})")
