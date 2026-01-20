@@ -1432,7 +1432,9 @@
         // CONFIGURACIÓN
         // ============================================
         const CONFIG = {
-            API_URL: "http://127.0.0.1:8000",
+            API_URL: window.location.origin === "file://" || window.location.origin === "" 
+                ? "http://localhost:8000"  // Si se abre como archivo local
+                : window.location.origin,   // Si se sirve desde el servidor
             ENDPOINTS: {
                 HEALTH: '/health',
                 TRANSCRIBE_LOCAL: '/transcribe/full-analysis',
@@ -1454,7 +1456,8 @@
                 'triste': '#3b82f6',
                 'neutral': '#a78bfa'
             }
-        };
+};
+
 
         // ============================================
         // VARIABLES GLOBALES
