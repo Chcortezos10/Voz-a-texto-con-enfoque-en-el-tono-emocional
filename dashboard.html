@@ -1432,9 +1432,23 @@
         // CONFIGURACIÓN
         // ============================================
         const CONFIG = {
-            API_URL: window.location.origin === "file://" || window.location.origin === "" 
-                ? "http://localhost:8000"  // Si se abre como archivo local
-                : window.location.origin,   // Si se sirve desde el servidor
+            API_URL: (() => {
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+        
+                // Si se abre como archivo local (file://)
+                if (protocol === "file:") {
+                    return "http://localhost:8000";
+                }
+        
+                // Si el hostname es 0.0.0.0 o está vacío, usar localhost
+                if (hostname === "0.0.0.0" || hostname === "") {
+                    return "http://localhost:8000";
+                }
+        
+                // En producción o Docker, usar el origin actual
+                return window.location.origin;
+            })(),
             ENDPOINTS: {
                 HEALTH: '/health',
                 TRANSCRIBE_LOCAL: '/transcribe/full-analysis',
@@ -1456,7 +1470,7 @@
                 'triste': '#3b82f6',
                 'neutral': '#a78bfa'
             }
-};
+        };
 
 
         // ============================================

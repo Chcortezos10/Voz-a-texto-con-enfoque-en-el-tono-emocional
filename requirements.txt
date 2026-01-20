@@ -10,7 +10,7 @@
 # Para CUDA 12.1+: usar cu121
 # Para CUDA 11.8: cambiar a cu118
 # Para CPU-only: eliminar --extra-index-url y usar solo torch
---extra-index-url https://download.pytorch.org/whl/cu121
+#--extra-index-url https://download.pytorch.org/whl/cu121
 torch>=2.3.0,<2.6.0
 torchaudio>=2.3.0,<2.6.0
 
