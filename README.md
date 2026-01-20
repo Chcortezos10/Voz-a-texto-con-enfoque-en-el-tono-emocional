@@ -51,6 +51,7 @@ pip install -r requirements.txt
 
 ```bash
 # 1. Construir e iniciar el contenedor
+# 1. Construir e iniciar el contenedor
 docker-compose up --build
 
 # 2. Espera a ver el mensaje: "SISTEMA LISTO: http://127.0.0.1:8000"
@@ -62,8 +63,13 @@ http://localhost:8000
 docker-compose up -d
 
 # Ver logs en tiempo real
+# Ver logs en tiempo real
 docker-compose logs -f
 
+# Reiniciar el contenedor
+docker-compose restart
+
+# Detener el contenedor
 # Reiniciar el contenedor
 docker-compose restart
 
