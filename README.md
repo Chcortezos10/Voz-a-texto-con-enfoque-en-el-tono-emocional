@@ -42,25 +42,50 @@ Esto iniciará el API y abrirá el dashboard automáticamente.
 pip install -r requirements.txt
 
 # 3. Iniciar servidor
-uvicorn app_fastapi:app --host 127.0.0.1 --port 8000
+uvicorn app_fastapi:app --reload --host 0.0.0.0 --port 8000
+
+# 4. Abrir dashboard en navegador:
+# http://localhost:8000
 ```
 
-Luego abre `dashboard.html` en tu navegador.
+---
 
-### Opción 3: Docker
+### Opción 3: Docker (Recomendado para Producción)
+
+**Requisitos previos:**
+
+- Docker Desktop instalado y corriendo
+- Puerto 8000 disponible
+
+#### 🚀 Inicio Rápido
 
 ```bash
-# Construir e iniciar
+# 1. Construir e iniciar el contenedor
 docker-compose up --build
 
-# Iniciar en segundo plano
+# 2. Espera a ver el mensaje: "SISTEMA LISTO: http://127.0.0.1:8000"
+
+# 3. Abre tu navegador en:
+# http://localhost:8000
+```
+
+#### 📋 Comandos Docker útiles
+
+```bash
+# Iniciar en segundo plano (detached)
 docker-compose up -d
 
-# Ver logs
+# Ver logs en tiempo real
 docker-compose logs -f
 
-# Detener
+# Reiniciar el contenedor
+docker-compose restart
+
+# Detener el contenedor
 docker-compose down
+
+# Detener y eliminar volúmenes (limpieza completa)
+docker-compose down -v
 ```
 
 ---
@@ -85,39 +110,39 @@ El dashboard HTML5 incluye:
 ## 📁 Estructura del Proyecto
 
 ```
-├── core/                          # Módulos principales
-│   ├── emotion_analysis.py        # Análisis emocional multi-modal
-│   ├── translation.py             # Traducción ES→EN (Helsinki-NLP)
-│   ├── audio_processing.py        # Procesamiento de audio
-│   ├── transcription.py           # Transcripción local con Whisper
-│   ├── transcription_cloud.py     # Transcripción cloud (OpenAI, Groq)
-│   ├── diarization.py             # Diarización de hablantes
-│   ├── model_manager.py           # Gestión centralizada de modelos
-│   ├── export_manager.py          # Exportación a múltiples formatos
-│   └── models.py                  # Carga de modelos Whisper
+├── core/                     # Módulos principales
+│   ├── emotion_analysis.py   # Análisis emocional multi-modal
+│   ├── translation.py        # Traducción ES→EN (Helsinki-NLP)
+│   ├── audio_processing.py   # Procesamiento de audio
+│   ├── transcription.py      # Transcripción local con Whisper
+│   ├── transcription_cloud.py# Transcripción cloud (OpenAI, Groq)
+│   ├── diarization.py        # Diarización de hablantes
+│   ├── model_manager.py      # Gestión centralizada de modelos
+│   ├── export_manager.py     # Exportación a múltiples formatos
+│   └── models.py             # Carga de modelos Whisper
 │
-├── routes/                        # Rutas API modulares
-│   ├── history_routes.py          # Historial de análisis
-│   ├── export_routes.py           # Exportación de datos
-│   └── additional_routes.py       # Transcripción cloud y sesiones
+├── routes/                   # Rutas API modulares
+│   ├── history_routes.py     # Historial de análisis
+│   ├── export_routes.py      # Exportación de datos
+│   └── additional_routes.py  # Transcripción cloud y sesiones
 │
-├── app_fastapi.py                 # API REST unificada (puerto 8000)
-├── config.py                      # Configuración y mapeo de emociones
-├── Validators.py                  # Validación de audio y parámetros
-├── Resilience.py                  # Circuit Breaker y Retry Logic
+├── app_fastapi.py            # API REST unificada (puerto 8000)
+├── config.py                 # Configuración y mapeo de emociones
+├── Validators.py             # Validación de audio y parámetros
+├── Resilience.py             # Circuit Breaker y Retry Logic
 │
-├── dashboard.html                 # Dashboard web interactivo
-├── run_system_v2.bat              # Script de inicio (Windows)
-├── run_system.sh                  # Script de inicio (Linux/Mac)
+├── dashboard.html            # Dashboard web interactivo
+├── run_system_v2.bat         # Script de inicio (Windows)
+├── run_system.sh             # Script de inicio (Linux/Mac)
 │
-├── Dockerfile                     # Configuración Docker
-├── docker-compose.yml             # Orquestación de contenedores
-├── requirements.txt               # Dependencias Python
+├── Dockerfile                # Configuración Docker
+├── docker-compose.yml        # Orquestación de contenedores
+├── requirements.txt          # Dependencias Python
 │
-├── data/                          # Archivos de datos e historial
-├── history/                       # Almacenamiento de historial
-├── output/                        # Archivos de salida
-└── pruebas/                       # Archivos de prueba
+├── data/                     # Archivos de datos e historial
+├── history/                  # Almacenamiento de historial
+├── output/                   # Archivos de salida
+└── pruebas/                  # Archivos de prueba
 ```
 
 ---

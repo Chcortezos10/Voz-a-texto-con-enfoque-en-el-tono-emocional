@@ -242,6 +242,28 @@
             gap: 0.5rem;
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
         .btn-primary {
             background: var(--primary);
             color: white;
@@ -1094,6 +1116,86 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
+
+        /* EMOTION EDITING */
+        .emotion-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .edit-emotion-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            padding: 4px;
+        }
+
+        .edit-emotion-btn:hover {
+            opacity: 1;
+        }
+
+        .emotion-picker {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            margin-top: 4px;
+        }
+
+        .emotion-picker button {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .emotion-picker button:hover {
+            background: #4a4a4a;
+            transform: scale(1.05);
+        }
+
+        .emotion-picker button:active {
+            transform: scale(0.95);
+        }
+
+        /* Toast animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1857,16 +1959,35 @@
             const box = document.getElementById('transcriptBox');
             if (!box) return;
             
-            box.innerHTML = segments.map((seg, idx) => `
-                <div class="transcript-segment" data-index="${idx}">
-                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
-                    <span style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
-                        (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
+            box.innerHTML = segments.map((seg, idx) => {
+                const segmentId = `segment_${idx}`;
+                const predictionId = seg.prediction_id || `local_${idx}`;
+                const emotion = seg.emotion || 'neutral';
+                const emotionEmoji = CONFIG.EMOTIONS[emotion] || '';
+                const emotionColor = CONFIG.EMOTION_COLORS[emotion] || '#a78bfa';
+                
+                return `
+                <div class="transcript-segment" data-index="${idx}" data-segment-id="${segmentId}" data-prediction-id="${predictionId}">
+                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong>
+                    <span class="emotion-container">
+                        <span class="emotion" id="emotion-${segmentId}" style="color: ${emotionColor}">
+                            ${emotionEmoji} ${emotion}
+                        </span>
+                        <button class="edit-emotion-btn" onclick="showEmotionPicker('${segmentId}', event)" title="Corregir emoción">
+                            ✏️
+                        </button>
+                        <div class="emotion-picker" id="picker-${segmentId}" style="display: none;">
+                            <button onclick="updateEmotion('${segmentId}', 'feliz', '${predictionId}', ${idx})">😊 feliz</button>
+                            <button onclick="updateEmotion('${segmentId}', 'triste', '${predictionId}', ${idx})">😢 triste</button>
+                            <button onclick="updateEmotion('${segmentId}', 'enojado', '${predictionId}', ${idx})">😠 enojado</button>
+                            <button onclick="updateEmotion('${segmentId}', 'neutral', '${predictionId}', ${idx})">😐 neutral</button>
+                        </div>
                     </span>
                     <br>
                     ${seg.text_es || seg.text}
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // ============================================
@@ -2140,6 +2261,89 @@
             });
         }
 
+
+        // Mostrar/ocultar el selector de emociones
+        function showEmotionPicker(segmentId) {
+       // Ocultar otros pickers abiertos
+            document.querySelectorAll('.emotion-picker').forEach(picker => {
+            picker.style.display = 'none';
+            });
+    
+    // Mostrar el picker de este segmento
+        const picker = document.getElementById(`picker-${segmentId}`);
+        picker.style.display = 'flex';
+    
+    // Cerrar al hacer click fuera
+        document.addEventListener('click', function closeOnClickOutside(e) {
+            if (!e.target.closest('.emotion-container')) {
+            picker.style.display = 'none';
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    });
+}
+
+// Actualizar la emocion (enviar feedback al backend)
+        async function updateEmotion(segmentId, newEmotion, predictionId, segmentIndex) {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/validate_prediction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prediction_id: predictionId,
+                        correct_label: newEmotion
+                    })
+                });
+        
+            if (response.ok) {
+            // Actualizar UI inmediatamente
+            const emotionElement = document.getElementById(`emotion-${segmentId}`);
+            const emojiMap = {
+                'feliz': '😊',
+                'triste': '😢',
+                'enojado': '😠',
+                'neutral': '😐'
+            };
+            
+            emotionElement.textContent = `${emojiMap[newEmotion]} ${newEmotion}`;
+            
+            // Ocultar picker
+            document.getElementById(`picker-${segmentId}`).style.display = 'none';
+            
+            // Mostrar confirmación sutil
+            showToast('✅ Emoción actualizada');
+        }
+    } catch (error) {
+        console.error('Error updating emotion:', error);
+        showToast('❌ Error al actualizar');
+    }
+}
+
+// Toast de confirmación (opcional)
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    
+            document.body.appendChild(toast);
+    
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+}
+
         // ============================================
         // ADVANCED CHARTS MODAL
         // ============================================
@@ -2256,6 +2460,88 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') hideAdvancedCharts();
         });
+
+        // ============================================
+        // EMOTION EDITING
+        // ============================================
+        function showEmotionPicker(segmentId, event) {
+            event.stopPropagation();
+            
+            // Hide all other pickers first
+            document.querySelectorAll('.emotion-picker').forEach(picker => {
+                picker.style.display = 'none';
+            });
+            
+            // Show this picker
+            const picker = document.getElementById(`picker-${segmentId}`);
+            if (picker) {
+                picker.style.display = 'flex';
+            }
+            
+            // Close when clicking outside
+            const closeOnClickOutside = (e) => {
+                if (!e.target.closest('.emotion-container')) {
+                    document.querySelectorAll('.emotion-picker').forEach(p => {
+                        p.style.display = 'none';
+                    });
+                    document.removeEventListener('click', closeOnClickOutside);
+                }
+            };
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeOnClickOutside);
+            }, 10);
+        }
+
+        async function updateEmotion(segmentId, newEmotion, predictionId, segmentIndex) {
+            try {
+                // Try to send feedback to backend (optional - may not exist)
+                try {
+                    const response = await fetch(`${CONFIG.API_URL}/validate_prediction`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prediction_id: predictionId,
+                            correct_label: newEmotion,
+                            segment_index: segmentIndex
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        console.log('Feedback endpoint not available, updating UI only');
+                    }
+                } catch (fetchError) {
+                    console.log('Feedback endpoint not available, updating UI only');
+                }
+                
+                // Update UI immediately
+                const emotionElement = document.getElementById(`emotion-${segmentId}`);
+                if (emotionElement) {
+                    const emoji = CONFIG.EMOTIONS[newEmotion] || '😐';
+                    const color = CONFIG.EMOTION_COLORS[newEmotion] || '#a78bfa';
+                    emotionElement.textContent = `${emoji} ${newEmotion}`;
+                    emotionElement.style.color = color;
+                }
+                
+                // Update currentResults if available
+                if (currentResults && currentResults.segments && currentResults.segments[segmentIndex]) {
+                    currentResults.segments[segmentIndex].emotion = newEmotion;
+                }
+                
+                // Hide picker
+                const picker = document.getElementById(`picker-${segmentId}`);
+                if (picker) {
+                    picker.style.display = 'none';
+                }
+                
+                // Show confirmation toast
+                toast.success('✅ Emoción actualizada');
+                
+            } catch (error) {
+                console.error('Error updating emotion:', error);
+                toast.error('❌ Error al actualizar');
+            }
+        }
     </script>
 </body>
 </html>

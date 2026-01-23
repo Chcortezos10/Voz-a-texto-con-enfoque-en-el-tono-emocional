@@ -54,43 +54,134 @@ from config import (
 # Diccionario de palabras clave para reforzar detección emocional en español
 # Estas palabras/frases sobrescriben la clasificación del modelo cuando hay confusión
 LEXICON_TRISTE = {
-    # Frases de malestar
-    "me pone mal", "pone mal", "me duele", "me afecta", "me entristece",
-    "qué pena", "que pena", "qué lástima", "que lastima", "qué tristeza",
-    "me da pena", "me da tristeza", "me da lástima",
-    # Palabras de disculpa/arrepentimiento
-    "perdón", "perdon", "perdona", "perdóname", "lo siento", "disculpa",
-    "lamentablemente", "desafortunadamente", "por desgracia",
-    # Palabras de sufrimiento
-    "pobres", "pobreza", "sufren", "sufriendo", "sufrimiento",
-    "dolor", "doloroso", "llorar", "lloro", "llorando", "lágrimas",
-    "triste", "tristeza", "deprimido", "angustia", "angustiado",
-    "desesperado", "desesperación", "soledad", "solo", "sola",
-    # Palabras de dificultad
-    "difícil", "dificil", "complicado", "terrible", "horrible",
-    "mal", "peor", "fatal", "desgracia", "tragedia",
-    # Negaciones emocionales
-    "no puedo", "no soporto", "no aguanto", "me cuesta",
+    # Palabras EXTREMAS (peso 0.5) - Eventos traumáticos
+    "muerte": 0.5, "muerto": 0.5, "murió": 0.5, "falleció": 0.5,
+    "suicidio": 0.5, "suicida": 0.5, "luto": 0.5, "duelo": 0.5,
+    "agonía": 0.5, "tragedia": 0.5, "fatal": 0.5,
+    
+    # Palabras FUERTES (peso 0.4) - Sufrimiento intenso
+    "llorar": 0.5, "lloro": 0.5, "llorando": 0.5,  # ← Aumentar peso
+    "lágrimas": 0.5, "lágrima": 0.5,  # ← Aumentar peso
+    "llora": 0.5, "lloran": 0.5, "lloraba": 0.5,
+    "llore": 0.45, "llores": 0.45,
+    "sollozar": 0.5, "sollozos": 0.5, "sollozo": 0.5,
+    "gimiendo": 0.45, "gimotear": 0.45, "lamento": 0.45,
+    "me pongo a llorar": 0.5, "me hace llorar": 0.5,
+    "estoy llorando": 0.5, "voy a llorar": 0.5,
+    "quiero llorar": 0.45, "ganas de llorar": 0.45,
+    "no puedo parar de llorar": 0.5,
+    
+    "pobreza": 0.4, "hambre": 0.4, "deuda": 0.4, "miseria": 0.4,
+    "dolor": 0.4, "doloroso": 0.4, "sufro": 0.4, "sufriendo": 0.4,
+    "desesperado": 0.4, "desesperación": 0.4, "angustia": 0.4,
+    "deprimido": 0.4, "depresión": 0.4, "devastado": 0.4,
+    
+    # Palabras MODERADAS (peso 0.3) - Malestar general
+    "triste": 0.3, "tristeza": 0.3, "pena": 0.3, "lástima": 0.3,
+    "me pone mal": 0.3, "pone mal": 0.3, "me duele": 0.3, 
+    "me afecta": 0.3, "me entristece": 0.3, "qué pena": 0.3,
+    "me da pena": 0.3, "me da tristeza": 0.3, "me da lástima": 0.3,
+    "perdón": 0.3, "lo siento": 0.3, "disculpa": 0.3, "perdona": 0.3,
+    "lamentablemente": 0.3, "desafortunadamente": 0.3, "por desgracia": 0.3,
+    "pobres": 0.3, "soledad": 0.3, "solo": 0.3, "sola": 0.3,
+    "melancolía": 0.3, "melancólico": 0.3, "nostálgico": 0.3,
+    
+    # Palabras LEVES (peso 0.2) - Dificultades
+    "difícil": 0.2, "complicado": 0.2, "terrible": 0.2, "horrible": 0.2,
+    "mal": 0.2, "peor": 0.2, "desgracia": 0.2,
+    "no puedo": 0.2, "no soporto": 0.2, "no aguanto": 0.2, "me cuesta": 0.2,
 }
 
 LEXICON_ENOJADO = {
-    "rabia", "ira", "furia", "furioso", "enojado", "molesto",
-    "indignado", "indignación", "injusto", "injusticia",
-    "odio", "detesto", "me irrita", "irritante", "harto", "harta",
-    "que asco", "qué asco", "asqueroso", "repugnante",
-    "maldito", "maldita", "maldición",
+    # Palabras EXTREMAS (peso 0.5) - Furia e indignación
+    "odio": 0.5, "detesto": 0.5, "asco": 0.5, "repugnante": 0.5,
+    "maldito": 0.5, "maldita": 0.5, "maldición": 0.5,
+    "furia": 0.5, "furioso": 0.5, "furiosa": 0.5,
+    "rabia": 0.5, "ira": 0.5, "iracundo": 0.5,
+    "me cago en": 0.5, "vete a la mierda": 0.5, "vete al carajo": 0.5,
+    "hijo de puta": 0.5, "hijos de puta": 0.5,
+    "mierda": 0.5, "carajo": 0.5, "joder": 0.5,
+    "puto": 0.5, "puta": 0.5, "puñeta": 0.5,
+    
+    # Palabras FUERTES (peso 0.4) - Enojo intenso
+    "enojado": 0.4, "enojada": 0.4, "enojo": 0.4,
+    "molesto": 0.4, "molesta": 0.4, "molestia": 0.4,
+    "indignado": 0.4, "indignada": 0.4, "indignación": 0.4,
+    "injusto": 0.4, "injusticia": 0.4, "injusta": 0.4,
+    "me irrita": 0.4, "irritante": 0.4, "irritado": 0.4,
+    "harto": 0.4, "harta": 0.4, "hartazgo": 0.4,
+    "cabrón": 0.4, "cabrona": 0.4, "cabrones": 0.4,
+    "estúpido": 0.4, "estúpida": 0.4, "idiota": 0.4,
+    "imbécil": 0.4, "pendejo": 0.4, "pendeja": 0.4,
+    "me revienta": 0.4, "me cansa": 0.4, "me saca": 0.4,
+    "no aguanto": 0.4, "no soporto": 0.4, "insoportable": 0.4,
+    
+    # Palabras MODERADAS (peso 0.3) - Molestia general
+    "qué asco": 0.3, "asqueroso": 0.3, "asquerosa": 0.3,
+    "corrupto": 0.3, "corrupción": 0.3, "corrupta": 0.3,
+    "ladrones": 0.3, "ladrón": 0.3, "roban": 0.3, "robo": 0.3,
+    "mentira": 0.3, "mentiroso": 0.3, "mentirosa": 0.3,
+    "engaño": 0.3, "trampa": 0.3, "tramposo": 0.3,
+    "pelea": 0.3, "gritos": 0.3, "gritando": 0.3, "grito": 0.3,
+    "discutir": 0.3, "discusión": 0.3, "peleando": 0.3,
+    "bronca": 0.3, "enemistad": 0.3, "rencor": 0.3,
+    "venganza": 0.3, "vengarme": 0.3, "vengativo": 0.3,
+    "hostil": 0.3, "hostilidad": 0.3, "agresivo": 0.3,
+    "violento": 0.3, "violencia": 0.3, "agredir": 0.3,
+    "abuso": 0.3, "abusivo": 0.3, "abusiva": 0.3,
+    "desprecio": 0.3, "despreciable": 0.3, "despreciar": 0.3,
+    "humillar": 0.3, "humillación": 0.3, "humillante": 0.3,
+    "frustrado": 0.3, "frustración": 0.3, "frustrante": 0.3,
+    "intolerante": 0.3, "intolerancia": 0.3,
+    
+    # Palabras LEVES (peso 0.2) - Molestia leve
+    "fastidioso": 0.2, "fastidio": 0.2, "fastidiado": 0.2,
+    "molestia": 0.2, "problema": 0.2, "problemático": 0.2,
+    "incómodo": 0.2, "incomodidad": 0.2, "desagradable": 0.2,
+    "disgusto": 0.2, "disgustado": 0.2, "disgustada": 0.2,
+    "enfadado": 0.2, "enfadada": 0.2, "enfado": 0.2,
+    "queja": 0.2, "quejar": 0.2, "quejoso": 0.2,
+    "crítica": 0.2, "criticar": 0.2, "crítico": 0.2,
+    "protesta": 0.2, "protestar": 0.2, "reclamar": 0.2,
 }
 
 LEXICON_FELIZ = {
-    "feliz", "felicidad", "alegría", "alegre", "contento", "contenta",
-    "genial", "maravilloso", "fantástico", "excelente", "increíble",
-    "me encanta", "qué bien", "qué bueno", "perfecto",
-    "amo", "adoro", "hermoso", "hermosa", "lindo", "linda",
-    "celebrar", "celebración", "fiesta", "éxito",
-    "jaja", "jajaja", "jajajaja", "jeje", "jejeje", "risa", "risas",
-    "riendo", "carcajada", "gracioso", "divertido", "divertida",
-    "me rio", "me reí", "qué risa", "que chistoso", "qué chistoso",
-    "buenísimo", "espectacular", "súper", "super", "wow", "guau",
+    # Palabras EXTREMAS (peso 0.5) - Euforia
+    "amo": 0.5, "adoro": 0.5, "me encanta": 0.5, "encantado": 0.5,
+    "increíble": 0.5, "espectacular": 0.5, "maravilloso": 0.5,
+    "perfecta": 0.5, "perfecto": 0.5, "buenísimo": 0.5,
+    
+    # Palabras FUERTES (peso 0.4) - Alegría intensa
+    "feliz": 0.4, "felicidad": 0.4, "alegría": 0.4, "alegre": 0.4,
+    "genial": 0.4, "fantástico": 0.4, "excelente": 0.4,
+    
+    # ← AGREGAR ESTAS (detección de risa):
+    "jajaja": 0.5, "jajajaja": 0.5, "jajajajaja": 0.5,
+    "jajajajajaja": 0.5, "jajajajajajaja": 0.5,
+    "jejeje": 0.45, "jejejeje": 0.45, "jijiji": 0.45,
+    "jojojo": 0.45, "juajua": 0.45,
+    "hahaha": 0.5, "hahahaha": 0.5, "hehehe": 0.45,
+    "jaja": 0.4, "jeje": 0.4, "jiji": 0.4, "jojo": 0.4,
+    "carcajada": 0.5, "carcajadas": 0.5,
+    "riendo": 0.45, "riéndose": 0.45, "reír": 0.4,
+    "risa": 0.4, "risas": 0.4, "risota": 0.45, "risotas": 0.45,
+    "muerto de risa": 0.5, "me muero de risa": 0.5,
+    "me río": 0.4, "me estoy riendo": 0.45,
+    "qué risa": 0.4, "qué risas": 0.4, "me da risa": 0.4,
+    "ja": 0.3, "je": 0.3, "ji": 0.3,  # Risa corta
+    
+    "celebrar": 0.4, "celebración": 0.4, "éxito": 0.4, "victoria": 0.4,
+    
+    # Palabras MODERADAS (peso 0.3) - Satisfacción
+    "contento": 0.3, "contenta": 0.3, "qué bien": 0.3, "qué bueno": 0.3,
+    "hermoso": 0.3, "hermosa": 0.3, "lindo": 0.3, "linda": 0.3,
+    "gracioso": 0.3, "divertido": 0.3, "divertida": 0.3,
+    "qué chistoso": 0.3, "chistoso": 0.3, "cómico": 0.3,
+    "humor": 0.3, "humorístico": 0.3,
+    
+    # Palabras LEVES (peso 0.2)
+    "bien": 0.2, "mejor": 0.2, "super": 0.2, "súper": 0.2, 
+    "guau": 0.2, "wow": 0.2, "fiesta": 0.2, "sonrisa": 0.2,
 }
 
 def analyze_lexicon(text: str) -> Dict[str, float]:
@@ -100,7 +191,7 @@ def analyze_lexicon(text: str) -> Dict[str, float]:
     """
     text_lower = text.lower()
     scores = {"triste": 0.0, "enojado": 0.0, "feliz": 0.0, "neutral": 0.0}
-    
+
     # Buscar coincidencias en cada lexicón
     for palabra in LEXICON_TRISTE:
         if palabra in text_lower:

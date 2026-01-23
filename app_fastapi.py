@@ -13,6 +13,7 @@ import time
 import torch
 import gc
 import psutil
+import soundfile as sf
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -51,6 +52,7 @@ from core.diarization import (
     merge_consecutive_same_speaker,
     format_labeled_transcription
 )
+from core.feedback_system import FeedbackCollector
 from resemblyzer import VoiceEncoder
 
 # Config
@@ -92,7 +94,6 @@ except ImportError:
 from fastapi.responses import HTMLResponse
 
 # GESTIÓN DE MEMORIA
-
 
 def log_memory_usage() -> float:
     """Retorna el uso actual de memoria en MB."""
@@ -179,6 +180,69 @@ app.add_middleware(
     allow_methods=["*"],  # Permitir todos los métodos
     allow_headers=["*"],  # Permitir todos los headers
 )
+
+feedback_collector = FeedbackCollector(storage_dir="./feedback_data")
+
+from pydantic import BaseModel
+
+class ValidatePredictionRequest(BaseModel):
+    prediction_id: str
+    correct_label: str
+    comment: Optional[str] = None
+
+@app.post("/validate_prediction", tags=["Feedback"])
+async def validate_prediction(request: ValidatePredictionRequest):
+    """
+    Permite al usuario corregir una prediccion de emocion.
+    """
+    valid_labels = ["feliz", "triste", "enojado", "neutral"]
+    if request.correct_label not in valid_labels:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Label invalido. Debe ser: {', '.join(valid_labels)}"
+        )
+    
+    try:
+        result = feedback_collector.validate_prediction(
+            prediction_id=request.prediction_id,
+            correct_label=request.correct_label,
+            user_comment=request.comment
+        )
+        
+        validated_count = feedback_collector.get_validated_count()
+        
+        logger.info(
+            f"Feedback: {request.prediction_id} -> {request.correct_label} "
+            f"(Total: {validated_count})"
+        )
+        
+        return {
+            "status": "success",
+            "message": "Gracias por tu feedback",
+            "was_correct": result["predicted_label"] == result["correct_label"],
+            "total_validated": validated_count,
+            "ready_for_retraining": validated_count >= 100
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error validando prediccion: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/feedback/stats", tags=["Feedback"])
+async def get_feedback_stats():
+    """Obtiene estadísticas del sistema de feedback."""
+    try:
+        return {
+            "validated": feedback_collector.get_validated_count(),
+            "pending": feedback_collector.get_pending_count(),
+            "ready_for_retraining": feedback_collector.get_validated_count() >= 100,
+            "threshold": 100
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Incluir routers
 app.include_router(history_router)
@@ -369,7 +433,6 @@ async def analyze_segments_with_emotions(
                 except Exception as e:
                     logger.warning(f"Error extrayendo audio seg {i}: {e}")
             
-            # Analizar emoción
             emotion_result = emotion_analyzer.analyze_segment(
                 text_es=seg_text_es,
                 text_en=seg_text_en,
@@ -381,14 +444,14 @@ async def analyze_segments_with_emotions(
                 use_ensemble=True
             )
             
-            # Limpiar archivo temporal
             if seg_audio_path and os.path.exists(seg_audio_path):
                 try:
                     os.remove(seg_audio_path)
                 except:
                     pass
             
-            # Determinar speaker
+            del seg_chunk
+            
             speaker_id = 0
             if enable_diarization and speaker_labels:
                 seg_mid = (start + end) / 2
@@ -397,7 +460,17 @@ async def analyze_segments_with_emotions(
                         speaker_id = spk
                         break
             
-            # Construir segmento enriquecido
+            prediction_id = feedback_collector.save_prediction(
+                audio_path=f"segment_{start}_{end}",
+                predicted_label=emotion_result.top_emotion,
+                confidence=emotion_result.top_score,
+                metadata={
+                    "text_es": seg_text_es,
+                    "text_en": seg_text_en,
+                    "start": start,
+                    "end": end
+                }
+            )
             enriched_segments.append({
                 "start": start,
                 "end": end,
@@ -416,7 +489,8 @@ async def analyze_segments_with_emotions(
                 },
                 "speaker_id": speaker_id,
                 "speaker_label": f"Hablante {speaker_id + 1}",
-                "speaker": f"speaker_{speaker_id}"
+                "speaker": f"speaker_{speaker_id}",
+                "prediction_id": prediction_id
             })
             
         except Exception as e:
