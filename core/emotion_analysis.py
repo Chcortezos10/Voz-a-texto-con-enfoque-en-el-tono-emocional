@@ -1,3 +1,4 @@
+
 """
 Módulo unificado de análisis emocional multi-modal.
 Combina análisis de texto (español e inglés) y audio para mayor precisión.
@@ -191,35 +192,35 @@ def analyze_lexicon(text: str) -> Dict[str, float]:
     """
     text_lower = text.lower()
     scores = {"triste": 0.0, "enojado": 0.0, "feliz": 0.0, "neutral": 0.0}
-    
+
     # Buscar coincidencias en cada lexicón
     for palabra in LEXICON_TRISTE:
         if palabra in text_lower:
             scores["triste"] += 0.3  # Cada coincidencia suma 0.3
-    
+
     for palabra in LEXICON_ENOJADO:
         if palabra in text_lower:
             scores["enojado"] += 0.3
-    
+
     for palabra in LEXICON_FELIZ:
         if palabra in text_lower:
             scores["feliz"] += 0.3
-    
+
     # Normalizar si hay coincidencias
     total = sum(scores.values())
     if total > 0:
         scores = {k: min(1.0, v) for k, v in scores.items()}  # Cap at 1.0
     else:
         scores["neutral"] = 0.1  # Sin coincidencias = ligeramente neutral
-    
+
     return scores
 
 def apply_lexicon_correction(emotions: Dict[str, float], text: str) -> Dict[str, float]:
     lexicon_scores = analyze_lexicon(text)
     text_lower = text.lower()
-    
+
     has_laugh = any(x in text_lower for x in ["jaja", "jeje", "risa", "risas", "jajaja", "jejeje", "riendo", "carcajada"])
-    
+
     if lexicon_scores["triste"] >= 0.15 and lexicon_scores["feliz"] < 0.15:
         feliz_score = emotions.get("feliz", 0.0)
         if feliz_score > 0.15:
@@ -228,7 +229,7 @@ def apply_lexicon_correction(emotions: Dict[str, float], text: str) -> Dict[str,
             emotions["triste"] = emotions.get("triste", 0.0) + transfer + 0.15
         else:
             emotions["triste"] = emotions.get("triste", 0.0) + 0.25
-    
+
     if lexicon_scores["enojado"] >= 0.15 and lexicon_scores["feliz"] < 0.15:
         feliz_score = emotions.get("feliz", 0.0)
         if feliz_score > 0.15:
@@ -237,13 +238,13 @@ def apply_lexicon_correction(emotions: Dict[str, float], text: str) -> Dict[str,
             emotions["enojado"] = emotions.get("enojado", 0.0) + transfer + 0.15
         else:
             emotions["enojado"] = emotions.get("enojado", 0.0) + 0.25
-    
+
     if lexicon_scores["feliz"] >= 0.15 or has_laugh:
         if lexicon_scores["triste"] < 0.15 and lexicon_scores["enojado"] < 0.15:
             emotions["feliz"] = emotions.get("feliz", 0.0) + 0.35
             if has_laugh:
                 emotions["feliz"] = emotions.get("feliz", 0.0) + 0.25
-    
+
     return emotions
 
 # MAPEO_EMOCIONAL_EXTENDIDO eliminado en favor de config.EMOTION_MAPPING
@@ -275,11 +276,11 @@ class SmartResultCache:
                 return self.cache[key]
             self.misses += 1
             return None
-    
+
     def add(self, key: str, value: EmotionResult) -> None:
         with self.lock:
             self.cache[key] = value
-    
+
     def get_stats(self):
         with self.lock:
             return {
@@ -353,7 +354,7 @@ class ProsodyAnalyzer:
         """Extrae las características prosódicas del audio."""
         if not LIBROSA_AVAILABLE:
             return ProsodyFeatures()
-        
+
         try:
             f0, voiced_flag, voiced_probs = librosa.pyin(
                 audio,
@@ -361,24 +362,24 @@ class ProsodyAnalyzer:
                 fmax=librosa.note_to_hz('C7'),
                 sr=self.sr
             )
-            
+
             f0_valid = f0[~np.isnan(f0)]
             if len(f0_valid) == 0:
                 f0_valid = np.array([150.0])
-            
+
             # Energía RMS
             rms = librosa.feature.rms(y=audio, frame_length=2048, hop_length=512)[0]
-            
+
             # Tasa de habla estimada
             energy_diff = np.abs(np.diff(rms))
             threshold = np.mean(energy_diff) + 0.5 * np.std(energy_diff)
             onsets = np.sum(energy_diff > threshold)
             duration = len(audio) / self.sr
-            
+
             # Ratio de pausas
             silence_threshold = np.mean(rms) * 0.25
             pause_frames = np.sum(rms < silence_threshold)
-            
+
             return ProsodyFeatures(
                 pitch_mean=float(np.mean(f0_valid)),
                 pitch_std=float(np.std(f0_valid)),
@@ -393,32 +394,32 @@ class ProsodyAnalyzer:
         except Exception as e:
             print(f"Error al extraer características prosódicas: {e}")
             return ProsodyFeatures()
-        
+
     def infer_emotion(self, features: ProsodyFeatures) -> Tuple[str, float, Dict[str, float]]:
         """Infiere la emoción a partir de las características prosódicas."""
         scores = {}
         for emotion, rule in self.PROSODY_RULES.items():
             score = 0.0
             weights = rule.get("weights", {"pitch": 0.25, "pitch_var": 0.25, "energy": 0.25, "rate": 0.25})
-            
+
             # Evaluar pitch
             pitch_score = self._evaluate_pitch(features.pitch_mean, rule["pitch"])
             score += pitch_score * weights["pitch"]
-            
+
             # Evaluar variabilidad de pitch
             var_score = self._evaluate_pitch_var(features.pitch_std, rule["pitch_var"])
             score += var_score * weights["pitch_var"]
-            
+
             # Evaluar energía
             energy_score = self._evaluate_energy(features.energy_mean, rule["energy"])
             score += energy_score * weights["energy"]
-            
+
             # Evaluar velocidad
             rate_score = self._evaluate_rate(features.speech_rate, rule["rate"])
             score += rate_score * weights["rate"]
-            
+
             scores[emotion] = score
-        
+
         # Normalizar scores y calcular top_emotion
         total = sum(scores.values())
         if total > 0:
@@ -429,7 +430,7 @@ class ProsodyAnalyzer:
             top_emotion = "neutral"
             confidence = 0.0
             scores = {"neutral": 1.0}
-        
+
         return top_emotion, confidence, scores
 
     def _evaluate_pitch(self, pitch: float, expected: str) -> float:
@@ -440,7 +441,7 @@ class ProsodyAnalyzer:
             return min(1.0, max(0.0, (180 - pitch) / 100))
         else:  # medium
             return 1.0 - abs(pitch - 160) / 100
-    
+
     def _evaluate_pitch_var(self, std: float, expected: str) -> float:
         """Evalúa la variabilidad del pitch."""
         if expected == "high":
@@ -449,7 +450,7 @@ class ProsodyAnalyzer:
             return min(1.0, max(0.0, (30 - std) / 30))
         else:
             return 1.0 - abs(std - 25) / 30
-    
+
     def _evaluate_energy(self, energy: float, expected: str) -> float:
         """Evalúa la energía."""
         thresholds = self.energy_thresholds
@@ -461,7 +462,7 @@ class ProsodyAnalyzer:
             return min(1.0, max(0.0, (thresholds["medium"] - energy) / thresholds["medium"]))
         else:
             return 1.0 - abs(energy - thresholds["medium"]) / thresholds["medium"]
-    
+
     def _evaluate_rate(self, rate: float, expected: str) -> float:
         """Evalúa la velocidad del habla."""
         thresholds = self.rate_thresholds
@@ -485,31 +486,31 @@ def get_prosody_analyzer() -> ProsodyAnalyzer:
 
 class TemporalEmotionState:
     """Estado para suavizado temporal de emociones."""
-    
+
     def __init__(self, max_history: int = 10):
         """Inicializa el estado temporal con historial limitado."""
         self.history = deque(maxlen=max_history)
-    
+
     def add(self, emotions: Dict[str, float]) -> None:
         """Agrega un nuevo resultado de emociones al historial."""
         self.history.append(emotions.copy())
-    
+
     def update(self, emotions: Dict[str, float]) -> None:
         """Alias for add method."""
         self.add(emotions)
-    
+
     def reset(self) -> None:
         self.history.clear()
-    
+
     def get_smoothed(self, current: Dict[str, float], alpha: float = 0.6) -> Dict[str, float]:
         """Retorna las emociones suavizadas con el historial."""
         if not self.history:
             return current
-        
+
         all_emotions = set(current.keys())
         for hist in self.history:
             all_emotions.update(hist.keys())
-        
+
         smoothed = {}
         for emotion in all_emotions:
             current_val = current.get(emotion, 0.0)
@@ -554,7 +555,7 @@ def load_text_emotion_en():
 def load_text_emotion_es():
     from config import MAX_EMOTION_MODELS_LOADED
     device_num = 0 if get_device() == "cuda" else -1
-    
+
     def _loader():
         logger.info(f"Cargando modelo de emociones en español...")
         return pipeline(
@@ -563,7 +564,7 @@ def load_text_emotion_es():
             top_k=None,
             device=device_num
         )
-    
+
     manager = get_model_manager(max_models=MAX_EMOTION_MODELS_LOADED)
     return manager.get_model("text_emotion_es", _loader)    
 
@@ -571,7 +572,7 @@ def load_text_emotion_es():
 def load_audio_emotion():
     from config import MAX_EMOTION_MODELS_LOADED
     device_num = 0 if get_device() == "cuda" else -1
-    
+
     def _loader():
         logger.info(f"Cargando modelo de emociones de audio...")
         return pipeline(
@@ -579,7 +580,7 @@ def load_audio_emotion():
             model=AUDIO_EMOTION_MODEL,
             device=device_num
         )
-    
+
     manager = get_model_manager(max_models=MAX_EMOTION_MODELS_LOADED)
     return manager.get_model("audio_emotion", _loader)
 
@@ -590,9 +591,9 @@ def load_go_emotion():
     if not ENABLE_GO_EMOTIONS:
         logger.info("GoEmotions deshabilitado")
         return None
-    
+
     device_num = 0 if get_device() == "cuda" else -1
-    
+
     def _loader():
         logger.info(f"Cargando modelo de emociones de GoEmotions...")
         return pipeline(
@@ -621,7 +622,7 @@ def analyze_text_go_emotions(text: str) -> EmotionResult:
         classifier = load_go_emotion()
         if classifier is None:
             return EmotionResult({"neutral": 1.0}, "neutral", 1.0, 0.5, "go_emotions")
-        
+
         results = classifier(text[:512])[0]
         emotions = {"feliz": 0.0, "enojado": 0.0, "triste": 0.0, "neutral": 0.0}
 
@@ -630,11 +631,11 @@ def analyze_text_go_emotions(text: str) -> EmotionResult:
             score = float(result["score"])
             mapped = EMOTION_MAPPING.get(label, "neutral")
             emotions[mapped] = emotions.get(mapped, 0.0) + score
-        
+
         total = sum(emotions.values())
         if total > 0:
             emotions = {k: v / total for k, v in emotions.items()}
-        
+
         top_emotion = max(emotions, key=emotions.get)
         return EmotionResult(
             emotions=emotions,
@@ -664,7 +665,7 @@ class EnsembleResult:
 
 class EmotionEnsemble:
     """Ensemble de múltiples modelos para análisis emocional."""
-    
+
     def __init__(
         self,
         use_go_emotions: bool = False,  # Deshabilitado por defecto (ahorra RAM)
@@ -680,7 +681,7 @@ class EmotionEnsemble:
         self.active_boost = active_boost
         self._executor = ThreadPoolExecutor(max_workers=2) if parallel else None
         self._prosody = get_prosody_analyzer() if use_prosody else None
-    
+
     def analyze(
         self,
         text_es: str,
@@ -693,26 +694,26 @@ class EmotionEnsemble:
         start_time = time_module.time()
         results = {}
         weights = {}
-        
+
         if self.parallel and self._executor:
             futures = {}
-            
+
             if text_es.strip():
                 futures['text_es'] = self._executor.submit(analyze_text_emotion_es, text_es)
                 weights['text_es'] = 0.30
-            
+
             if text_en.strip():
                 futures['text_en'] = self._executor.submit(analyze_text_emotion_en, text_en)
                 weights['text_en'] = 0.25
-            
+
             if self.use_go_emotions and text_en.strip():
                 futures['go_emotions'] = self._executor.submit(analyze_text_go_emotions, text_en)
                 weights['go_emotions'] = 0.15
-            
+
             if audio_path:
                 futures['audio'] = self._executor.submit(analyze_audio_emotion, audio_path)
                 weights['audio'] = 0.15
-            
+
             for key, future in futures.items():
                 try:
                     result = future.result(timeout=60)
@@ -726,29 +727,29 @@ class EmotionEnsemble:
             if text_es.strip():
                 results['text_es'] = analyze_text_emotion_es(text_es)
                 weights['text_es'] = 0.30
-            
+
             if text_en.strip():
                 results['text_en'] = analyze_text_emotion_en(text_en)
                 weights['text_en'] = 0.25
-            
+
             if self.use_go_emotions and text_en.strip():
                 result = analyze_text_go_emotions(text_en)
                 if result.emotions:
                     results['go_emotions'] = result
                     weights['go_emotions'] = 0.15
-            
+
             if audio_path:
                 results['audio'] = analyze_audio_emotion(audio_path)
                 weights['audio'] = 0.15
-        
+
         prosody_emotion = None
         prosody_confidence = 0.0
-        
+
         if self.use_prosody and self._prosody and audio_array is not None and len(audio_array) > 0:
             try:
                 features = self._prosody.extract_features(audio_array)
                 prosody_emotion, prosody_confidence, prosody_scores = self._prosody.infer_emotion(features)
-                
+
                 results['prosody'] = EmotionResult(
                     emotions=prosody_scores,
                     top_emotion=prosody_emotion,
@@ -759,7 +760,7 @@ class EmotionEnsemble:
                 weights['prosody'] = PROSODY_WEIGHT
             except Exception as e:
                 logger.warning(f"Error en prosodia: {e}")
-        
+
         if not results:
             return EnsembleResult(
                 emotions={"neutral": 1.0},
@@ -769,11 +770,11 @@ class EmotionEnsemble:
                 source="fallback",
                 processing_time=time_module.time() - start_time
             )
-        
+
         fused = self._fuse_results(results, weights)
         agreement = self._calculate_agreement(results)
         confidence = (fused["top_score"] * 0.6) + (agreement * 0.4)
-        
+
         return EnsembleResult(
             emotions=fused["emotions"],
             top_emotion=fused["top_emotion"],
@@ -786,40 +787,40 @@ class EmotionEnsemble:
             prosody_confidence=round(prosody_confidence, 4),
             processing_time=round(time_module.time() - start_time, 3)
         )
-    
+
     def _fuse_results(self, results: Dict[str, EmotionResult], weights: Dict[str, float]) -> Dict[str, Any]:
         """Fusiona resultados con votación ponderada."""
         total_weight = sum(weights.get(k, 0) for k in results.keys())
         if total_weight == 0:
             total_weight = 1
-        
+
         norm_weights = {k: weights.get(k, 0) / total_weight for k in results.keys()}
-        
+
         all_emotions = set()
         for result in results.values():
             all_emotions.update(result.emotions.keys())
-        
+
         fused = {}
         for emotion in all_emotions:
             weighted_sum = 0.0
             for key, result in results.items():
                 weighted_sum += result.emotions.get(emotion, 0.0) * norm_weights.get(key, 0)
             fused[emotion] = weighted_sum
-        
+
         fused = self._apply_sensitivity(fused)
-        
+
         total = sum(fused.values())
         if total > 0:
             fused = {k: round(v / total, 4) for k, v in fused.items()}
-        
+
         top_emotion = max(fused, key=fused.get)
-        
+
         return {"emotions": fused, "top_emotion": top_emotion, "top_score": fused[top_emotion]}
-    
+
     def _apply_sensitivity(self, emotions: Dict[str, float]) -> Dict[str, float]:
         """Aplica ajustes de sensibilidad balanceados."""
         adjusted = {}
-        
+
         for emo, score in emotions.items():
             emo_lower = emo.lower()
             if emo_lower in ["neutral", "other", "others", "neu"]:
@@ -830,7 +831,7 @@ class EmotionEnsemble:
                 adjusted[emo] = score * HAPPY_SUPPRESSION_FACTOR
             else:
                 adjusted[emo] = score * ACTIVE_EMOTION_BOOST
-        
+
         if adjusted:
             top = max(adjusted, key=adjusted.get)
             if top.lower() in ["neutral", "other", "others"]:
@@ -838,18 +839,18 @@ class EmotionEnsemble:
                 if candidates:
                     best = max(candidates, key=candidates.get)
                     adjusted[best] *= 1.15
-        
+
         return adjusted
-    
+
     def _calculate_agreement(self, results: Dict[str, EmotionResult]) -> float:
         """Calcula acuerdo entre modelos."""
         if len(results) < 2:
             return 1.0
-        
+
         top_emotions = [r.top_emotion for r in results.values()]
         counts = Counter(top_emotions)
         most_common_count = counts.most_common(1)[0][1]
-        
+
         return most_common_count / len(results)
 
 
@@ -888,16 +889,16 @@ def analyze_text_emotion_en(text: str) -> EmotionResult:
             confidence=0.0,
             source="text_en"
         )
-    
+
     try:
         classifier = load_text_emotion_en()
         results = classifier(text[:512])[0]  
-        
+
         emotions = {}
         for r in results:
             label = normalize_emotion_label(r["label"])
             emotions[label] = float(r["score"])
-        
+
         top = max(results, key=lambda x: x["score"])
         return EmotionResult(
             emotions=emotions,
@@ -932,19 +933,19 @@ def analyze_text_emotion_es(text: str) -> EmotionResult:
             confidence=0.0,
             source="text_es"
         )
-    
+
     try:
         classifier = load_text_emotion_es()
         results = classifier(text[:512])[0]
-        
+
         emotions = {}
         for r in results:
             label = normalize_emotion_label(r["label"])
             emotions[label] = float(r["score"])
-        
+
         # APLICAR CORRECCIÓN LEXICOGRÁFICA para evitar confusión feliz/triste
         emotions = apply_lexicon_correction(emotions, text)
-        
+
         # Recalcular top_emotion después de la corrección
         if emotions:
             top_emotion = max(emotions, key=emotions.get)
@@ -952,7 +953,7 @@ def analyze_text_emotion_es(text: str) -> EmotionResult:
         else:
             top_emotion = normalize_emotion_label(max(results, key=lambda x: x["score"])["label"])
             top_score = float(max(results, key=lambda x: x["score"])["score"])
-        
+
         return EmotionResult(
             emotions=emotions,
             top_emotion=top_emotion,
@@ -981,12 +982,12 @@ def analyze_audio_emotion(audio_path: str) -> EmotionResult:
     try:
         classifier = load_audio_emotion()
         results = classifier(audio_path, top_k=None)
-        
+
         emotions = {}
         for r in results:
             label = normalize_emotion_label(r["label"])
             emotions[label] = float(r["score"])
-        
+
         top = max(results, key=lambda x: x["score"])
         return EmotionResult(
             emotions=emotions,
@@ -1039,7 +1040,7 @@ def _fuse_weighted_average(
     """
     all_emotions = set(text_result.emotions.keys()) | set(audio_result.emotions.keys())
     fused_raw = {}
-    
+
     # 1. Promedio Ponderado Inicial
     for emotion in all_emotions:
         text_score = text_result.emotions.get(emotion, 0.0)
@@ -1048,17 +1049,17 @@ def _fuse_weighted_average(
             text_score * EMOTION_WEIGHT_TEXT +
             audio_score * EMOTION_WEIGHT_AUDIO
         )
-        
-        
+
+
     # 2. Ajuste de Sensibilidad (ULTRA-AGGRESSIVE Neutral Suppression)
     # Usuario requiere prácticamente eliminar neutral/other de los resultados
     BOOST_FACTOR = EMOTION_BOOST_FACTOR
     NEUTRAL_DAMP = EMOTION_NEUTRAL_DAMP
     CONFIDENCE_THRESHOLD = EMOTION_CONFIDENCE_THRESHOLD
-    
+
     adjusted_scores = {}
     total_score = 0.0
-    
+
     for emo, score in fused_raw.items():
         emo_lower = emo.lower()
         # Castigar tanto 'neutral' como 'other'
@@ -1071,7 +1072,7 @@ def _fuse_weighted_average(
 
         adjusted_scores[emo] = new_score
         total_score += new_score
-        
+
     # 3. Renormalización
     final_emotions = {}
     if total_score > 0:
@@ -1082,7 +1083,7 @@ def _fuse_weighted_average(
 
     if not final_emotions:
         return EmotionResult({}, "neutral", 0.0, 0.0, "multimodal")
-    
+
     top_emotion = max(final_emotions, key=final_emotions.get)
     top_score = final_emotions[top_emotion]
 
@@ -1095,7 +1096,7 @@ def _fuse_weighted_average(
             k: v for k, v in final_emotions.items() 
             if k.lower() not in ["neutral", "other", "others", "neu"] and v > CONFIDENCE_THRESHOLD
         }
-        
+
         if candidates:
             # Encontramos una alternativa válida - SIEMPRE la promovemos
             top_emotion = max(candidates, key=candidates.get)
@@ -1182,21 +1183,21 @@ def analyze_segment_multimodal(
     """
     # Análisis de texto en español
     result_es = analyze_text_emotion_es(text_es)
-    
+
     # Análisis de texto en inglés (traducido)
     result_en = analyze_text_emotion_en(text_en)
-    
+
     # Combinar análisis de texto (promedio ES + EN)
     text_combined = _fuse_weighted_average(result_es, result_en)
     text_combined.source = "text"
-    
+
     # Análisis de audio si está disponible
     if audio_path:
         result_audio = analyze_audio_emotion(audio_path)
         final_result = fuse_emotions(text_combined, result_audio)
     else:
         final_result = text_combined
-    
+
     return {
         "text_es": {
             "top_emotion": result_es.top_emotion,
@@ -1236,46 +1237,46 @@ def compute_weighted_emotion_score(
     """
     emotion_weights = {}
     total_duration = 0.0
-    
+
     for seg in segments:
         duration = seg.get("end", 0) - seg.get("start", 0)
         if duration <= 0:
             continue
-        
+
         total_duration += duration
-        
+
         # Obtener emociones del segmento
         emotions = seg.get("multimodal", {}).get("emotions", {})
         if not emotions:
             emotions = seg.get("emotions", {})
-        
+
         for emotion, score in emotions.items():
             if emotion not in emotion_weights:
                 emotion_weights[emotion] = 0.0
             emotion_weights[emotion] += score * duration
-    
+
     # Normalizar por duración total
     if total_duration > 0:
         for emotion in emotion_weights:
             emotion_weights[emotion] /= total_duration
-    
+
     # Ordenar por score
     sorted_emotions = dict(
         sorted(emotion_weights.items(), key=lambda x: x[1], reverse=True)
     )
-    
+
     return sorted_emotions
 
 
 class TemporalEmotionAnalyzer:
     """Analizador con suavizado temporal y soporte para ensemble."""
-    
+
     def __init__(self, use_prosody: bool = True):
         self.history = []
         self.segment_count = 0
         self.use_prosody = use_prosody
         self._temporal_state = TemporalEmotionState()
-    
+
     def analyze_segment(
         self,
         text_es: str,
@@ -1288,10 +1289,10 @@ class TemporalEmotionAnalyzer:
         use_ensemble: bool = True
     ) -> EmotionResult:
         """Analiza un segmento con múltiples fuentes y suavizado temporal."""
-        
+
         if use_ensemble:
             ensemble = get_emotion_ensemble(use_go_emotions=False, use_prosody=self.use_prosody)
-            
+
             ensemble_result = ensemble.analyze(
                 text_es=text_es,
                 text_en=text_en,
@@ -1299,7 +1300,7 @@ class TemporalEmotionAnalyzer:
                 audio_array=audio_array,
                 sr=sr
             )
-            
+
             fused_emotions = ensemble_result.emotions
             top_emotion = ensemble_result.top_emotion
             top_score = ensemble_result.top_score
@@ -1307,18 +1308,18 @@ class TemporalEmotionAnalyzer:
         else:
             results = []
             weights = []
-            
+
             result_es = analyze_text_emotion_es(text_es)
             if result_es.emotions:
                 results.append(result_es)
                 weights.append(0.35)
-            
+
             if text_en and text_en.strip():
                 result_en = analyze_text_emotion_en(text_en)
                 if result_en.emotions:
                     results.append(result_en)
                     weights.append(0.25)
-            
+
             if audio_path and audio_weight > 0:
                 try:
                     result_audio = analyze_audio_emotion(audio_path)
@@ -1327,7 +1328,7 @@ class TemporalEmotionAnalyzer:
                         weights.append(audio_weight)
                 except Exception as e:
                     logger.warning(f"Error análisis audio: {e}")
-            
+
             if not results:
                 return EmotionResult(
                     emotions={"neutral": 1.0},
@@ -1336,34 +1337,34 @@ class TemporalEmotionAnalyzer:
                     confidence=0.0,
                     source="fallback"
                 )
-            
+
             total_weight = sum(weights)
             weights = [w / total_weight for w in weights]
-            
+
             all_emotions = set()
             for r in results:
                 all_emotions.update(r.emotions.keys())
-            
+
             fused_emotions = {}
             for emotion in all_emotions:
                 weighted_sum = sum(r.emotions.get(emotion, 0.0) * w for r, w in zip(results, weights))
                 fused_emotions[emotion] = weighted_sum
-            
+
             fused_emotions = self._apply_sensitivity_adjustments(fused_emotions)
-            
+
             total = sum(fused_emotions.values())
             if total > 0:
                 fused_emotions = {k: round(v / total, 4) for k, v in fused_emotions.items()}
-            
+
             top_emotion = max(fused_emotions, key=fused_emotions.get)
             top_score = fused_emotions[top_emotion]
             confidence = top_score
-        
+
         if apply_smoothing and self.history:
             fused_emotions = self._temporal_state.get_smoothed(fused_emotions, alpha=0.7)
             top_emotion = max(fused_emotions, key=fused_emotions.get)
             top_score = fused_emotions[top_emotion]
-        
+
         self._temporal_state.add(fused_emotions)
         self.history.append(fused_emotions.copy())
         self.segment_count += 1
@@ -1375,7 +1376,7 @@ class TemporalEmotionAnalyzer:
             confidence=round(confidence, 4),
             source="ensemble" if use_ensemble else "multimodal"
         )
-    
+
     def _apply_sensitivity_adjustments(self, emotions: Dict[str, float]) -> Dict[str, float]:
         """Aplica ajustes de sensibilidad (BALANCEADO - permite neutral genuino)."""
         adjusted = {}
@@ -1393,9 +1394,8 @@ class TemporalEmotionAnalyzer:
             else:
                 adjusted[emo] = score * ACTIVE_EMOTION_BOOST
         return adjusted
-    
+
     def reset(self):
         """Reinicia el estado del analizador."""
         self.history = []
         self.segment_count = 0
-        self._temporal_state = TemporalEmotionState()

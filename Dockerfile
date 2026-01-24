@@ -3,9 +3,8 @@
 # Versión: 5.0.0 (Optimizada con gestión de memoria)
 # =====================================================
 
-# Base image ligera para CPU (compatible con AMD Ryzen, Intel, etc.)
-# Para GPU NVIDIA, usar: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-FROM python:3.11-slim
+# Base image con soporte CUDA para NVIDIA GPU
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
 # Metadatos
 LABEL maintainer="Christian"
@@ -53,7 +52,7 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 COPY . .
 
 # Crear directorios necesarios
-RUN mkdir -p /app/data /app/output /app/models /app/history
+RUN mkdir -p /app/data /app/output /app/models /app/history /app/feedback_data
 
 # Establecer permisos
 RUN chmod -R 755 /app
@@ -67,4 +66,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=120s --retries=3 \
 
 # Comando para ejecutar la aplicación
 # Usar workers=1 para evitar problemas con modelos grandes en memoria
-CMD ["uvicorn", "app_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "120"]
+CMD ["uvicorn", "app_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "120", "--loop", "asyncio"]

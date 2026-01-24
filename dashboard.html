@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
-    
+
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Embedded Styles -->
     <style>
         /* VARIABLES Y RESET */
@@ -90,8 +92,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .theme-toggle-btn {
@@ -156,8 +165,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* UPLOAD SECTION */
@@ -295,7 +311,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .progress-container {
@@ -390,12 +408,12 @@
             border-radius: 50%;
         }
 
-        .toggle-switch input:checked + .toggle-slider {
+        .toggle-switch input:checked+.toggle-slider {
             background-color: var(--primary);
             border-color: var(--primary);
         }
 
-        .toggle-switch input:checked + .toggle-slider:before {
+        .toggle-switch input:checked+.toggle-slider:before {
             transform: translateX(24px);
         }
 
@@ -504,12 +522,100 @@
             background: var(--surface-hover);
             border-left: 3px solid var(--border);
             transition: all 0.3s;
-            cursor: pointer;
         }
 
         .transcript-segment:hover {
             background: rgba(99, 102, 241, 0.1);
             border-left-color: var(--primary);
+        }
+
+        .segment-header-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .segment-text-content {
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .edit-emotion-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .edit-emotion-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .emotion-picker {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--surface);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .picker-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .emotion-option {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: var(--surface-hover);
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .emotion-option:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .emotion-option[data-emotion="feliz"]:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+        }
+
+        .emotion-option[data-emotion="triste"]:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .emotion-option[data-emotion="enojado"]:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .emotion-option[data-emotion="neutral"]:hover {
+            background: rgba(167, 139, 250, 0.2);
+            border-color: #a78bfa;
+        }
+
+        .emotion-display {
+            font-weight: 500;
         }
 
         .transcript-segment.active-segment {
@@ -720,7 +826,8 @@
             cursor: pointer;
         }
 
-        .speaker-input, .emotion-select {
+        .speaker-input,
+        .emotion-select {
             padding: 0.4rem 0.8rem;
             background: var(--surface);
             border: 1px solid var(--border);
@@ -728,7 +835,8 @@
             color: var(--text-main);
         }
 
-        .speaker-input:focus, .emotion-select:focus {
+        .speaker-input:focus,
+        .emotion-select:focus {
             border-color: var(--primary);
             outline: none;
         }
@@ -862,7 +970,8 @@
             border-collapse: collapse;
         }
 
-        .data-table th, .data-table td {
+        .data-table th,
+        .data-table td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
@@ -881,10 +990,25 @@
             font-weight: 600;
         }
 
-        .emotion-badge.feliz { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .emotion-badge.enojado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .emotion-badge.triste { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-        .emotion-badge.neutral { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+        .emotion-badge.feliz {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .emotion-badge.enojado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .emotion-badge.triste {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .emotion-badge.neutral {
+            background: rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+        }
 
         /* TOAST */
         #toastContainer {
@@ -909,7 +1033,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
             color: var(--text-main);
             opacity: 0;
@@ -934,10 +1058,21 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .charts-grid { grid-template-columns: 1fr; }
-            .stats-charts-grid { grid-template-columns: 1fr; }
-            .header { padding: 1rem; }
-            .container { padding: 0 1rem; }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
         }
 
         /* DIARIZATION TIMELINE */
@@ -961,7 +1096,7 @@
             color: white;
             font-size: 0.75rem;
             font-weight: 600;
-            border-right: 1px solid rgba(255,255,255,0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -972,7 +1107,7 @@
         }
 
         .timeline-segment.active {
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             filter: brightness(1.3);
             border: 2px solid white;
         }
@@ -1096,6 +1231,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Toast Container -->
     <div id="toastContainer"></div>
@@ -1157,8 +1293,8 @@
                         </div>
                     </div>
                     <div id="apiKeySection" style="display: none; margin-top: 1rem;">
-                        <input type="password" id="openaiApiKey" placeholder="sk-..." 
-                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
+                        <input type="password" id="openaiApiKey" placeholder="sk-..."
+                            style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
                     </div>
                 </div>
 
@@ -1202,7 +1338,8 @@
 
             <!-- Results Section -->
             <div id="resultsSection" style="display: none; margin-top: 3rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <h2>📊 Resultados</h2>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn btn-secondary" onclick="exportData('json')">
@@ -1267,16 +1404,18 @@
                 <div class="audio-player" id="audioPlayerSection" style="display: none;">
                     <h3 style="margin-bottom: 1rem;">🎧 Reproductor con Diarización</h3>
                     <audio id="audioElement" style="display: none;"></audio>
-                    
+
                     <!-- Player Controls -->
                     <div class="player-controls">
                         <button class="player-btn" onclick="audioPlayer.toggle()" id="playPauseBtn">
                             <i class="fas fa-play"></i>
                         </button>
-                        <button class="player-btn" onclick="audioPlayer.skip(-10)" style="background: var(--surface-hover);">
+                        <button class="player-btn" onclick="audioPlayer.skip(-10)"
+                            style="background: var(--surface-hover);">
                             <i class="fas fa-backward"></i>
                         </button>
-                        <button class="player-btn" onclick="audioPlayer.skip(10)" style="background: var(--surface-hover);">
+                        <button class="player-btn" onclick="audioPlayer.skip(10)"
+                            style="background: var(--surface-hover);">
                             <i class="fas fa-forward"></i>
                         </button>
                         <div class="time-display">
@@ -1285,18 +1424,18 @@
                             <span id="totalTimeDisplay">0:00</span>
                         </div>
                     </div>
-                    
+
                     <!-- Seek Bar -->
                     <div class="player-progress">
-                        <input type="range" id="seekBar" min="0" max="100" value="0" 
-                               oninput="audioPlayer.seek(this.value)">
+                        <input type="range" id="seekBar" min="0" max="100" value="0"
+                            oninput="audioPlayer.seek(this.value)">
                     </div>
-                    
+
                     <!-- Diarization Timeline -->
                     <div class="diarization-timeline" id="diarizationTimeline">
                         <!-- Timeline segments will be generated dynamically -->
                     </div>
-                    
+
                     <!-- Current Segment Panel -->
                     <div class="current-segment-panel" id="currentSegmentPanel">
                         <div class="panel-speaker">
@@ -1312,7 +1451,7 @@
                             Selecciona o reproduce un segmento para ver su contenido aquí...
                         </div>
                     </div>
-                    
+
                     <!-- Player Extras -->
                     <div class="player-extras" style="margin-top: 1rem;">
                         <div class="speed-control">
@@ -1328,8 +1467,8 @@
                         </div>
                         <div class="volume-control">
                             <i class="fas fa-volume-up"></i>
-                            <input type="range" min="0" max="100" value="100" 
-                                   oninput="audioPlayer.setVolume(this.value)">
+                            <input type="range" min="0" max="100" value="100"
+                                oninput="audioPlayer.setVolume(this.value)">
                         </div>
                     </div>
                 </div>
@@ -1344,7 +1483,8 @@
 
         <!-- TAB: HISTORIAL -->
         <div id="tab-history" class="tab-content">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                 <h2>📁 Historial de Análisis</h2>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" onclick="loadHistory()">
@@ -1366,14 +1506,14 @@
                 <div class="config-card">
                     <h3>API Keys</h3>
                     <label>OpenAI API Key:</label>
-                    <input type="password" id="settingsApiKey" 
-                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;" 
-                           placeholder="sk-..." />
+                    <input type="password" id="settingsApiKey"
+                        style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;"
+                        placeholder="sk-..." />
                     <button class="btn btn-primary" onclick="saveApiKey()">
                         <i class="fas fa-save"></i> Guardar
                     </button>
                 </div>
-                
+
                 <div class="config-card">
                     <h3>Datos</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
@@ -1435,20 +1575,24 @@
             API_URL: (() => {
                 const protocol = window.location.protocol;
                 const hostname = window.location.hostname;
-        
+
                 // Si se abre como archivo local (file://)
                 if (protocol === "file:") {
                     return "http://localhost:8000";
                 }
-        
+
                 // Si el hostname es 0.0.0.0 o está vacío, usar localhost
                 if (hostname === "0.0.0.0" || hostname === "") {
                     return "http://localhost:8000";
                 }
-        
+
                 // En producción o Docker, usar el origin actual
                 return window.location.origin;
             })(),
+            POSSIBLE_URLS: [
+                'http://localhost:8000',
+                'http://127.0.0.1:8000'
+            ],
             ENDPOINTS: {
                 HEALTH: '/health',
                 TRANSCRIBE_LOCAL: '/transcribe/full-analysis',
@@ -1511,11 +1655,11 @@
             show(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
-                const icons = { 
-                    success: 'fa-check-circle', error: 'fa-times-circle', 
-                    warning: 'fa-exclamation-triangle', info: 'fa-info-circle' 
+                const icons = {
+                    success: 'fa-check-circle', error: 'fa-times-circle',
+                    warning: 'fa-exclamation-triangle', info: 'fa-info-circle'
                 };
-                
+
                 const toastEl = document.createElement('div');
                 toastEl.className = 'toast';
                 toastEl.style.borderLeft = `4px solid ${colors[type]}`;
@@ -1524,7 +1668,7 @@
                     <div style="flex: 1; font-weight: 500;">${message}</div>
                     <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
                 `;
-                
+
                 container.appendChild(toastEl);
                 setTimeout(() => toastEl.classList.add('show'), 10);
                 setTimeout(() => {
@@ -1575,30 +1719,72 @@
         };
 
         // ============================================
-        // API CHECK
+        // API CHECK - Con detección automática y try/catch robusto
         // ============================================
         async function checkAPI() {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}/health`);
-                const statusEl = document.getElementById('apiStatus');
-                const connEl = document.getElementById('connectionStatus');
-                if (response.ok) {
-                    statusEl.textContent = '🟢 Online';
-                    statusEl.classList.add('online');
-                    if (connEl) connEl.textContent = 'Conectado ✅';
-                } else {
-                    statusEl.textContent = '🔴 Error';
-                    statusEl.classList.remove('online');
-                    if (connEl) connEl.textContent = 'Error ❌';
+            const statusEl = document.getElementById('apiStatus');
+            const connEl = document.getElementById('connectionStatus');
+
+            // Incluir CONFIG.API_URL (ya calculado) + posibles alternativas
+            let urlsToTry = [
+                CONFIG.API_URL,  // Primero la URL calculada según el entorno
+                window.location.origin,  // Luego el origin actual
+                'http://localhost:8000',
+                'http://127.0.0.1:8000'
+            ];
+
+            // Filtrar URLs vacías, duplicadas o inválidas
+            urlsToTry = [...new Set(urlsToTry)].filter(url => url && url !== 'null' && url !== 'file://' && !url.startsWith('file:'));
+
+            console.log('🔍 Buscando servidor en:', urlsToTry);
+
+            for (const url of urlsToTry) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                    const response = await fetch(`${url}/health`, {
+                        method: 'GET',
+                        signal: controller.signal,
+                        mode: 'cors'
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        // Actualizar CONFIG.API_URL con la URL que funcionó
+                        CONFIG.API_URL = url;
+                        console.log(`✅ Servidor conectado en: ${url}`);
+
+                        if (statusEl) {
+                            statusEl.textContent = '🟢 Online';
+                            statusEl.classList.add('online');
+                        }
+                        if (connEl) connEl.textContent = 'Conectado ✅';
+
+                        // Actualizar el display del backend URL si existe
+                        const backendUrlEl = document.getElementById('backendUrl');
+                        if (backendUrlEl) backendUrlEl.textContent = url;
+
+                        return true;
+                    }
+                } catch (e) {
+                    // Capturar cualquier error silenciosamente y probar la siguiente URL
+                    console.log(`❌ No responde: ${url} - ${e.name || e.message}`);
+                    continue;
                 }
-            } catch (e) {
-                const statusEl = document.getElementById('apiStatus');
-                const connEl = document.getElementById('connectionStatus');
+            }
+
+            // Si ninguna URL funcionó
+            console.error('❌ No se pudo conectar al servidor. URLs probadas:', urlsToTry);
+            if (statusEl) {
                 statusEl.textContent = '🔴 Offline';
                 statusEl.classList.remove('online');
-                if (connEl) connEl.textContent = 'Desconectado ❌';
             }
+            if (connEl) connEl.textContent = 'Desconectado ❌';
+            return false;
         }
+
+        // Ejecutar checkAPI al cargar y cada 5 segundos
         checkAPI();
         setInterval(checkAPI, 5000);
 
@@ -1646,7 +1832,7 @@
         // MODEL SELECTOR
         // ============================================
         document.querySelectorAll('.model-option').forEach(opt => {
-            opt.addEventListener('click', function() {
+            opt.addEventListener('click', function () {
                 document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById('apiKeySection').style.display = this.dataset.model === 'cloud' ? 'block' : 'none';
@@ -1656,10 +1842,10 @@
         // ============================================
         // SLIDERS
         // ============================================
-        document.getElementById('numSpeakers').addEventListener('input', function() {
+        document.getElementById('numSpeakers').addEventListener('input', function () {
             document.getElementById('numSpeakersValue').textContent = this.value == 0 ? 'Auto' : this.value;
         });
-        document.getElementById('audioWeight').addEventListener('input', function() {
+        document.getElementById('audioWeight').addEventListener('input', function () {
             document.getElementById('audioWeightValue').textContent = this.value + '%';
         });
 
@@ -1704,7 +1890,7 @@
                 formData.append('lite_mode', document.getElementById('liteMode').checked);
                 formData.append('audio_weight', parseInt(document.getElementById('audioWeight').value) / 100);
                 formData.append('enable_diarization', document.getElementById('enableDiarization').checked);
-                
+
                 const numSpeakers = parseInt(document.getElementById('numSpeakers').value);
                 if (numSpeakers > 0) formData.append('num_speakers', numSpeakers);
 
@@ -1722,12 +1908,12 @@
                 }
 
                 const res = await fetch(CONFIG.API_URL + endpoint, { method: 'POST', body: formData });
-                
+
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
                     throw new Error(errData.detail || errData.error || 'Error en API');
                 }
-                
+
                 const data = await res.json();
 
                 clearInterval(simInterval);
@@ -1756,7 +1942,7 @@
         function displayResults(data) {
             const top = data.global_emotions?.top_emotion || 'neutral';
             const emoji = CONFIG.EMOTIONS[top] || '😐';
-            
+
             document.getElementById('metricEmotion').textContent = emoji + ' ' + top.toUpperCase();
             document.getElementById('metricIntensity').textContent = Math.round((data.global_emotions?.top_score || 0) * 100) + '%';
             document.getElementById('metricSpeakers').textContent = data.diarization?.num_speakers || 1;
@@ -1764,7 +1950,7 @@
 
             renderCharts(data);
             renderTranscript(data.segments || []);
-            
+
             // Initialize audio player with the file and segments
             if (selectedFile) {
                 audioPlayer.init(selectedFile, data.segments || [], data.metadata?.total_duration || 0);
@@ -1774,7 +1960,7 @@
         function renderCharts(data) {
             const timeline = data.emotion_timeline || [];
             const emotions = [...new Set(timeline.map(t => t.emotion))];
-            
+
             if (timelineChartInstance) timelineChartInstance.destroy();
             if (distributionChartInstance) distributionChartInstance.destroy();
 
@@ -1782,7 +1968,7 @@
             if (timelineCtx && timeline.length > 0) {
                 const step = Math.max(1, Math.floor(timeline.length / 20));
                 const sampledTimeline = timeline.filter((_, i) => i % step === 0);
-                
+
                 timelineChartInstance = new Chart(timelineCtx, {
                     type: 'line',
                     data: {
@@ -1798,24 +1984,24 @@
                             pointHoverRadius: 5
                         }))
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: { duration: 500 },
                         plugins: {
-                            legend: { 
+                            legend: {
                                 position: 'top',
-                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 }
                             }
                         },
                         scales: {
-                            y: { 
+                            y: {
                                 min: 0,
                                 max: 100,
                                 ticks: { color: '#94a3b8', callback: v => v + '%' },
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' }
                             },
-                            x: { 
+                            x: {
                                 ticks: { color: '#94a3b8', maxRotation: 0 },
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' }
                             }
@@ -1838,14 +2024,14 @@
                             borderColor: '#16161d'
                         }]
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: { duration: 500 },
                         plugins: {
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 }
                             }
                         }
                     }
@@ -1856,17 +2042,88 @@
         function renderTranscript(segments) {
             const box = document.getElementById('transcriptBox');
             if (!box) return;
-            
+
             box.innerHTML = segments.map((seg, idx) => `
-                <div class="transcript-segment" data-index="${idx}">
-                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
-                    <span style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
-                        (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
-                    </span>
-                    <br>
-                    ${seg.text_es || seg.text}
+                <div class="transcript-segment" data-index="${idx}" data-prediction-id="${seg.prediction_id || ''}">
+                    <div class="segment-header-row">
+                        <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
+                        <span class="emotion-display" id="emotion-display-${idx}" style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
+                            (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
+                        </span>
+                        <button class="edit-emotion-btn" onclick="toggleEmotionPicker(${idx})" title="Editar emoción">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </div>
+                    <div class="emotion-picker" id="emotion-picker-${idx}" style="display: none;">
+                        <span class="picker-label">Corregir emoción:</span>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'feliz')" data-emotion="feliz">😊 Feliz</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'triste')" data-emotion="triste">😢 Triste</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'enojado')" data-emotion="enojado">😠 Enojado</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'neutral')" data-emotion="neutral">😐 Neutral</button>
+                    </div>
+                    <div class="segment-text-content">${seg.text_es || seg.text}</div>
                 </div>
             `).join('');
+        }
+
+        // Mostrar/ocultar selector de emoción
+        function toggleEmotionPicker(idx) {
+            const picker = document.getElementById(`emotion-picker-${idx}`);
+            if (picker) {
+                picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        // Actualizar emoción y enviar feedback
+        async function updateEmotion(idx, newEmotion) {
+            const segment = currentResults?.segments?.[idx];
+            if (!segment) {
+                toast.error('Segmento no encontrado');
+                return;
+            }
+
+            const predictionId = segment.prediction_id;
+            if (!predictionId) {
+                toast.warning('Este segmento no tiene ID de predicción');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/validate_prediction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prediction_id: predictionId,
+                        correct_label: newEmotion,
+                        comment: `Corrección manual desde dashboard`
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Actualizar la UI
+                    const emotionDisplay = document.getElementById(`emotion-display-${idx}`);
+                    if (emotionDisplay) {
+                        emotionDisplay.innerHTML = `(${CONFIG.EMOTIONS[newEmotion] || '😐'} ${newEmotion}) ✓`;
+                        emotionDisplay.style.color = CONFIG.EMOTION_COLORS[newEmotion] || '#a78bfa';
+                    }
+
+                    // Ocultar picker
+                    toggleEmotionPicker(idx);
+
+                    // Actualizar datos locales
+                    segment.emotion = newEmotion;
+
+                    toast.success(`Emoción corregida a "${newEmotion}" (${result.total_validated} validados)`);
+                } else {
+                    const error = await response.json();
+                    toast.error(error.detail || 'Error al validar');
+                }
+            } catch (e) {
+                console.error('Error actualizando emoción:', e);
+                toast.error('Error de conexión');
+            }
         }
 
         // ============================================
@@ -1898,7 +2155,7 @@
                 const res = await fetch(`${CONFIG.API_URL}/history/`);
                 const history = await res.json();
                 const grid = document.getElementById('historyGrid');
-                
+
                 if (!Array.isArray(history) || history.length === 0) {
                     grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones guardadas</p>';
                     return;
@@ -1972,7 +2229,7 @@
                 a.download = `transcripcion_${Date.now()}.${format}`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
+
                 toast.success(`Exportado a ${format.toUpperCase()}`);
             } catch (e) {
                 toast.error('Error exportando: ' + e.message);
@@ -1992,26 +2249,26 @@
             segments: [],
             duration: 0,
             currentSegmentIndex: -1,
-            
+
             init(audioFile, segments, duration) {
                 this.audio = document.getElementById('audioElement');
                 this.segments = segments || [];
                 this.duration = duration || 0;
-                
+
                 if (audioFile) {
                     this.audio.src = URL.createObjectURL(audioFile);
                     document.getElementById('audioPlayerSection').style.display = 'block';
-                    
+
                     this.audio.addEventListener('loadedmetadata', () => {
                         this.duration = this.audio.duration;
                         document.getElementById('totalTimeDisplay').textContent = Utils.formatTime(this.duration);
                         buildDiarizationTimeline(this.segments, this.duration);
                     });
-                    
+
                     this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 }
             },
-            
+
             toggle() {
                 if (!this.audio) return;
                 const btn = document.getElementById('playPauseBtn');
@@ -2023,41 +2280,41 @@
                     btn.innerHTML = '<i class="fas fa-play"></i>';
                 }
             },
-            
+
             skip(seconds) {
                 if (!this.audio) return;
                 this.audio.currentTime = Math.max(0, Math.min(this.audio.currentTime + seconds, this.duration));
             },
-            
+
             seek(percent) {
                 if (!this.audio) return;
                 this.audio.currentTime = (percent / 100) * this.duration;
             },
-            
+
             seekToTime(time) {
                 if (!this.audio) return;
                 this.audio.currentTime = time;
                 if (this.audio.paused) this.toggle();
             },
-            
+
             setSpeed(speed) {
                 if (this.audio) this.audio.playbackRate = parseFloat(speed);
             },
-            
+
             setVolume(volume) {
                 if (this.audio) this.audio.volume = volume / 100;
             },
-            
+
             onTimeUpdate() {
                 const currentTime = this.audio.currentTime;
                 document.getElementById('currentTimeDisplay').textContent = Utils.formatTime(currentTime);
                 document.getElementById('seekBar').value = (currentTime / this.duration) * 100;
                 this.updateCurrentSegment(currentTime);
             },
-            
+
             updateCurrentSegment(currentTime) {
                 let segmentIndex = -1;
-                
+
                 for (let i = 0; i < this.segments.length; i++) {
                     const seg = this.segments[i];
                     if (currentTime >= seg.start && currentTime < seg.end) {
@@ -2065,35 +2322,35 @@
                         break;
                     }
                 }
-                
+
                 // Update transcript highlighting
                 document.querySelectorAll('.transcript-segment').forEach((el, idx) => {
                     el.classList.toggle('active-segment', idx === segmentIndex);
                 });
-                
+
                 // Highlight segment in the timeline
                 document.querySelectorAll('.timeline-segment').forEach(seg => {
                     seg.classList.remove('active');
                 });
-                
+
                 if (segmentIndex >= 0) {
                     const timelineSegments = document.querySelectorAll('.timeline-segment');
                     if (timelineSegments[segmentIndex]) {
                         timelineSegments[segmentIndex].classList.add('active');
                     }
-                    
+
                     // Update current segment panel
                     const seg = this.segments[segmentIndex];
                     const emotion = seg.emotion || 'neutral';
                     const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
                     const intensity = seg.emotion_score || seg.intensity || 0;
-                    
+
                     document.getElementById('currentSpeaker').textContent = seg.speaker_label || 'Hablante 1';
                     document.getElementById('currentEmotionIcon').textContent = emotionIcon;
                     document.getElementById('currentEmotion').textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
                     document.getElementById('currentIntensity').textContent = Math.round(intensity * 100) + '%';
                     document.getElementById('currentText').textContent = seg.text_es || seg.text || '';
-                    
+
                     this.currentSegmentIndex = segmentIndex;
                 }
             }
@@ -2114,16 +2371,16 @@
         function buildDiarizationTimeline(segments, audioDuration) {
             const timeline = document.getElementById('diarizationTimeline');
             if (!timeline || !segments || segments.length === 0) return;
-            
+
             timeline.innerHTML = '';
-            
+
             segments.forEach((seg, idx) => {
                 const startPercent = (seg.start / audioDuration) * 100;
                 const widthPercent = ((seg.end - seg.start) / audioDuration) * 100;
                 const speaker = seg.speaker_label || 'Hablante 1';
                 const emotion = seg.emotion || 'neutral';
                 const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
-                
+
                 const segmentDiv = document.createElement('div');
                 segmentDiv.className = 'timeline-segment';
                 segmentDiv.style.left = startPercent + '%';
@@ -2132,10 +2389,10 @@
                 segmentDiv.innerHTML = `<span>${emotionIcon}</span>`;
                 segmentDiv.title = `${speaker} - ${emotion} (${seg.start.toFixed(1)}s - ${seg.end.toFixed(1)}s)`;
                 segmentDiv.dataset.index = idx;
-                
+
                 // Click to jump to segment
                 segmentDiv.onclick = () => audioPlayer.seekToTime(seg.start);
-                
+
                 timeline.appendChild(segmentDiv);
             });
         }
@@ -2151,7 +2408,7 @@
                 toast.warning('No hay datos para mostrar');
                 return;
             }
-            
+
             document.getElementById('advancedChartsModal').style.display = 'flex';
             renderAdvancedCharts(currentResults);
         }
@@ -2162,11 +2419,11 @@
 
         function renderAdvancedCharts(data) {
             const segments = data.segments || [];
-            
+
             // Destroy previous chart instances
             if (intensityChartInstance) intensityChartInstance.destroy();
             if (speakerComparisonChartInstance) speakerComparisonChartInstance.destroy();
-            
+
             // Intensity Chart
             const intensityCtx = document.getElementById('intensityChart');
             if (intensityCtx && segments.length > 0) {
@@ -2191,8 +2448,8 @@
                             legend: { labels: { color: '#f8fafc' } }
                         },
                         scales: {
-                            y: { 
-                                min: 0, 
+                            y: {
+                                min: 0,
                                 max: 100,
                                 ticks: { color: '#94a3b8', callback: v => v + '%' }
                             },
@@ -2201,7 +2458,7 @@
                     }
                 });
             }
-            
+
             // Speaker Comparison Chart
             const speakerCtx = document.getElementById('speakerComparisonChart');
             if (speakerCtx && segments.length > 0) {
@@ -2218,10 +2475,10 @@
                     }
                     speakerData[speaker].count++;
                 });
-                
+
                 const speakers = Object.keys(speakerData);
                 const emotions = ['feliz', 'enojado', 'triste', 'neutral'];
-                
+
                 speakerComparisonChartInstance = new Chart(speakerCtx, {
                     type: 'bar',
                     data: {
@@ -2248,14 +2505,15 @@
         }
 
         // Close modal on outside click
-        document.getElementById('advancedChartsModal')?.addEventListener('click', function(e) {
+        document.getElementById('advancedChartsModal')?.addEventListener('click', function (e) {
             if (e.target === this) hideAdvancedCharts();
         });
 
         // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') hideAdvancedCharts();
         });
     </script>
 </body>
+
 </html>

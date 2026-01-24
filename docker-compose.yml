@@ -27,7 +27,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       # Optimizaciones para CPU
-      - OMP_NUM_THREADS=4  # Ajustado para 4 núcleos de CPU (Ryzen 5)
+      - OMP_NUM_THREADS=4 # Ajustado para 4 núcleos de CPU (Ryzen 5)
       # Modelo Whisper se detecta automáticamente según GPU disponible
       # Para forzar un modelo específico, descomenta la siguiente línea:
       # - WHISPER_MODEL=small  # Opciones: base, small, medium, large-v3
@@ -43,11 +43,12 @@ services:
       - ./data:/app/data
       - ./output:/app/output
       - ./history:/app/history
+      - ./feedback_data:/app/feedback_data
       # Dashboard HTML (hot-reload en desarrollo)
       - ./dashboard.html:/app/dashboard.html:ro
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -55,14 +56,14 @@ services:
 
     restart: unless-stopped
 
-    # Límites de recursos (ajustar según tu sistema)
-    # Descomenta para limitar recursos:
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 10G
-    #     reservations:
-    #       memory: 4G
+    # Configurar recursos de GPU (NVIDIA)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 
     logging:
       driver: "json-file"

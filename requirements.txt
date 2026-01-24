@@ -1,18 +1,16 @@
 # =====================================================
 # Proyecto: Voz a Texto con Enfoque en Tono Emocional
-# Archivo de dependencias actualizado - 2026
+# Archivo de dependencias - 2026-01-23
 # Python 3.10+ requerido
 # =====================================================
 
 # =====================================================
-# PyTorch (GPU version para CUDA 12.1+ - RTX 4060/4050)
+# PyTorch (GPU version para CUDA 12.1+)
 # =====================================================
-# Para CUDA 12.1+: usar cu121
-# Para CUDA 11.8: cambiar a cu118
-# Para CPU-only: eliminar --extra-index-url y usar solo torch
-#--extra-index-url https://download.pytorch.org/whl/cu121
-torch>=2.3.0,<2.6.0
-torchaudio>=2.3.0,<2.6.0
+# Para CUDA 12.1+: descomentar la siguiente línea
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.3.0+cu121
+torchaudio==2.3.0+cu121
 
 # =====================================================
 # Core / Utilidades del Sistema
@@ -28,35 +26,30 @@ cachetools>=5.3.0
 soundfile>=0.12.1
 webrtcvad>=2.0.10
 librosa>=0.10.1
-audioread>=3.0.0
-resampy>=0.4.2
 
 # =====================================================
-# Transcripción y Modelos de Voz
+# Transcripción
 # =====================================================
 openai-whisper>=20231117
-# Vosk removido si no se usa activamente (optimización)
-# vosk>=0.3.45
+vosk>=0.3.45
 
 # =====================================================
 # Diarización de Hablantes
 # =====================================================
 resemblyzer>=0.1.1
 scikit-learn>=1.3.0
-umap-learn>=0.5.5
 
 # =====================================================
 # NLP y Análisis Emocional (Transformers)
 # =====================================================
 transformers>=4.37.0,<4.46.0
-tokenizers>=0.15.0
+datasets>=2.14.0
+accelerate>=0.20.0
 sentencepiece>=0.1.99
 sacremoses>=0.0.53
-# pysentimiento removido si no se usa (optimización)
-# pysentimiento>=0.7.0
 
 # =====================================================
-# HuggingFace Hub para descarga de modelos
+# HuggingFace Hub
 # =====================================================
 huggingface-hub>=0.20.0
 safetensors>=0.4.0
@@ -67,56 +60,28 @@ safetensors>=0.4.0
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 python-multipart>=0.0.9
-starlette>=0.35.0
 pydantic>=2.5.0
-pydantic-settings>=2.1.0
+
+# =====================================================
+# Cliente OpenAI y HTTP (opcional - para cloud)
+# =====================================================
+openai>=1.10.0
 httpx>=0.26.0
 
 # =====================================================
-# Visualización y Exportación
+# Exportación PDF (opcional)
 # =====================================================
-plotly>=5.18.0
-matplotlib>=3.8.0
 reportlab>=4.0.9
-Pillow>=10.2.0
 
 # =====================================================
-# Cliente OpenAI (opcional para transcripción cloud)
+# NOTAS
 # =====================================================
-openai>=1.10.0
-
-# =====================================================
-# Compatibilidad y Seguridad
-# =====================================================
-protobuf>=3.20.0,<5.0.0
-typing-extensions>=4.9.0
-filelock>=3.13.0
-packaging>=23.0
-
-# =====================================================
-# Aceleración y Optimización
-# =====================================================
-# Opcional: Uncomment para acelerar inferencia
-# accelerate>=0.26.0
-# optimum>=1.16.0
-
-# =====================================================
-# NOTAS IMPORTANTES
-# =====================================================
-# 1. CUDA: Este archivo usa CUDA 12.1. Para otras versiones:
-#    - CUDA 11.8: cambiar cu121 por cu118
-#    - CPU only: eliminar --extra-index-url y torch<2.6.0
+# Instalación: pip install -r requirements.txt
+# Verificar CUDA: python -c "import torch; print(torch.cuda.is_available())"
 #
-# 2. VRAM: RTX 4060 (8GB) puede usar modelo "medium" de Whisper
-#    RTX 4050 (6GB) puede usar modelo "small" o "medium"
-#
-# 3. Instalación: pip install -r requirements.txt
-#
-# 4. Verificar CUDA: python -c "import torch; print(torch.cuda.is_available())"
-#
-# 5. Modelos descargados automáticamente en primera ejecución:
-#    - openai/whisper-medium (~5GB)
-#    - j-hartmann/emotion-english-distilroberta-base (~500MB)
-#    - daveni/twitter-xlm-roberta-emotion-es (~1.2GB)
-#    - Helsinki-NLP/opus-mt-es-en (~300MB)
-#    - superb/wav2vec2-base-superb-er (~400MB)
+# Modelos descargados automáticamente:
+# - openai/whisper-medium (~5GB)
+# - j-hartmann/emotion-english-distilroberta-base (~500MB)
+# - daveni/twitter-xlm-roberta-emotion-es (~1.2GB)
+# - Helsinki-NLP/opus-mt-es-en (~300MB)
+# - superb/wav2vec2-base-superb-er (~400MB)

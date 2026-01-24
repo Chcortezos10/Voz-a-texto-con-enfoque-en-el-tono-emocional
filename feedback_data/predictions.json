@@ -1,0 +1,483 @@
+{
+  "ba4bb1d3-8eca-4389-8eaa-e43977844b37": {
+    "audio_path": "./feedback_data/audio/ba4bb1d3-8eca-4389-8eaa-e43977844b37.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4977,
+    "metadata": {
+      "text_es": "Amigos, buenos días.",
+      "text_en": "Amigos, buenos días.",
+      "start": 0.0,
+      "end": 1.0
+    },
+    "timestamp": "2026-01-24T06:47:31.772825",
+    "validated": false
+  },
+  "edbea166-d08a-460c-be58-285120c381b0": {
+    "audio_path": "./feedback_data/audio/edbea166-d08a-460c-be58-285120c381b0.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5447,
+    "metadata": {
+      "text_es": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "text_en": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "start": 1.0,
+      "end": 4.0
+    },
+    "timestamp": "2026-01-24T06:47:35.167095",
+    "validated": false
+  },
+  "5d15284c-b97b-459d-b34d-d1eedde308db": {
+    "audio_path": "./feedback_data/audio/5d15284c-b97b-459d-b34d-d1eedde308db.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4391,
+    "metadata": {
+      "text_es": "Hoy es mi último día de trabajo en Tilemazonas.",
+      "text_en": "Hoy es mi último día de trabajo en Tilemazonas.",
+      "start": 4.0,
+      "end": 7.0
+    },
+    "timestamp": "2026-01-24T06:47:36.531404",
+    "validated": false
+  },
+  "80a6240f-68d1-438d-8f9f-77b858a78531": {
+    "audio_path": "./feedback_data/audio/80a6240f-68d1-438d-8f9f-77b858a78531.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4738,
+    "metadata": {
+      "text_es": "Me voy voluntariamente por decisión propia, aunque claro,",
+      "text_en": "Me voy voluntariamente por decisión propia, aunque claro,",
+      "start": 7.0,
+      "end": 10.0
+    },
+    "timestamp": "2026-01-24T06:47:38.215798",
+    "validated": false
+  },
+  "eac0db66-f9e1-4969-808f-754ba64365e4": {
+    "audio_path": "./feedback_data/audio/eac0db66-f9e1-4969-808f-754ba64365e4.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4136,
+    "metadata": {
+      "text_es": "en esa decisión incluyó determinantemente una situación que se volvió insostenible.",
+      "text_en": "en esa decisión incluyó determinantemente una situación que se volvió insostenible.",
+      "start": 10.0,
+      "end": 15.0
+    },
+    "timestamp": "2026-01-24T06:47:40.353785",
+    "validated": false
+  },
+  "1377bc88-7c6d-40c5-af1b-5030c1a6d0c9": {
+    "audio_path": "./feedback_data/audio/1377bc88-7c6d-40c5-af1b-5030c1a6d0c9.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.419,
+    "metadata": {
+      "text_es": "Les cuento.",
+      "text_en": "Les cuento.",
+      "start": 15.0,
+      "end": 16.0
+    },
+    "timestamp": "2026-01-24T06:47:40.939094",
+    "validated": false
+  },
+  "9f7e9a41-e576-47cc-a7ec-aee3f996dd55": {
+    "audio_path": "./feedback_data/audio/9f7e9a41-e576-47cc-a7ec-aee3f996dd55.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3706,
+    "metadata": {
+      "text_es": "Por disposición de la Constitución, disposición por cierto hecha con dedicatoria y maldad,",
+      "text_en": "Por disposición de la Constitución, disposición por cierto hecha con dedicatoria y maldad,",
+      "start": 16.0,
+      "end": 20.0
+    },
+    "timestamp": "2026-01-24T06:47:43.013426",
+    "validated": false
+  },
+  "068c71e9-29cd-4e45-bfb1-34efbebdd979": {
+    "audio_path": "./feedback_data/audio/068c71e9-29cd-4e45-bfb1-34efbebdd979.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4572,
+    "metadata": {
+      "text_es": "Tilemazonas debe ser vendido.",
+      "text_en": "Tilemazonas debe ser vendido.",
+      "start": 20.0,
+      "end": 22.0
+    },
+    "timestamp": "2026-01-24T06:47:43.764943",
+    "validated": false
+  },
+  "69a6978a-c37f-4839-84d9-8d11ed62f707": {
+    "audio_path": "./feedback_data/audio/69a6978a-c37f-4839-84d9-8d11ed62f707.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4413,
+    "metadata": {
+      "text_es": "Y esta venta por incluir una frecuencia radioeléctrica tiene que ser autorizada por el gobierno.",
+      "text_en": "Y esta venta por incluir una frecuencia radioeléctrica tiene que ser autorizada por el gobierno.",
+      "start": 22.0,
+      "end": 26.0
+    },
+    "timestamp": "2026-01-24T06:47:45.076569",
+    "validated": false
+  },
+  "d5204e27-4947-43a7-a3dc-0b4558017835": {
+    "audio_path": "./feedback_data/audio/d5204e27-4947-43a7-a3dc-0b4558017835.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5188,
+    "metadata": {
+      "text_es": "Me parece evidente, por la insistencia y la acidez de los ataques del gobierno en mi contra,",
+      "text_en": "Me parece evidente, por la insistencia y la acidez de los ataques del gobierno en mi contra,",
+      "start": 26.0,
+      "end": 31.0
+    },
+    "timestamp": "2026-01-24T06:47:46.282419",
+    "validated": false
+  },
+  "44ef9f4d-ad6c-4342-b3c0-201bb006dcba": {
+    "audio_path": "./feedback_data/audio/44ef9f4d-ad6c-4342-b3c0-201bb006dcba.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3835,
+    "metadata": {
+      "text_es": "que yo podría ser un obstáculo para que el gobierno autorice esa venta cuando llegue el momento.",
+      "text_en": "que yo podría ser un obstáculo para que el gobierno autorice esa venta cuando llegue el momento.",
+      "start": 31.0,
+      "end": 36.0
+    },
+    "timestamp": "2026-01-24T06:47:47.597394",
+    "validated": false
+  },
+  "6b1685d6-b177-493f-8b6f-4a3327aa9901": {
+    "audio_path": "./feedback_data/audio/6b1685d6-b177-493f-8b6f-4a3327aa9901.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4803,
+    "metadata": {
+      "text_es": "Frente a ese panorama, he insisto, para yo no ser un pretexto del gobierno",
+      "text_en": "Frente a ese panorama, he insisto, para yo no ser un pretexto del gobierno",
+      "start": 36.0,
+      "end": 40.0
+    },
+    "timestamp": "2026-01-24T06:47:48.431129",
+    "validated": false
+  },
+  "6a549677-3f13-4c7a-b313-aa725628a665": {
+    "audio_path": "./feedback_data/audio/6a549677-3f13-4c7a-b313-aa725628a665.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4285,
+    "metadata": {
+      "text_es": "para que Tilemazonas se extingue y desaparezca, he decidido dar este paso al costado de efecto inmediato.",
+      "text_en": "para que Tilemazonas se extingue y desaparezca, he decidido dar este paso al costado de efecto inmediato.",
+      "start": 40.0,
+      "end": 46.0
+    },
+    "timestamp": "2026-01-24T06:47:49.678140",
+    "validated": false
+  },
+  "a4ed563a-b2ae-494b-bb98-4b38045beb2f": {
+    "audio_path": "./feedback_data/audio/a4ed563a-b2ae-494b-bb98-4b38045beb2f.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5167,
+    "metadata": {
+      "text_es": "Luego, sin ningún cálculo político, ni ningún beneficio económico, ninguno.",
+      "text_en": "Luego, sin ningún cálculo político, ni ningún beneficio económico, ninguno.",
+      "start": 46.0,
+      "end": 51.0
+    },
+    "timestamp": "2026-01-24T06:47:50.735836",
+    "validated": false
+  },
+  "c4279f2e-051c-4bee-80cb-4671b8331b99": {
+    "audio_path": "./feedback_data/audio/c4279f2e-051c-4bee-80cb-4671b8331b99.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.424,
+    "metadata": {
+      "text_es": "Si alguien creyera lo contrario, se equivocaría.",
+      "text_en": "Si alguien creyera lo contrario, se equivocaría.",
+      "start": 51.0,
+      "end": 53.0
+    },
+    "timestamp": "2026-01-24T06:47:51.339975",
+    "validated": false
+  },
+  "1a03fb0d-3f0c-42e7-a550-8a19e787a751": {
+    "audio_path": "./feedback_data/audio/1a03fb0d-3f0c-42e7-a550-8a19e787a751.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4366,
+    "metadata": {
+      "text_es": "Si alguien dijera lo contrario, mentiría.",
+      "text_en": "Si alguien dijera lo contrario, mentiría.",
+      "start": 53.0,
+      "end": 55.0
+    },
+    "timestamp": "2026-01-24T06:47:51.822584",
+    "validated": false
+  },
+  "3de34f7d-a7b5-44f6-b7a7-09a41dfbafc0": {
+    "audio_path": "./feedback_data/audio/3de34f7d-a7b5-44f6-b7a7-09a41dfbafc0.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4173,
+    "metadata": {
+      "text_es": "Es un salto al vacío sin red.",
+      "text_en": "Es un salto al vacío sin red.",
+      "start": 55.0,
+      "end": 57.0
+    },
+    "timestamp": "2026-01-24T06:47:52.297315",
+    "validated": false
+  },
+  "cbfeff8f-9acd-4b5c-957f-b4e902039876": {
+    "audio_path": "./feedback_data/audio/cbfeff8f-9acd-4b5c-957f-b4e902039876.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4803,
+    "metadata": {
+      "text_es": "Y es que en asuntos de principios, así soy, así soy de necio.",
+      "text_en": "Y es que en asuntos de principios, así soy, así soy de necio.",
+      "start": 57.0,
+      "end": 61.0
+    },
+    "timestamp": "2026-01-24T06:47:53.271900",
+    "validated": false
+  },
+  "4a8ace59-1464-4602-95e0-18b0ddd43d05": {
+    "audio_path": "./feedback_data/audio/4a8ace59-1464-4602-95e0-18b0ddd43d05.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5128,
+    "metadata": {
+      "text_es": "En fin, pero no puedo irme sin dejar de expresar constancia de dos agradecimientos.",
+      "text_en": "En fin, pero no puedo irme sin dejar de expresar constancia de dos agradecimientos.",
+      "start": 61.0,
+      "end": 65.0
+    },
+    "timestamp": "2026-01-24T06:47:54.431399",
+    "validated": false
+  },
+  "7bd001fb-cb27-495b-8d14-83e85397cc39": {
+    "audio_path": "./feedback_data/audio/7bd001fb-cb27-495b-8d14-83e85397cc39.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4231,
+    "metadata": {
+      "text_es": "El uno a este canal, a Tilemazonas, a todos sus directivos, periodistas y empleados,",
+      "text_en": "El uno a este canal, a Tilemazonas, a todos sus directivos, periodistas y empleados,",
+      "start": 65.0,
+      "end": 70.0
+    },
+    "timestamp": "2026-01-24T06:47:55.466517",
+    "validated": false
+  },
+  "9d26f37a-68d5-4804-bb27-9afe31003edb": {
+    "audio_path": "./feedback_data/audio/9d26f37a-68d5-4804-bb27-9afe31003edb.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4318,
+    "metadata": {
+      "text_es": "y muy singularmente a su presidente, el doctor Fidelegas,",
+      "text_en": "y muy singularmente a su presidente, el doctor Fidelegas,",
+      "start": 70.0,
+      "end": 72.0
+    },
+    "timestamp": "2026-01-24T06:47:56.098684",
+    "validated": false
+  },
+  "36aa749c-549c-4f72-ac35-4eccaabf17a9": {
+    "audio_path": "./feedback_data/audio/36aa749c-549c-4f72-ac35-4eccaabf17a9.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.483,
+    "metadata": {
+      "text_es": "por el apoyo que siempre me dieron para un trabajo periodístico independiente.",
+      "text_en": "por el apoyo que siempre me dieron para un trabajo periodístico independiente.",
+      "start": 72.0,
+      "end": 77.0
+    },
+    "timestamp": "2026-01-24T06:47:57.102537",
+    "validated": false
+  },
+  "016b5b57-5c6e-4f37-92af-04524e663cad": {
+    "audio_path": "./feedback_data/audio/016b5b57-5c6e-4f37-92af-04524e663cad.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.536,
+    "metadata": {
+      "text_es": "El otro a todos ustedes, amigos, por su sintonía diaria, por su apoyo,",
+      "text_en": "El otro a todos ustedes, amigos, por su sintonía diaria, por su apoyo,",
+      "start": 77.0,
+      "end": 81.0
+    },
+    "timestamp": "2026-01-24T06:47:58.183969",
+    "validated": false
+  },
+  "ce2d89be-4374-42d9-8205-d02ec2871fb3": {
+    "audio_path": "./feedback_data/audio/ce2d89be-4374-42d9-8205-d02ec2871fb3.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4627,
+    "metadata": {
+      "text_es": "por sus muchísimos mensajes de respaldo y cariño,",
+      "text_en": "por sus muchísimos mensajes de respaldo y cariño,",
+      "start": 81.0,
+      "end": 84.0
+    },
+    "timestamp": "2026-01-24T06:47:59.533178",
+    "validated": false
+  },
+  "4a730203-39da-4b6c-a22e-32ff213f8cdb": {
+    "audio_path": "./feedback_data/audio/4a730203-39da-4b6c-a22e-32ff213f8cdb.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3658,
+    "metadata": {
+      "text_es": "y también por sus críticas que me sirvieron para tratar de hacer mi trabajo cada vez mejor.",
+      "text_en": "y también por sus críticas que me sirvieron para tratar de hacer mi trabajo cada vez mejor.",
+      "start": 84.0,
+      "end": 89.0
+    },
+    "timestamp": "2026-01-24T06:48:00.894256",
+    "validated": false
+  },
+  "71f142b9-6eb0-40f6-a6dd-1829bc314f41": {
+    "audio_path": "./feedback_data/audio/71f142b9-6eb0-40f6-a6dd-1829bc314f41.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3795,
+    "metadata": {
+      "text_es": "¿Cuándo me reencontraré con ustedes?",
+      "text_en": "¿Cuándo me reencontraré con ustedes?",
+      "start": 89.0,
+      "end": 91.0
+    },
+    "timestamp": "2026-01-24T06:48:01.560801",
+    "validated": false
+  },
+  "5cdbe843-cbd2-4368-8e82-51a5ec9ad6a0": {
+    "audio_path": "./feedback_data/audio/5cdbe843-cbd2-4368-8e82-51a5ec9ad6a0.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4007,
+    "metadata": {
+      "text_es": "Pues supongo cuando los ecuatorianos volvamos a vivir en democracia.",
+      "text_en": "Pues supongo cuando los ecuatorianos volvamos a vivir en democracia.",
+      "start": 91.0,
+      "end": 95.0
+    },
+    "timestamp": "2026-01-24T06:48:03.284287",
+    "validated": false
+  },
+  "b5991687-b1e3-4da8-99cf-176f9c83ab2f": {
+    "audio_path": "./feedback_data/audio/b5991687-b1e3-4da8-99cf-176f9c83ab2f.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4071,
+    "metadata": {
+      "text_es": "Es decir, cuando esté generalmente en vigencia un sistema de derechos, garantías y libertades.",
+      "text_en": "Es decir, cuando esté generalmente en vigencia un sistema de derechos, garantías y libertades.",
+      "start": 95.0,
+      "end": 102.0
+    },
+    "timestamp": "2026-01-24T06:48:05.694165",
+    "validated": false
+  },
+  "be40d5ba-12fd-4466-82e8-4f71d539ce56": {
+    "audio_path": "./feedback_data/audio/be40d5ba-12fd-4466-82e8-4f71d539ce56.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3654,
+    "metadata": {
+      "text_es": "Continúo con mi mensaje de despedida que se interrumpió debido a un problema técnico causado por un error humano.",
+      "text_en": "Continúo con mi mensaje de despedida que se interrumpió debido a un problema técnico causado por un error humano.",
+      "start": 102.0,
+      "end": 109.0
+    },
+    "timestamp": "2026-01-24T06:48:08.255948",
+    "validated": false
+  },
+  "39b828fc-9ff9-474f-900e-a1ac734b5cff": {
+    "audio_path": "./feedback_data/audio/39b828fc-9ff9-474f-900e-a1ac734b5cff.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4351,
+    "metadata": {
+      "text_es": "Les preguntaba, ¿cuándo me reencontraré con ustedes?",
+      "text_en": "Les preguntaba, ¿cuándo me reencontraré con ustedes?",
+      "start": 109.0,
+      "end": 112.0
+    },
+    "timestamp": "2026-01-24T06:48:09.219742",
+    "validated": false
+  },
+  "eac8b03c-7ba8-41cd-b77d-ba81f59d4a45": {
+    "audio_path": "./feedback_data/audio/eac8b03c-7ba8-41cd-b77d-ba81f59d4a45.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.408,
+    "metadata": {
+      "text_es": "Contesto, pues supongo cuando los ecuatorianos volvamos a vivir en democracia.",
+      "text_en": "Contesto, pues supongo cuando los ecuatorianos volvamos a vivir en democracia.",
+      "start": 112.0,
+      "end": 116.0
+    },
+    "timestamp": "2026-01-24T06:48:10.574068",
+    "validated": false
+  },
+  "625d47f2-c052-4f66-851b-8c728ecd31d1": {
+    "audio_path": "./feedback_data/audio/625d47f2-c052-4f66-851b-8c728ecd31d1.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4074,
+    "metadata": {
+      "text_es": "Es decir, cuando esté genuinamente en vigencia un estado de derechos, garantías y libertades",
+      "text_en": "Es decir, cuando esté genuinamente en vigencia un estado de derechos, garantías y libertades",
+      "start": 116.0,
+      "end": 120.0
+    },
+    "timestamp": "2026-01-24T06:48:11.578050",
+    "validated": false
+  },
+  "a9844841-f3ad-4aae-b37a-f65c196ae7ae": {
+    "audio_path": "./feedback_data/audio/a9844841-f3ad-4aae-b37a-f65c196ae7ae.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3933,
+    "metadata": {
+      "text_es": "en el que sea posible discrepar, disentir y cuestionar sin ser víctima de insultos, ofensas, amenazas y persecuciones como ocurre actualmente.",
+      "text_en": "en el que sea posible discrepar, disentir y cuestionar sin ser víctima de insultos, ofensas, amenazas y persecuciones como ocurre actualmente.",
+      "start": 120.0,
+      "end": 127.0
+    },
+    "timestamp": "2026-01-24T06:48:13.804152",
+    "validated": false
+  },
+  "ad7c4f64-9bb1-4972-8076-4fe5f0dfc399": {
+    "audio_path": "./feedback_data/audio/ad7c4f64-9bb1-4972-8076-4fe5f0dfc399.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3818,
+    "metadata": {
+      "text_es": "Nos reencontraremos tal vez cuando se pueda informar sin que la respuesta del poder sea una avalancha de cadenas de radio y televisión",
+      "text_en": "Nos reencontraremos tal vez cuando se pueda informar sin que la respuesta del poder sea una avalancha de cadenas de radio y televisión",
+      "start": 127.0,
+      "end": 134.0
+    },
+    "timestamp": "2026-01-24T06:48:15.739746",
+    "validated": false
+  },
+  "5cea4d67-6e80-4492-b1ea-290f6fd86033": {
+    "audio_path": "./feedback_data/audio/5cea4d67-6e80-4492-b1ea-290f6fd86033.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4208,
+    "metadata": {
+      "text_es": "y de retas de verdades a medias, mentiras inmensas y un enorme, enorme repertorio de agravios, ultrajes y descalificaciones.",
+      "text_en": "y de retas de verdades a medias, mentiras inmensas y un enorme, enorme repertorio de agravios, ultrajes y descalificaciones.",
+      "start": 134.0,
+      "end": 141.0
+    },
+    "timestamp": "2026-01-24T06:48:17.618989",
+    "validated": false
+  },
+  "e0e5d945-710c-42e2-a1ab-b037fb6515be": {
+    "audio_path": "./feedback_data/audio/e0e5d945-710c-42e2-a1ab-b037fb6515be.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5239,
+    "metadata": {
+      "text_es": "Nos reencontraremos quizás cuando en vez de fomentar el odio y la división un gobierno aliente la unidad y el respeto entre todos los ecuatorianos.",
+      "text_en": "Nos reencontraremos quizás cuando en vez de fomentar el odio y la división un gobierno aliente la unidad y el respeto entre todos los ecuatorianos.",
+      "start": 141.0,
+      "end": 149.0
+    },
+    "timestamp": "2026-01-24T06:48:19.670193",
+    "validated": false
+  },
+  "13a559d4-2364-4ea2-a69b-eb29564f0031": {
+    "audio_path": "./feedback_data/audio/13a559d4-2364-4ea2-a69b-eb29564f0031.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4501,
+    "metadata": {
+      "text_es": "Hasta entonces amigos, me despido sin estridencias ni rencores. Gracias, gracias una vez más a todos, a todos ustedes.",
+      "text_en": "Hasta entonces amigos, me despido sin estridencias ni rencores. Gracias, gracias una vez más a todos, a todos ustedes.",
+      "start": 149.0,
+      "end": 157.0
+    },
+    "timestamp": "2026-01-24T06:48:21.589351",
+    "validated": false
+  }
+}
