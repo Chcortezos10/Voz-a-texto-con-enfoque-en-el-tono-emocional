@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 try:
     from transformers import (
-        Wav2Vec2Processor, 
+        Wav2Vec2FeatureExtractor, 
         Wav2Vec2ForSequenceClassification,
         TrainingArguments, 
         Trainer
     )
-    from datasets import Dataset, Audio
+    from datasets import Dataset, Audio, Features, Value
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
@@ -84,22 +84,46 @@ def prepare_dataset(entries: List[Dict[str, Any]]) -> Optional[Dataset]:
         return None
         
     audio_paths = [e["audio_path"] for e in entries]
-    labels = [EMOTION_MAP.get(e["correct_label"].lower(), 0) for e in entries]
+    labels = [int(EMOTION_MAP.get(e["correct_label"].lower(), 0)) for e in entries]
     
+    # Explicitly define features to ensure labels are int64
+    features = Features({
+        "audio": Value("string"),
+        "label": Value("int64")
+    })
+
     dataset = Dataset.from_dict({
         "audio": audio_paths,
         "label": labels
-    })
+    }, features=features)
     
-    # Cast to Audio column to handle loading
-    dataset = dataset.cast_column("audio", Audio(sampling_rate=CONFIG["target_sr"]))
+    # Remove cast_column to avoid backend issues
+    # dataset = dataset.cast_column("audio", Audio(sampling_rate=CONFIG["target_sr"]))
     
     return dataset
 
 def compute_metrics(eval_pred):
     """Computes accuracy metrics."""
-    predictions = np.argmax(eval_pred.predictions, axis=1)
-    return {"accuracy": (predictions == eval_pred.label_ids).astype(np.float32).mean().item()}
+    preds = eval_pred.predictions
+    labels = eval_pred.label_ids
+    
+    print(f"DEBUG: preds type: {type(preds)}")
+    if isinstance(preds, np.ndarray):
+        print(f"DEBUG: preds shape: {preds.shape}")
+    elif isinstance(preds, (list, tuple)):
+        print(f"DEBUG: preds len: {len(preds)}")
+        if len(preds) > 0:
+            print(f"DEBUG: preds[0] type: {type(preds[0])}")
+            if hasattr(preds[0], 'shape'):
+                 print(f"DEBUG: preds[0] shape: {preds[0].shape}")
+
+    if isinstance(preds, tuple):
+         # If it's a tuple, it might be (logits, hidden_states). We usually want the first element.
+         predictions = np.argmax(preds[0], axis=1)
+    else:
+         predictions = np.argmax(preds, axis=1)
+            
+    return {"accuracy": (predictions == labels).astype(np.float32).mean().item()}
 
 def run_retraining():
     if not TRANSFORMERS_AVAILABLE:
@@ -120,25 +144,36 @@ def run_retraining():
     train_ds = dataset["train"]
     test_ds = dataset["test"]
     
-    # 2. Load Processor & Model
+    # 2. Load Feature Extractor & Model
     logger.info(f"Loading base model: {CONFIG['model_name']}")
-    processor = Wav2Vec2Processor.from_pretrained(CONFIG["model_name"])
+    feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(CONFIG["model_name"])
     
-    # Feature Extractor wrapper
-    def preprocess_function(examples):
-        audio_arrays = [x["array"] for x in examples["audio"]]
-        inputs = processor(
-            audio_arrays, 
+    # Feature Extractor wrapper (Non-batched to avoid jagged array issues)
+    def preprocess_function(example):
+        # Load and resample
+        speech, _ = librosa.load(example["audio"], sr=CONFIG["target_sr"])
+        speech = speech.astype(np.float32)
+        
+        inputs = feature_extractor(
+            [speech], 
             sampling_rate=CONFIG["target_sr"], 
-            padding=True, 
+            padding="max_length", 
             max_length=int(CONFIG["target_sr"] * CONFIG["max_duration"]), 
             truncation=True,
-            return_tensors="pt"
+            # return_tensors="pt" # Removed to let collator handle conversion
         )
-        return inputs
+        
+        result = inputs["input_values"][0]
+        # logger.info(f"Processed length: {len(result)}")
+        if len(result) != int(CONFIG["target_sr"] * CONFIG["max_duration"]):
+            logger.error(f"Length mismatch! Expected {int(CONFIG['target_sr'] * CONFIG['max_duration'])}, got {len(result)}")
+        
+        # Return single item as list
+        return {"input_values": result.tolist()}
 
-    encoded_train = train_ds.map(preprocess_function, batched=True, batch_size=CONFIG["batch_size"])
-    encoded_test = test_ds.map(preprocess_function, batched=True, batch_size=CONFIG["batch_size"])
+    # Use remove_columns to drop the 'audio' column which just contains paths now
+    encoded_train = train_ds.map(preprocess_function, batched=False, remove_columns=["audio"], load_from_cache_file=False)
+    encoded_test = test_ds.map(preprocess_function, batched=False, remove_columns=["audio"], load_from_cache_file=False)
 
     # Load Model with correct number of labels
     model = Wav2Vec2ForSequenceClassification.from_pretrained(
@@ -160,11 +195,32 @@ def run_retraining():
         num_train_epochs=CONFIG["epochs"],
         weight_decay=0.01,
         load_best_model_at_end=True,
-        metric_for_best_model="accuracy",
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
         logging_dir=f"{CONFIG['output_dir']}/logs",
         logging_steps=10,
         use_cpu=not torch.cuda.is_available()
     )
+
+    # Custom collator to ensure correct types (labels as LongTensor)
+    def data_collator(features):
+        batch = {}
+        # Combine input_values into a batch
+        # datasets.map with batched=True often results in list of lists for input_values, or tensors.
+        # We need to handle both
+        input_values = [f["input_values"] for f in features]
+        
+        # Debug shapes
+        shapes = [len(x) for x in input_values]
+        logger.info(f"Collator input shapes: {shapes}")
+        
+        # Calculate max length in this batch (if not already padded to max)
+        # But we padded in preprocess, so simple stack
+        batch["input_values"] = torch.tensor(input_values)
+        
+        # Combine labels
+        batch["labels"] = torch.tensor([f["label"] for f in features], dtype=torch.long)
+        return batch
 
     # 4. Trainer
     trainer = Trainer(
@@ -172,8 +228,9 @@ def run_retraining():
         args=training_args,
         train_dataset=encoded_train,
         eval_dataset=encoded_test,
-        tokenizer=processor.feature_extractor,
-        compute_metrics=compute_metrics,
+        tokenizer=feature_extractor,
+        # compute_metrics=compute_metrics, # Disabled for debugging
+        data_collator=data_collator,
     )
 
     # 5. Train
@@ -183,9 +240,13 @@ def run_retraining():
     # 6. Save
     logger.info(f"Saving fine-tuned model to {CONFIG['output_dir']}")
     trainer.save_model(CONFIG["output_dir"])
-    processor.save_pretrained(CONFIG["output_dir"])
+    feature_extractor.save_pretrained(CONFIG["output_dir"])
     
     logger.info("Retraining complete successfully.")
 
 if __name__ == "__main__":
-    run_retraining()
+    import traceback
+    try:
+        run_retraining()
+    except Exception:
+        traceback.print_exc()

@@ -1,0 +1,58 @@
+{
+  "ba4bb1d3-8eca-4389-8eaa-e43977844b37": {
+    "audio_path": "./feedback_data/audio/ba4bb1d3-8eca-4389-8eaa-e43977844b37.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4977,
+    "metadata": {
+      "text_es": "Amigos, buenos días.",
+      "text_en": "Amigos, buenos días.",
+      "start": 0.0,
+      "end": 1.0
+    },
+    "timestamp": "2026-01-24T06:47:31.772825",
+    "validated": true,
+    "correct_label": "neutral"
+  },
+  "edbea166-d08a-460c-be58-285120c381b0": {
+    "audio_path": "./feedback_data/audio/edbea166-d08a-460c-be58-285120c381b0.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5447,
+    "metadata": {
+      "text_es": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "text_en": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "start": 1.0,
+      "end": 4.0
+    },
+    "timestamp": "2026-01-24T06:47:35.167095",
+    "validated": true,
+    "correct_label": "triste"
+  },
+  "1377bc88-7c6d-40c5-af1b-5030c1a6d0c9": {
+    "audio_path": "./feedback_data/audio/1377bc88-7c6d-40c5-af1b-5030c1a6d0c9.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.419,
+    "metadata": {
+      "text_es": "Les cuento.",
+      "text_en": "Les cuento.",
+      "start": 15.0,
+      "end": 16.0
+    },
+    "timestamp": "2026-01-24T06:47:40.939094",
+    "validated": true,
+    "correct_label": "neutral"
+  },
+  "068c71e9-29cd-4e45-bfb1-34efbebdd979": {
+    "audio_path": "./feedback_data/audio/068c71e9-29cd-4e45-bfb1-34efbebdd979.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4572,
+    "metadata": {
+      "text_es": "Tilemazonas debe ser vendido.",
+      "text_en": "Tilemazonas debe ser vendido.",
+      "start": 20.0,
+      "end": 22.0
+    },
+    "timestamp": "2026-01-24T06:47:43.764943",
+    "validated": true,
+    "correct_label": "enojado"
+  }
+}
