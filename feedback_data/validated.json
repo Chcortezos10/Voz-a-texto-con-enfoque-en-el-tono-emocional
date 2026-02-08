@@ -54,5 +54,37 @@
     "timestamp": "2026-01-24T06:47:43.764943",
     "validated": true,
     "correct_label": "enojado"
+  },
+  "be17ca96-ee9c-4923-a38d-754c1b62e5c3": {
+    "audio_path": "./feedback_data/audio/be17ca96-ee9c-4923-a38d-754c1b62e5c3.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.8817,
+    "metadata": {
+      "text_es": "bailarina hay mucha honra",
+      "text_en": "dancer there's a lot of honor",
+      "start": 159.0,
+      "end": 161.0
+    },
+    "timestamp": "2026-02-08T20:24:27.230522",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-08T20:25:53.939006"
+  },
+  "78df8f6e-203d-4244-ab3c-c46cc6f09893": {
+    "audio_path": "./feedback_data/audio/78df8f6e-203d-4244-ab3c-c46cc6f09893.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.4266,
+    "metadata": {
+      "text_es": "yo estoy aquí dándote la cara",
+      "text_en": "I'm here giving you the face",
+      "start": 169.0,
+      "end": 171.0
+    },
+    "timestamp": "2026-02-08T20:24:30.505655",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-08T20:26:00.325885"
   }
 }

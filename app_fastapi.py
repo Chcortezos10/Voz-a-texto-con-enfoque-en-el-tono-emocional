@@ -260,21 +260,33 @@ async def dashboard():
 async def startup_event():
     """Inicializa el sistema."""
     logger.info("=" * 60)
-    logger.info(" INICIANDO SISTEMA (Modo Optimizado RAM)")
+    logger.info(" INICIANDO SISTEMA VOZ-A-TEXTO EMOCIONAL v5.0")
     logger.info("=" * 60)
     
-    # Precargar solo Whisper
-    load_models() 
-    logger.info("Whisper cargado")
+    # Detectar GPU
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name(0)
+        vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        logger.info(f"✅ GPU DETECTADA: {gpu_name} ({vram_gb:.1f} GB VRAM)")
+    else:
+        logger.warning("⚠️  GPU NO DETECTADA - Usando CPU (procesamiento más lento)")
+    
+    # Precargar Whisper
+    models = load_models()
+    device = models.get("device", "cpu")
+    logger.info(f"✅ Whisper cargado en: {device.upper()}")
     
     # Modelos de emoción se cargarán bajo demanda
-    logger.info("ℹ Modelos de emoción: Carga bajo demanda")
+    logger.info("ℹ️  Modelos de emoción: Carga bajo demanda")
     
     log_memory_usage()
     
     logger.info("=" * 60)
-    logger.info(" SISTEMA LISTO: http://127.0.0.1:8000")
+    logger.info("🚀 SERVIDOR LISTO")
+    logger.info("   Dashboard: http://127.0.0.1:8000/")
+    logger.info("   API Docs:  http://127.0.0.1:8000/docs")
     logger.info("=" * 60)
+
 
 # FUNCIONES AUXILIARES
 

@@ -18,20 +18,21 @@ services:
     container_name: transcriptor-emocional-v5
     image: transcriptor-emocional:5.0.0
 
-    # Configuración para CPU (sin GPU NVIDIA)
-    # Si tienes GPU NVIDIA, descomenta la sección deploy
+    # Runtime NVIDIA para soporte GPU
+    runtime: nvidia
 
     ports:
       - "8000:8000"
 
     environment:
       - PYTHONUNBUFFERED=1
-      # Optimizaciones para CPU
-      - OMP_NUM_THREADS=4 # Ajustado para 4 núcleos de CPU (Ryzen 5)
+      # Variables NVIDIA para acceso a GPU dentro del contenedor
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # Optimizaciones de threads
+      - OMP_NUM_THREADS=4
       # Modelo Whisper se detecta automáticamente según GPU disponible
-      # Para forzar un modelo específico, descomenta la siguiente línea:
-      # - WHISPER_MODEL=small  # Opciones: base, small, medium, large-v3
-      # Variables de la aplicación
+      # Para forzar: WHISPER_MODEL=small|medium|large-v3
       - LOG_LEVEL=INFO
 
     volumes:
@@ -56,14 +57,14 @@ services:
 
     restart: unless-stopped
 
-    # Configurar recursos de GPU (NVIDIA)
+    # Recursos GPU (Docker Compose v2+)
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+              count: all
+              capabilities: [ gpu, compute, utility ]
 
     logging:
       driver: "json-file"
