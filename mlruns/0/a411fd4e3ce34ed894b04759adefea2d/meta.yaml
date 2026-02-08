@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Christian/OneDrive/Escritorio/Voz-a-texto-con-enfoque-en-el-tono-emocional/mlruns/0/a411fd4e3ce34ed894b04759adefea2d/artifacts
+end_time: 1770585088130
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: a411fd4e3ce34ed894b04759adefea2d
+run_name: ./model/finetuned_audio_emotion
+run_uuid: a411fd4e3ce34ed894b04759adefea2d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1770585066269
+status: 3
+tags: []
+user_id: Christian

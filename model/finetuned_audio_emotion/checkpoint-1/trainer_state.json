@@ -1,5 +1,5 @@
 {
-  "best_metric": 0.0,
+  "best_metric": 0.22288289666175842,
   "best_model_checkpoint": "./model/finetuned_audio_emotion\\checkpoint-1",
   "epoch": 1.0,
   "eval_steps": 500,
@@ -10,11 +10,10 @@
   "log_history": [
     {
       "epoch": 1.0,
-      "eval_accuracy": 0.0,
-      "eval_loss": 22.89458656311035,
-      "eval_runtime": 0.8351,
-      "eval_samples_per_second": 1.198,
-      "eval_steps_per_second": 1.198,
+      "eval_loss": 0.22288289666175842,
+      "eval_runtime": 0.1818,
+      "eval_samples_per_second": 11.001,
+      "eval_steps_per_second": 5.501,
       "step": 1
     }
   ],
@@ -35,7 +34,7 @@
       "attributes": {}
     }
   },
-  "total_flos": 272360496960000.0,
+  "total_flos": 363147329280000.0,
   "train_batch_size": 4,
   "trial_name": null,
   "trial_params": null

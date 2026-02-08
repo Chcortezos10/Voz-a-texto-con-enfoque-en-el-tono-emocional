@@ -1,4 +1,3 @@
-# app_fastapi.py - VERSIÓN SIMPLIFICADA Y OPTIMIZADA
 import uvicorn
 import asyncio
 import logging
