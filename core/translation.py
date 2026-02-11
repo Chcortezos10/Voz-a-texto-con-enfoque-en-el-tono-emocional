@@ -76,7 +76,7 @@ def translate_es_to_en(text: str, max_length: int = 512) -> str:
             translated = model.generate(
                 **inputs,
                 max_length=max_length,
-                num_beams=4,
+                num_beams=2,
                 early_stopping=True
             )
         
@@ -150,7 +150,7 @@ def translate_batch(texts: List[str], max_length: int = 512) -> List[str]:
             translated = model.generate(
                 **inputs,
                 max_length=max_length,
-                num_beams=4,
+                num_beams=2,
                 early_stopping=True
             )
         

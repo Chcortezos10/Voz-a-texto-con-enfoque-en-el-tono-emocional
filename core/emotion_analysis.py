@@ -668,9 +668,9 @@ class EmotionEnsemble:
 
     def __init__(
         self,
-        use_go_emotions: bool = False,  # Deshabilitado por defecto (ahorra RAM)
+        use_go_emotions: bool = False,
         use_prosody: bool = True,
-        parallel: bool = False,  # Secuencial por defecto (más estable)
+        parallel: bool = True,
         neutral_suppression: float = 0.12,
         active_boost: float = 2.0
     ):
@@ -679,7 +679,7 @@ class EmotionEnsemble:
         self.parallel = parallel
         self.neutral_suppression = neutral_suppression
         self.active_boost = active_boost
-        self._executor = ThreadPoolExecutor(max_workers=2) if parallel else None
+        self._executor = ThreadPoolExecutor(max_workers=4) if parallel else None
         self._prosody = get_prosody_analyzer() if use_prosody else None
 
     def analyze(
@@ -857,7 +857,7 @@ class EmotionEnsemble:
 _emotion_ensemble: Optional[EmotionEnsemble] = None
 
 
-def get_emotion_ensemble(use_go_emotions: bool = False, use_prosody: bool = True, parallel: bool = False) -> EmotionEnsemble:
+def get_emotion_ensemble(use_go_emotions: bool = False, use_prosody: bool = True, parallel: bool = True) -> EmotionEnsemble:
     """Obtiene o crea instancia del ensemble (modo bajo RAM por defecto)."""
     global _emotion_ensemble
     if _emotion_ensemble is None:

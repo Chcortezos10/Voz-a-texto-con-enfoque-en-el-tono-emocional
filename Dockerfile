@@ -1,6 +1,6 @@
 # =====================================================
 # Dockerfile - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 5.0.0 (Optimizada con gestión de memoria)
+# Versión: 7.0.0 (Optimizada con gestión de memoria)
 # =====================================================
 
 # Base image con soporte CUDA para NVIDIA GPU
@@ -9,7 +9,7 @@ FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 # Metadatos
 LABEL maintainer="Christian"
 LABEL description="API de transcripción de voz a texto con análisis emocional"
-LABEL version="5.0.0"
+LABEL version="7.0.0"
 
 # Evitar prompts interactivos durante instalación
 ENV DEBIAN_FRONTEND=noninteractive

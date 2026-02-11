@@ -1,6 +1,6 @@
 # =====================================================
 # Docker Compose - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 5.0.0
+# Versión: 7.0.0
 # =====================================================
 # Uso:
 #   docker-compose up --build        # Construir e iniciar
@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transcriptor-emocional-v5
-    image: transcriptor-emocional:5.0.0
+    container_name: transcriptor-emocional-v7
+    image: transcriptor-emocional:7.0.0
 
     # Runtime NVIDIA para soporte GPU
     runtime: nvidia

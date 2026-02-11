@@ -399,143 +399,131 @@ async def analyze_segments_with_emotions(
     speaker_labels: Dict[Tuple[float, float], int],
     enable_diarization: bool
 ) -> List[Dict[str, Any]]:
-    """
-    Analiza emociones para cada segmento.
-    
-    Returns:
-        Lista de segmentos enriquecidos con análisis emocional
-    """
-    # Traducir todos los textos en batch
     segment_texts = [s.get("text", "").strip() for s in segments_raw]
     translations = []
-    
+
     if not lite_mode and segment_texts:
         logger.info("Traduciendo segmentos...")
         translations = await run_blocking(translate_batch, segment_texts)
-    
-    # Analizar emociones
+
     enriched_segments = []
     emotion_analyzer = TemporalEmotionAnalyzer(use_prosody=not lite_mode)
     logger.info("Analizando emociones multimodales...")
-    
-    for i, seg in enumerate(segments_raw):
-        try:
-            seg_text_es = segment_texts[i] if i < len(segment_texts) else ""
-            seg_text_en = translations[i] if i < len(translations) else ""
-            
-            if not seg_text_es:
-                continue
-            
-            start = float(seg.get("start", 0))
-            end = float(seg.get("end", 0))
-            
-            # Extraer audio del segmento
-            seg_audio_path = None
-            seg_chunk = None
-            
-            if not lite_mode and len(audio_data) > 0:
-                try:
-                    start_idx = max(0, int(start * sr))
-                    end_idx = min(len(audio_data), int(end * sr))
-                    
-                    if (end_idx - start_idx) > (sr * 0.1):
-                        seg_chunk = audio_data[start_idx:end_idx]
-                        seg_audio_path = await run_blocking(write_wav_from_array, seg_chunk, sr)
-                except Exception as e:
-                    logger.warning(f"Error extrayendo audio seg {i}: {e}")
-            
-            # Analizar emoción
-            emotion_result = emotion_analyzer.analyze_segment(
-                text_es=seg_text_es,
-                text_en=seg_text_en,
-                audio_path=seg_audio_path,
-                audio_array=seg_chunk,
-                sr=sr,
-                audio_weight=audio_weight,
-                apply_smoothing=True,
-                use_ensemble=True
-            )
-            
-            # Limpiar archivo temporal
-            if seg_audio_path and os.path.exists(seg_audio_path):
-                try:
-                    os.remove(seg_audio_path)
-                except:
-                    pass
 
-            del seg_chunk
-            
-            # Determinar speaker
-            speaker_id = 0
-            if enable_diarization and speaker_labels:
-                seg_mid = (start + end) / 2
-                for (win_s, win_e), spk in speaker_labels.items():
-                    if win_s <= seg_mid < win_e:
-                        speaker_id = spk
-                        break
+    async def _analyze_single_segment(i, seg):
+        seg_text_es = segment_texts[i] if i < len(segment_texts) else ""
+        seg_text_en = translations[i] if i < len(translations) else ""
 
-            # Prepare audio context for feedback (last 10s from end of segment)
-            feedback_audio_path = None
-            if not lite_mode and len(audio_data) > 0:
-                try:
-                    # 10 seconds context window ending at segment end
-                    ctx_end_sec = end
-                    ctx_start_sec = max(0, ctx_end_sec - 10.0)
-                    
-                    ctx_start_idx = int(ctx_start_sec * sr)
-                    ctx_end_idx = int(ctx_end_sec * sr)
-                    
-                    if ctx_end_idx > ctx_start_idx:
-                        ctx_chunk = audio_data[ctx_start_idx:ctx_end_idx]
-                        feedback_audio_path = await run_blocking(write_wav_from_array, ctx_chunk, sr)
-                except Exception as e:
-                    logger.warning(f"Error prepping feedback audio: {e}")
+        if not seg_text_es:
+            return None
 
-            prediction_id = feedback_collector.save_prediction(
-                predicted_label=emotion_result.top_emotion,
-                confidence=emotion_result.top_score,
-                audio_temp_path=feedback_audio_path,
-                metadata={
-                    "text_es": seg_text_es,
-                    "text_en": seg_text_en,
-                    "start": start,
-                    "end": end
-                }
-            )
-            
-            # Cleanup temp feedback audio matching the one created above
-            if feedback_audio_path and os.path.exists(feedback_audio_path):
-                try:
-                    os.remove(feedback_audio_path)
-                except:
-                    pass
-            # Construir segmento enriquecido
-            enriched_segments.append({
-                "start": start,
-                "end": end,
-                "duration": end - start,
+        start = float(seg.get("start", 0))
+        end = float(seg.get("end", 0))
+
+        seg_audio_path = None
+        seg_chunk = None
+
+        if not lite_mode and len(audio_data) > 0:
+            try:
+                start_idx = max(0, int(start * sr))
+                end_idx = min(len(audio_data), int(end * sr))
+                if (end_idx - start_idx) > (sr * 0.1):
+                    seg_chunk = audio_data[start_idx:end_idx]
+                    seg_audio_path = await run_blocking(write_wav_from_array, seg_chunk, sr)
+            except Exception as e:
+                logger.warning(f"Error extrayendo audio seg {i}: {e}")
+
+        emotion_result = emotion_analyzer.analyze_segment(
+            text_es=seg_text_es,
+            text_en=seg_text_en,
+            audio_path=seg_audio_path,
+            audio_array=seg_chunk,
+            sr=sr,
+            audio_weight=audio_weight,
+            apply_smoothing=True,
+            use_ensemble=True
+        )
+
+        if seg_audio_path and os.path.exists(seg_audio_path):
+            try:
+                os.remove(seg_audio_path)
+            except:
+                pass
+
+        del seg_chunk
+
+        speaker_id = 0
+        if enable_diarization and speaker_labels:
+            seg_mid = (start + end) / 2
+            for (win_s, win_e), spk in speaker_labels.items():
+                if win_s <= seg_mid < win_e:
+                    speaker_id = spk
+                    break
+
+        feedback_audio_path = None
+        if not lite_mode and len(audio_data) > 0:
+            try:
+                ctx_end_sec = end
+                ctx_start_sec = max(0, ctx_end_sec - 10.0)
+                ctx_start_idx = int(ctx_start_sec * sr)
+                ctx_end_idx = int(ctx_end_sec * sr)
+                if ctx_end_idx > ctx_start_idx:
+                    ctx_chunk = audio_data[ctx_start_idx:ctx_end_idx]
+                    feedback_audio_path = await run_blocking(write_wav_from_array, ctx_chunk, sr)
+            except Exception as e:
+                logger.warning(f"Error prepping feedback audio: {e}")
+
+        prediction_id = feedback_collector.save_prediction(
+            predicted_label=emotion_result.top_emotion,
+            confidence=emotion_result.top_score,
+            audio_temp_path=feedback_audio_path,
+            metadata={
                 "text_es": seg_text_es,
                 "text_en": seg_text_en,
-                "text": seg_text_es,
-                "emotion": emotion_result.top_emotion,
-                "intensity": round(emotion_result.top_score, 2),
-                "emotions": {
-                    "fused": {
-                        "top_emotion": emotion_result.top_emotion,
-                        "score": round(emotion_result.top_score, 4),
-                        "all_emotions": emotion_result.emotions
-                    }
-                },
-                "speaker_id": speaker_id,
-                "speaker_label": f"Hablante {speaker_id + 1}",
-                "speaker": f"speaker_{speaker_id}",
-                "prediction_id": prediction_id
-            })
-            
-        except Exception as e:
-            logger.error(f"Error procesando segmento {i}: {e}")
-            continue
-    
+                "start": start,
+                "end": end
+            }
+        )
+
+        if feedback_audio_path and os.path.exists(feedback_audio_path):
+            try:
+                os.remove(feedback_audio_path)
+            except:
+                pass
+
+        return {
+            "start": start,
+            "end": end,
+            "duration": end - start,
+            "text_es": seg_text_es,
+            "text_en": seg_text_en,
+            "text": seg_text_es,
+            "emotion": emotion_result.top_emotion,
+            "intensity": round(emotion_result.top_score, 2),
+            "emotions": {
+                "fused": {
+                    "top_emotion": emotion_result.top_emotion,
+                    "score": round(emotion_result.top_score, 4),
+                    "all_emotions": emotion_result.emotions
+                }
+            },
+            "speaker_id": speaker_id,
+            "speaker_label": f"Hablante {speaker_id + 1}",
+            "speaker": f"speaker_{speaker_id}",
+            "prediction_id": prediction_id
+        }
+
+    BATCH_SIZE = 3
+    for batch_start in range(0, len(segments_raw), BATCH_SIZE):
+        batch = list(enumerate(segments_raw[batch_start:batch_start + BATCH_SIZE], start=batch_start))
+        tasks = [_analyze_single_segment(i, seg) for i, seg in batch]
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+        for result in batch_results:
+            if isinstance(result, dict):
+                enriched_segments.append(result)
+            elif isinstance(result, Exception):
+                logger.error(f"Error procesando segmento: {result}")
+
     return enriched_segments
 
 def calculate_global_stats(enriched_segments: List[Dict]) -> Dict[str, Any]:
@@ -963,7 +951,222 @@ async def transcribe_with_cloud_whisper(
             except:
                 pass
 
-# MAIN
+async def _process_single_audio(
+    file: UploadFile,
+    lite_mode: bool,
+    audio_weight: float,
+    enable_diarization: bool,
+    num_speakers: Optional[int]
+) -> Dict[str, Any]:
+    tmp_path = None
+    try:
+        audio_weight, warnings, lite_mode = await validate_request_params(lite_mode, audio_weight)
+        tmp_path = await save_upload_to_tempfile(file)
+
+        validator = AudioValidator()
+        validation_result = validator.validate_audio(tmp_path)
+
+        if not validation_result.is_valid:
+            return {
+                "filename": file.filename,
+                "status": "error",
+                "error": ", ".join(validation_result.errors)
+            }
+
+        models = load_models()
+        whisper_model = models["whisper"]
+
+        result = await safe_transcribe(whisper_model, tmp_path)
+        tx_full = result.get("text", "")
+        segments_raw = result.get("segments", [])
+
+        if not segments_raw:
+            return {
+                "filename": file.filename,
+                "status": "error",
+                "error": "No se detectó voz en el audio"
+            }
+
+        audio_data = np.array([])
+        sr = 16000
+
+        if not lite_mode:
+            y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
+            audio_data = y
+
+        speaker_labels = {}
+        num_speakers_detected = 1
+
+        if enable_diarization and not lite_mode:
+            speaker_labels, num_speakers_detected = await perform_diarization(
+                audio_data, sr, num_speakers
+            )
+
+        enriched_segments = await analyze_segments_with_emotions(
+            segments_raw, audio_data, sr, lite_mode,
+            audio_weight, speaker_labels, enable_diarization
+        )
+
+        global_emotions = calculate_global_stats(enriched_segments)
+        speaker_stats = calculate_speaker_stats(enriched_segments) if enable_diarization else {}
+        timeline = create_emotion_timeline(enriched_segments)
+
+        labeled_transcription = ""
+        if enable_diarization and not lite_mode:
+            merged_blocks = merge_consecutive_same_speaker(enriched_segments)
+            labeled_transcription = format_labeled_transcription(merged_blocks)
+
+        emotion_dist = global_emotions.get("emotion_distribution", {})
+        feliz = emotion_dist.get("feliz", 0.0)
+        enojado = emotion_dist.get("enojado", 0.0)
+        triste = emotion_dist.get("triste", 0.0)
+        neutral = emotion_dist.get("neutral", 0.0)
+        sentiment_score = round(feliz - (enojado + triste), 4)
+
+        cleanup_memory()
+
+        return {
+            "filename": file.filename,
+            "status": "success",
+            "duration_sec": round(validation_result.duration_sec, 2),
+            "transcription": tx_full,
+            "transcription_preview": tx_full[:200] + "..." if len(tx_full) > 200 else tx_full,
+            "labeled_transcription": labeled_transcription,
+            "segments": enriched_segments,
+            "total_segments": len(enriched_segments),
+            "global_emotions": global_emotions,
+            "emotion_scores": {
+                "feliz": round(feliz, 4),
+                "enojado": round(enojado, 4),
+                "triste": round(triste, 4),
+                "neutral": round(neutral, 4)
+            },
+            "dominant_emotion": global_emotions.get("top_emotion", "neutral"),
+            "dominant_score": round(global_emotions.get("top_score", 0.0), 4),
+            "sentiment_score": sentiment_score,
+            "emotion_timeline": timeline,
+            "diarization": {
+                "enabled": enable_diarization,
+                "num_speakers": num_speakers_detected,
+                "speaker_stats": speaker_stats
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Error procesando {file.filename}: {e}\n{traceback.format_exc()}")
+        return {
+            "filename": file.filename,
+            "status": "error",
+            "error": str(e)
+        }
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except:
+                pass
+
+@app.post("/transcribe/batch-scoring", tags=["Batch"])
+async def transcribe_batch_scoring(
+    files: List[UploadFile] = File(...),
+    lite_mode: bool = Form(False),
+    audio_weight: float = Form(0.4),
+    enable_diarization: bool = Form(True),
+    num_speakers: Optional[int] = Form(None)
+):
+    start_time = time.time()
+
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Máximo 10 archivos por batch")
+
+    if len(files) == 0:
+        raise HTTPException(status_code=400, detail="Debe enviar al menos 1 archivo")
+
+    for f in files:
+        validate_upload(f)
+
+    semaphore = asyncio.Semaphore(1)
+
+    async def _process_with_limit(file):
+        async with semaphore:
+            return await _process_single_audio(
+                file, lite_mode, audio_weight, enable_diarization, num_speakers
+            )
+
+    tasks = [_process_with_limit(f) for f in files]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    processed_results = []
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            processed_results.append({
+                "filename": files[i].filename,
+                "status": "error",
+                "error": str(result)
+            })
+        else:
+            processed_results.append(result)
+
+    successful = [r for r in processed_results if r.get("status") == "success"]
+    failed = [r for r in processed_results if r.get("status") == "error"]
+
+    ranking_positive = sorted(
+        successful, key=lambda x: x.get("sentiment_score", 0), reverse=True
+    )
+    ranking_negative = sorted(
+        successful, key=lambda x: x.get("sentiment_score", 0)
+    )
+
+    avg_sentiment = 0.0
+    emotion_totals = {"feliz": 0.0, "enojado": 0.0, "triste": 0.0, "neutral": 0.0}
+    dominant_counts = {}
+
+    if successful:
+        avg_sentiment = round(
+            sum(r.get("sentiment_score", 0) for r in successful) / len(successful), 4
+        )
+        for r in successful:
+            scores = r.get("emotion_scores", {})
+            for emo, val in scores.items():
+                emotion_totals[emo] = emotion_totals.get(emo, 0.0) + val
+            dom = r.get("dominant_emotion", "neutral")
+            dominant_counts[dom] = dominant_counts.get(dom, 0) + 1
+
+        total = sum(emotion_totals.values())
+        if total > 0:
+            emotion_totals = {k: round(v / total, 4) for k, v in emotion_totals.items()}
+
+    alerts = [r["filename"] for r in successful if r.get("sentiment_score", 0) < -0.3]
+
+    processing_time = time.time() - start_time
+
+    cleanup_memory()
+
+    return {
+        "status": "completed",
+        "total_files": len(files),
+        "successful": len(successful),
+        "failed": len(failed),
+        "total_processing_time": round(processing_time, 2),
+        "results": processed_results,
+        "summary": {
+            "average_sentiment": avg_sentiment,
+            "emotion_averages": emotion_totals,
+            "dominant_emotion_distribution": dominant_counts,
+            "negative_alerts": alerts,
+            "negative_alert_count": len(alerts)
+        },
+        "ranking": {
+            "most_positive": [
+                {"filename": r["filename"], "sentiment_score": r["sentiment_score"]}
+                for r in ranking_positive[:5]
+            ],
+            "most_negative": [
+                {"filename": r["filename"], "sentiment_score": r["sentiment_score"]}
+                for r in ranking_negative[:5]
+            ]
+        }
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

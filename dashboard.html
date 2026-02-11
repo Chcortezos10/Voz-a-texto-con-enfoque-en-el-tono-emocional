@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
+    <title>Voz-a-Texto Emocional V7 - Dashboard Pro</title>
 
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -1229,6 +1229,282 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
+
+        .scoring-upload {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .scoring-dropzone {
+            flex: 1;
+            min-width: 300px;
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scoring-dropzone:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .scoring-dropzone.active {
+            border-color: var(--success);
+        }
+
+        .scoring-file-list {
+            flex: 1;
+            min-width: 300px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .scoring-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .scoring-file-item:last-child {
+            border-bottom: none;
+        }
+
+        .scoring-file-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .scoring-progress {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .scoring-progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--surface-hover);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .scoring-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s;
+            border-radius: 5px;
+        }
+
+        .scoring-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .scoring-metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .scoring-metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .scoring-metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .scoring-metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .scoring-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scoring-search {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .scoring-search:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .scoring-filter-chip {
+            padding: 0.4rem 0.9rem;
+            background: var(--surface-hover);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .scoring-filter-chip:hover {
+            border-color: var(--primary);
+        }
+
+        .scoring-filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .scoring-table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .scoring-table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .scoring-table th:hover {
+            color: var(--primary);
+        }
+
+        .scoring-table th .sort-icon {
+            margin-left: 0.3rem;
+            font-size: 0.7rem;
+        }
+
+        .scoring-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .scoring-table tr:hover {
+            background: var(--surface-hover);
+        }
+
+        .score-bar {
+            display: inline-block;
+            height: 6px;
+            border-radius: 3px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+
+        .sentiment-pill {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .sentiment-negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .sentiment-neutral {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .sentiment-positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .scoring-detail-view {
+            display: none;
+        }
+
+        .scoring-detail-view.active {
+            display: block;
+        }
+
+        .scoring-main-view.hidden {
+            display: none;
+        }
+
+        .back-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .scoring-export-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
     </style>
 </head>
 
@@ -1238,7 +1514,7 @@
 
     <!-- Header -->
     <header class="header">
-        <div class="brand">Transcriptor Emocional Pro V5</div>
+        <div class="brand">Transcriptor Emocional Pro V7</div>
         <div id="apiStatus" class="status-badge">Conectando...</div>
     </header>
 
@@ -1261,13 +1537,122 @@
     <div class="container">
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('analyze', event)">Análisis</button>
-            <button class="tab" onclick="switchTab('history', event)">Historial</button>
-            <button class="tab" onclick="switchTab('settings', event)">Configuración</button>
+            <button class="tab active" onclick="switchTab('scoring', event)">📊 Scoring Masivo</button>
+            <button class="tab" onclick="switchTab('analyze', event)">🎙️ Análisis</button>
+            <button class="tab" onclick="switchTab('history', event)">📜 Historial</button>
+            <button class="tab" onclick="switchTab('settings', event)">⚙️ Configuración</button>
+        </div>
+
+        <!-- TAB: SCORING MASIVO -->
+        <div id="tab-scoring" class="tab-content active">
+            <div class="scoring-main-view" id="scoringMainView">
+                <div class="scoring-upload">
+                    <div class="scoring-dropzone" id="scoringDropzone">
+                        <div style="font-size: 3rem;">📁</div>
+                        <h3 style="margin-top: 0.5rem;">Subir audios para scoring</h3>
+                        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">Arrastra archivos o
+                            haz clic (máx 10)</p>
+                        <input type="file" id="scoringFileInput" hidden accept="audio/*,video/*" multiple />
+                    </div>
+                    <div class="scoring-file-list" id="scoringFileList">
+                        <p style="color: var(--text-muted); text-align: center;">Sin archivos seleccionados</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="scoringStartBtn" onclick="startBatchScoring()" disabled>
+                        <i class="fas fa-play"></i> Iniciar Scoring
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearScoringFiles()">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+                <div class="scoring-progress" id="scoringProgress">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="scoringProgressText">Procesando...</span>
+                        <span id="scoringProgressPercent">0%</span>
+                    </div>
+                    <div class="scoring-progress-bar">
+                        <div class="scoring-progress-fill" id="scoringProgressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="scoring-metrics" id="scoringMetrics" style="display: none;">
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricTotalAudios" style="color: var(--primary);">0</div>
+                        <div class="scoring-metric-label">Total Audios</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricDominantEmotion">-</div>
+                        <div class="scoring-metric-label">Emoción Predominante</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricAvgSentiment" style="color: var(--success);">-</div>
+                        <div class="scoring-metric-label">Sentimiento Promedio</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricAlerts" style="color: var(--danger);">0</div>
+                        <div class="scoring-metric-label">Alertas Negativas</div>
+                    </div>
+                </div>
+                <div id="scoringResultsSection" style="display: none;">
+                    <div class="scoring-controls">
+                        <input type="text" class="scoring-search" id="scoringSearch"
+                            placeholder="🔍 Buscar por nombre de archivo..." oninput="filterScoringTable()">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="scoring-filter-chip active" data-filter="all"
+                                onclick="setScoringFilter('all', this)">Todos</span>
+                            <span class="scoring-filter-chip" data-filter="feliz"
+                                onclick="setScoringFilter('feliz', this)">😊 Feliz</span>
+                            <span class="scoring-filter-chip" data-filter="enojado"
+                                onclick="setScoringFilter('enojado', this)">😠 Enojado</span>
+                            <span class="scoring-filter-chip" data-filter="triste"
+                                onclick="setScoringFilter('triste', this)">😢 Triste</span>
+                            <span class="scoring-filter-chip" data-filter="neutral"
+                                onclick="setScoringFilter('neutral', this)">😐 Neutral</span>
+                        </div>
+                        <div class="scoring-export-btns">
+                            <button class="btn btn-secondary btn-sm" onclick="exportScoringCSV()"><i
+                                    class="fas fa-file-csv"></i> CSV</button>
+                            <button class="btn btn-secondary btn-sm" onclick="exportScoringJSON()"><i
+                                    class="fas fa-file-code"></i> JSON</button>
+                        </div>
+                    </div>
+                    <div class="scoring-table-wrap">
+                        <table class="scoring-table" id="scoringTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortScoringTable('index')"># <span class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('filename')">Archivo <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('duration')">Duración <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('feliz')">😊 Feliz <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('enojado')">😠 Enojado <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('triste')">😢 Triste <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('neutral')">😐 Neutral <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('sentiment')">Sentimiento <span
+                                            class="sort-icon">↕</span></th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoringTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="scoring-detail-view" id="scoringDetailView">
+                <button class="back-btn" onclick="backToScoring()"><i class="fas fa-arrow-left"></i> Volver al
+                    Scoring</button>
+                <h2 id="detailFileName" style="margin-bottom: 1.5rem;"></h2>
+                <div id="detailContent"></div>
+            </div>
         </div>
 
         <!-- TAB: ANÁLISIS -->
-        <div id="tab-analyze" class="tab-content active">
+        <div id="tab-analyze" class="tab-content">
             <!-- Upload Section -->
             <div class="upload-section" id="uploadArea">
                 <div style="font-size: 4rem;">🎙️</div>
@@ -1338,6 +1723,12 @@
 
             <!-- Results Section -->
             <div id="resultsSection" style="display: none; margin-top: 3rem;">
+                <!-- Back to Scoring Button (Hidden by default) -->
+                <button id="backToScoringBtn" class="back-btn" onclick="backToScoringFromAnalyze()"
+                    style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Volver al Scoring
+                </button>
+
                 <div
                     style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <h2>📊 Resultados</h2>
@@ -1798,7 +2189,8 @@
                 evt.target.classList.add('active');
             } else {
                 const tabs = document.querySelectorAll('.tab');
-                const tabIndex = tab === 'analyze' ? 0 : tab === 'history' ? 1 : 2;
+                const tabMap = { 'scoring': 0, 'analyze': 1, 'history': 2, 'settings': 3 };
+                const tabIndex = tabMap[tab] !== undefined ? tabMap[tab] : 0;
                 if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
             }
             document.getElementById(`tab-${tab}`).classList.add('active');
@@ -2513,6 +2905,279 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') hideAdvancedCharts();
         });
+
+        let scoringFiles = [];
+        let scoringResults = [];
+        let scoringSortCol = 'index';
+        let scoringSortAsc = true;
+        let scoringFilterEmo = 'all';
+
+        const scoringDropzone = document.getElementById('scoringDropzone');
+        const scoringFileInput = document.getElementById('scoringFileInput');
+
+        scoringDropzone.addEventListener('click', () => scoringFileInput.click());
+        scoringFileInput.addEventListener('change', (e) => addScoringFiles(e.target.files));
+        scoringDropzone.addEventListener('dragover', (e) => { e.preventDefault(); scoringDropzone.classList.add('active'); });
+        scoringDropzone.addEventListener('dragleave', () => scoringDropzone.classList.remove('active'));
+        scoringDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            scoringDropzone.classList.remove('active');
+            addScoringFiles(e.dataTransfer.files);
+        });
+
+        function addScoringFiles(fileList) {
+            for (const f of fileList) {
+                if (scoringFiles.length >= 10) { toast.warning('Máximo 10 archivos'); break; }
+                if (!scoringFiles.find(sf => sf.name === f.name)) scoringFiles.push(f);
+            }
+            renderScoringFileList();
+        }
+
+        function removeScoringFile(idx) {
+            scoringFiles.splice(idx, 1);
+            renderScoringFileList();
+        }
+
+        function clearScoringFiles() {
+            scoringFiles = [];
+            renderScoringFileList();
+        }
+
+        function renderScoringFileList() {
+            const el = document.getElementById('scoringFileList');
+            const btn = document.getElementById('scoringStartBtn');
+            if (scoringFiles.length === 0) {
+                el.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Sin archivos seleccionados</p>';
+                btn.disabled = true;
+                return;
+            }
+            btn.disabled = false;
+            el.innerHTML = scoringFiles.map((f, i) => `
+                <div class="scoring-file-item">
+                    <span>🎵 ${f.name}</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="color:var(--text-muted);font-size:0.8rem;">${(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                        <button class="scoring-file-remove" onclick="removeScoringFile(${i})"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function startBatchScoring() {
+            if (scoringFiles.length === 0) return;
+
+            const progEl = document.getElementById('scoringProgress');
+            const fillEl = document.getElementById('scoringProgressFill');
+            const textEl = document.getElementById('scoringProgressText');
+            const pctEl = document.getElementById('scoringProgressPercent');
+            progEl.style.display = 'block';
+            fillEl.style.width = '5%';
+            textEl.textContent = `Procesando 0 de ${scoringFiles.length}...`;
+            pctEl.textContent = '5%';
+            document.getElementById('scoringStartBtn').disabled = true;
+
+            const formData = new FormData();
+            scoringFiles.forEach(f => formData.append('files', f));
+
+            let fakeProgress = 5;
+            const fakeInterval = setInterval(() => {
+                if (fakeProgress < 85) {
+                    fakeProgress += Math.random() * 8;
+                    fillEl.style.width = fakeProgress + '%';
+                    pctEl.textContent = Math.round(fakeProgress) + '%';
+                    const done = Math.floor(fakeProgress / 100 * scoringFiles.length);
+                    textEl.textContent = `Procesando ${done} de ${scoringFiles.length}...`;
+                }
+            }, 2000);
+
+            try {
+                const resp = await fetch(`${CONFIG.API_URL}/transcribe/batch-scoring`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(fakeInterval);
+                fillEl.style.width = '100%';
+                pctEl.textContent = '100%';
+                textEl.textContent = 'Completado';
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.detail || 'Error en el servidor');
+                }
+
+                const data = await resp.json();
+                scoringResults = data.results || [];
+                displayScoringResults(data);
+                toast.success(`Scoring completado: ${data.successful} de ${data.total_files} audios`);
+            } catch (e) {
+                clearInterval(fakeInterval);
+                toast.error('Error: ' + e.message);
+            } finally {
+                document.getElementById('scoringStartBtn').disabled = false;
+                setTimeout(() => { progEl.style.display = 'none'; }, 3000);
+            }
+        }
+
+        function displayScoringResults(data) {
+            document.getElementById('scoringMetrics').style.display = 'grid';
+            document.getElementById('scoringResultsSection').style.display = 'block';
+
+            document.getElementById('metricTotalAudios').textContent = data.successful || 0;
+
+            const domDist = data.summary?.dominant_emotion_distribution || {};
+            const topDom = Object.entries(domDist).sort((a, b) => b[1] - a[1])[0];
+            const emoIcons = { 'feliz': '😊', 'enojado': '😠', 'triste': '😢', 'neutral': '😐' };
+            document.getElementById('metricDominantEmotion').textContent = topDom ? `${emoIcons[topDom[0]] || ''} ${topDom[0]}` : '-';
+
+            const avgS = data.summary?.average_sentiment || 0;
+            const avgEl = document.getElementById('metricAvgSentiment');
+            avgEl.textContent = avgS.toFixed(2);
+            avgEl.style.color = avgS < -0.3 ? 'var(--danger)' : avgS > 0.3 ? 'var(--success)' : 'var(--warning)';
+
+            document.getElementById('metricAlerts').textContent = data.summary?.negative_alert_count || 0;
+
+            renderScoringTable();
+        }
+
+        function renderScoringTable() {
+            let filtered = scoringResults.filter(r => r.status === 'success');
+            const search = document.getElementById('scoringSearch').value.toLowerCase();
+            if (search) filtered = filtered.filter(r => r.filename.toLowerCase().includes(search));
+            if (scoringFilterEmo !== 'all') filtered = filtered.filter(r => r.dominant_emotion === scoringFilterEmo);
+
+            filtered.sort((a, b) => {
+                let va, vb;
+                switch (scoringSortCol) {
+                    case 'filename': va = a.filename; vb = b.filename; break;
+                    case 'duration': va = a.duration_sec || 0; vb = b.duration_sec || 0; break;
+                    case 'feliz': va = a.emotion_scores?.feliz || 0; vb = b.emotion_scores?.feliz || 0; break;
+                    case 'enojado': va = a.emotion_scores?.enojado || 0; vb = b.emotion_scores?.enojado || 0; break;
+                    case 'triste': va = a.emotion_scores?.triste || 0; vb = b.emotion_scores?.triste || 0; break;
+                    case 'neutral': va = a.emotion_scores?.neutral || 0; vb = b.emotion_scores?.neutral || 0; break;
+                    case 'sentiment': va = a.sentiment_score || 0; vb = b.sentiment_score || 0; break;
+                    default: va = 0; vb = 0;
+                }
+                if (typeof va === 'string') return scoringSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+                return scoringSortAsc ? va - vb : vb - va;
+            });
+
+            const tbody = document.getElementById('scoringTableBody');
+            tbody.innerHTML = filtered.map((r, i) => {
+                const s = r.emotion_scores || {};
+                const sent = r.sentiment_score || 0;
+                const sentClass = sent < -0.3 ? 'sentiment-negative' : sent > 0.3 ? 'sentiment-positive' : 'sentiment-neutral';
+                const sentIcon = sent < -0.3 ? '🔴' : sent > 0.3 ? '🟢' : '🟡';
+                const dur = r.duration_sec ? Utils.formatDuration(r.duration_sec) : '-';
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td title="${r.filename}">${r.filename.length > 30 ? r.filename.slice(0, 27) + '...' : r.filename}</td>
+                    <td>${dur}</td>
+                    <td><span class="score-bar" style="width:${(s.feliz || 0) * 60}px;background:#10b981;"></span>${((s.feliz || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.enojado || 0) * 60}px;background:#ef4444;"></span>${((s.enojado || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.triste || 0) * 60}px;background:#3b82f6;"></span>${((s.triste || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.neutral || 0) * 60}px;background:#a78bfa;"></span>${((s.neutral || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="sentiment-pill ${sentClass}">${sentIcon} ${sent.toFixed(2)}</span></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="showScoringDetail('${r.filename}')">Ver →</button></td>
+                </tr>`;
+            }).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin resultados</td></tr>';
+            }
+        }
+
+        function sortScoringTable(col) {
+            if (scoringSortCol === col) { scoringSortAsc = !scoringSortAsc; } else { scoringSortCol = col; scoringSortAsc = false; }
+            renderScoringTable();
+        }
+
+        function filterScoringTable() { renderScoringTable(); }
+
+        function setScoringFilter(emo, el) {
+            scoringFilterEmo = emo;
+            document.querySelectorAll('.scoring-filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderScoringTable();
+        }
+
+        function showScoringDetail(filename) {
+            const result = scoringResults.find(r => r.filename === filename);
+            if (!result) return;
+
+            // Set current results for the analyze tab
+            currentResults = result;
+            selectedFile = { name: result.filename }; // Mock file object for display
+
+            // Switch to Analyze tab
+            switchTab('analyze');
+
+            // Hide upload/config, show results
+            document.getElementById('uploadArea').style.display = 'none';
+            document.querySelector('.config-panel').style.display = 'none';
+            document.getElementById('analyzeBtn').style.display = 'none';
+
+            // Show "Back to Scoring" button
+            const backBtn = document.getElementById('backToScoringBtn');
+            if (backBtn) backBtn.style.display = 'inline-flex';
+
+            // Display results using the main render function
+            displayResults(result);
+            document.getElementById('resultsSection').style.display = 'block';
+
+            // Allow time for DOM update before initializing player
+            setTimeout(() => {
+                // Initialize player with dummy audio if file not present (or handle if needed)
+                // Note: The audio file object isn't available here, so player might not play 
+                // unless we provide a URL or similar. For now, we visualize the data.
+                console.log('Viewing detail for:', filename);
+            }, 100);
+        }
+
+        function backToScoringFromAnalyze() {
+            // Switch back to Scoring tab
+            switchTab('scoring');
+
+            // Reset Analyze tab state
+            document.getElementById('uploadArea').style.display = 'block';
+            document.querySelector('.config-panel').style.display = 'block'; // Was 'grid' or 'block'? CSS says .config-panel default is block
+            document.getElementById('analyzeBtn').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('backToScoringBtn').style.display = 'none';
+
+            // Clear current results
+            currentResults = null;
+            selectedFile = null;
+        }
+
+        // function backToScoring() { ... } // Removed as we use the new flow
+
+        function exportScoringCSV() {
+            const successful = scoringResults.filter(r => r.status === 'success');
+            if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }
+            let csv = 'Archivo,Duración(s),Feliz,Enojado,Triste,Neutral,Sentimiento,Emoción Dominante\n';
+            successful.forEach(r => {
+                const s = r.emotion_scores || {};
+                csv += `"${r.filename}",${r.duration_sec || 0},${((s.feliz || 0) * 100).toFixed(1)},${((s.enojado || 0) * 100).toFixed(1)},${((s.triste || 0) * 100).toFixed(1)},${((s.neutral || 0) * 100).toFixed(1)},${(r.sentiment_score || 0).toFixed(4)},${r.dominant_emotion || 'neutral'}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `scoring_emocional_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            toast.success('CSV exportado');
+        }
+
+        function exportScoringJSON() {
+            const successful = scoringResults.filter(r => r.status === 'success');
+            if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }
+            const blob = new Blob([JSON.stringify(successful, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `scoring_emocional_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            toast.success('JSON exportado');
+        }
     </script>
 </body>
 
