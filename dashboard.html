@@ -3105,9 +3105,19 @@
             const result = scoringResults.find(r => r.filename === filename);
             if (!result) return;
 
+            // Fix 1: Normalize metadata for duration display
+            if (!result.metadata) {
+                result.metadata = { total_duration: result.duration_sec || 0 };
+            } else if (!result.metadata.total_duration) {
+                result.metadata.total_duration = result.duration_sec || 0;
+            }
+
+            // Fix 2: Find the original File object for the audio player
+            const originalFile = scoringFiles.find(f => f.name === filename);
+
             // Set current results for the analyze tab
             currentResults = result;
-            selectedFile = { name: result.filename }; // Mock file object for display
+            selectedFile = originalFile || { name: result.filename }; // Use original file if available
 
             // Switch to Analyze tab
             switchTab('analyze');
@@ -3125,13 +3135,12 @@
             displayResults(result);
             document.getElementById('resultsSection').style.display = 'block';
 
-            // Allow time for DOM update before initializing player
-            setTimeout(() => {
-                // Initialize player with dummy audio if file not present (or handle if needed)
-                // Note: The audio file object isn't available here, so player might not play 
-                // unless we provide a URL or similar. For now, we visualize the data.
-                console.log('Viewing detail for:', filename);
-            }, 100);
+            // Re-initialize player explicitly if we have the file
+            if (originalFile && window.audioPlayer) {
+                setTimeout(() => {
+                    audioPlayer.init(originalFile, result.segments || [], result.metadata.total_duration);
+                }, 100);
+            }
         }
 
         function backToScoringFromAnalyze() {
