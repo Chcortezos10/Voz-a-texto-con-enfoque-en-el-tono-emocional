@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     build-essential \
     curl \
+    git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -46,7 +47,8 @@ COPY requirements.txt .
 
 # Instalar dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir httpx psutil
+    pip install --no-cache-dir httpx psutil && \
+    pip install --no-cache-dir git+https://github.com/m-bain/whisperx.git
 
 # Copiar el código fuente del proyecto
 COPY . .

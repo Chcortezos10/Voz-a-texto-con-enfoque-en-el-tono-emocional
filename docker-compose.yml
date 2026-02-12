@@ -28,6 +28,7 @@ services:
       - PYTHONUNBUFFERED=1
       # Variables NVIDIA para acceso a GPU dentro del contenedor
       - NVIDIA_VISIBLE_DEVICES=all
+      - HF_TOKEN=${HF_TOKEN}
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       # Optimizaciones de threads
       - OMP_NUM_THREADS=4

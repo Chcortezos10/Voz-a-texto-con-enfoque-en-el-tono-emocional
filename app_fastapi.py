@@ -34,9 +34,7 @@ except ImportError:
     logging.warning("additional_routes no disponible")
 
 # Core modules
-from core.models import load_whisper_models
 from core.audio_processing import load_audio, write_wav_from_array
-from core.speaker_diarization import diarize_audio, DiarizationResult   
 from core.translation import translate_batch
 from core.emotion_analysis import (
     analyze_audio_emotion, 
@@ -45,24 +43,18 @@ from core.emotion_analysis import (
     EmotionResult,
     TemporalEmotionAnalyzer
 )
+from core.whisperx_service import WhisperXService
 from core.diarization import (
-    compute_embeddings_with_vad,
-    detect_speaker_changes,
     merge_consecutive_same_speaker,
     format_labeled_transcription
 )
-from resemblyzer import VoiceEncoder
 
 # Config
 from config import (
     MAX_UPLOAD_SIZE,
     ALLOWED_MIME,
     WORKERS,
-    MAX_AUDIO_DURATION_SEC,
-    WINDOW_SEC,
-    HOP_SEC,
-    CHANGE_SIM_THRESHOLD,
-    MIN_SEG_SEC
+    MAX_AUDIO_DURATION_SEC
 )
 
 # Resilience & Validators
@@ -136,30 +128,24 @@ def get_metrics() -> Dict[str, Any]:
     }
 
 executor = ThreadPoolExecutor(max_workers=WORKERS)
-_models_cache: Optional[Dict[str, Any]] = None
-_voice_encoder: Optional[VoiceEncoder] = None
+_whisperx_service: Optional[WhisperXService] = None
 
-def load_models() -> Dict[str, Any]:
-    """Carga modelos de Whisper (lazy loading)."""
-    global _models_cache
-    if _models_cache is None:
-        _models_cache = load_whisper_models()
-    return _models_cache
-
-def get_voice_encoder() -> VoiceEncoder:
-    """Carga VoiceEncoder bajo demanda."""
-    global _voice_encoder
-    if _voice_encoder is None:
-        logger.info("Cargando VoiceEncoder para diarización...")
-        _voice_encoder = VoiceEncoder()
-        logger.info("VoiceEncoder cargado")
-    return _voice_encoder
+def get_whisperx_service() -> WhisperXService:
+    """Carga WhisperX Service bajo demanda."""
+    global _whisperx_service
+    if _whisperx_service is None:
+        logger.info("Inicializando WhisperX Service...")
+        _whisperx_service = WhisperXService()
+    return _whisperx_service
 
 async def run_blocking(func, *args, **kwargs):
     """Ejecuta función bloqueante en threadpool."""
     loop = asyncio.get_event_loop()
     partial_func = functools.partial(func, *args, **kwargs)
     return await loop.run_in_executor(executor, partial_func)
+
+# Funciones obsoletas eliminadas por migración a WhisperX
+# (load_models, get_voice_encoder, safe_transcribe, perform_diarization)
 
 # FASTAPI APP
 
@@ -453,7 +439,15 @@ async def analyze_segments_with_emotions(
         del seg_chunk
 
         speaker_id = 0
-        if enable_diarization and speaker_labels:
+        # Check if segment already has speaker info (WhisperX)
+        if "speaker" in seg:
+            try:
+                # Expecting "SPEAKER_01" -> 1
+                spk_str = seg["speaker"]
+                speaker_id = int(spk_str.split("_")[-1])
+            except:
+                speaker_id = 0
+        elif enable_diarization and speaker_labels:
             seg_mid = (start + end) / 2
             for (win_s, win_e), spk in speaker_labels.items():
                 if win_s <= seg_mid < win_e:
@@ -676,7 +670,7 @@ async def transcribe_full_analysis(
     num_speakers: Optional[int] = Form(None)
 ):
     """
-    Análisis completo de audio con transcripción y análisis emocional.
+    Análisis completo de audio con transcripción y análisis emocional (WhisperX).
     """
     validate_upload(file)
     start_time = time.time()
@@ -707,17 +701,17 @@ async def transcribe_full_analysis(
         if validation_result.warnings:
             warnings.extend(validation_result.warnings)
         
-        # Transcribir
-        logger.info(f"Transcribiendo (lite={lite_mode}, audio_weight={audio_weight}, diarization={enable_diarization})...")
-        models = load_models()
-        whisper_model = models["whisper"]
+        # Transcribir con WhisperX (incluye alineación y diarización si aplica)
+        logger.info(f"Procesando con WhisperX (lite={lite_mode}, audio_weight={audio_weight})...")
         
-        result = await safe_transcribe(whisper_model, tmp_path)
-        tx_full = result.get("text", "")
-        segments_raw = result.get("segments", [])
+        service = get_whisperx_service()
         
-        if not segments_raw:
-            raise HTTPException(status_code=422, detail="No se detectó voz en el audio")
+        # Ejecutar en threadpool para no bloquear event loop
+        # WhisperX gestiona su propia memoria GPU, pero la ejecucion es bloqueante
+        wx_result = await run_blocking(service.process_audio, tmp_path)
+        
+        segments_raw = wx_result["segments"]
+        tx_full = " ".join([s["text"].strip() for s in segments_raw])
         
         # Cargar audio completo para análisis
         audio_data = np.array([])
@@ -727,36 +721,32 @@ async def transcribe_full_analysis(
             y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
             audio_data = y
         
-        # Diarización
-        speaker_labels = {}
-        num_speakers_detected = 1
-        
-        if enable_diarization and not lite_mode:
-            speaker_labels, num_speakers_detected = await perform_diarization(
-                audio_data, sr, num_speakers
-            )
-        
         # Analizar emociones
+        # WhisperX ya devuelve 'speaker' en los segmentos si la diarización funcionó
         enriched_segments = await analyze_segments_with_emotions(
             segments_raw,
             audio_data,
             sr,
             lite_mode,
             audio_weight,
-            speaker_labels,
-            enable_diarization
+            speaker_labels={}, # Ya no usamos etiquetas separadas
+            enable_diarization=enable_diarization
         )
         
         # Estadísticas globales
         global_emotions = calculate_global_stats(enriched_segments)
-        speaker_stats = calculate_speaker_stats(enriched_segments) if enable_diarization else {}
+        speaker_stats = calculate_speaker_stats(enriched_segments)
         timeline = create_emotion_timeline(enriched_segments)
         
         # Transcripción con etiquetas de hablante
         labeled_transcription = ""
+        # WhisperX segments come properly ordered, so we can just format them
         if enable_diarization and not lite_mode:
+            # Reusamos la logica de merge para unificar bloques
             merged_blocks = merge_consecutive_same_speaker(enriched_segments)
             labeled_transcription = format_labeled_transcription(merged_blocks)
+            
+        num_speakers_detected = len(speaker_stats)
         
         # Resultado final
         processing_time = time.time() - start_time
@@ -768,7 +758,7 @@ async def transcribe_full_analysis(
         
         return {
             "status": "success",
-            "mode": "full_analysis_v4.1",
+            "mode": "whisperx_v1.0",
             "transcription": tx_full,
             "labeled_transcription": labeled_transcription,
             "segments": enriched_segments,
@@ -882,14 +872,10 @@ async def transcribe_with_cloud_whisper(
             y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
             audio_data = y
         
-        # Diarización
-        speaker_labels = {}
-        num_speakers_detected = 1
-        
-        if enable_diarization and not lite_mode:
-            speaker_labels, num_speakers_detected = await perform_diarization(
-                audio_data, sr, num_speakers
-            )
+        if enable_diarization:
+            logger.warning("Diarización no disponible en modo Cloud (requiere WhisperX local).")
+            # speaker_labels, num_speakers_detected = await perform_diarization(...)
+            pass
         
         # Analizar emociones
         enriched_segments = await analyze_segments_with_emotions(
