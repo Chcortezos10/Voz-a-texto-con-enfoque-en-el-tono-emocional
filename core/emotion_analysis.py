@@ -32,6 +32,8 @@ import torch
 import numpy as np
 from transformers import pipeline
 
+import numpy as np
+
 from config import (
     TEXT_EMOTION_MODEL,
     EMOTION_BOOST_FACTOR,

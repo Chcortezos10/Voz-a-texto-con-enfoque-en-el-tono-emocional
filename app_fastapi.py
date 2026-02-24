@@ -24,6 +24,9 @@ from collections import Counter
 # Routers
 from routes.history_routes import router as history_router
 from routes.export_routes import router as export_router
+from routes.scoring_routes import router as scoring_router
+from routes.alert_routes import router as alert_router
+from routes.kpi_routes import router as kpi_router
 
 # Importar rutas adicionales (cloud, export, sessions)
 try:
@@ -44,10 +47,14 @@ from core.emotion_analysis import (
     TemporalEmotionAnalyzer
 )
 from core.whisperx_service import WhisperXService
+from core.pyannote_diarizer import get_local_diarizer
 from core.diarization import (
     merge_consecutive_same_speaker,
     format_labeled_transcription
 )
+from core.scoring_engine import calculate_quality_score
+from core.alert_system import check_alerts
+from core.call_summary import generate_call_summary
 
 # Config
 from config import (
@@ -99,6 +106,11 @@ def cleanup_memory():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
+async def run_blocking(func, *args, **kwargs):
+    """Ejecuta una función bloqueante en un thread pool para no bloquear el loop principal."""
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, functools.partial(func, *args, **kwargs))
+
 # MÉTRICAS SIMPLES
 
 
@@ -138,14 +150,7 @@ def get_whisperx_service() -> WhisperXService:
         _whisperx_service = WhisperXService()
     return _whisperx_service
 
-async def run_blocking(func, *args, **kwargs):
-    """Ejecuta función bloqueante en threadpool."""
-    loop = asyncio.get_event_loop()
-    partial_func = functools.partial(func, *args, **kwargs)
-    return await loop.run_in_executor(executor, partial_func)
-
 # Funciones obsoletas eliminadas por migración a WhisperX
-# (load_models, get_voice_encoder, safe_transcribe, perform_diarization)
 
 # FASTAPI APP
 
@@ -232,9 +237,38 @@ async def get_feedback_stats():
 # Incluir routers
 app.include_router(history_router)
 app.include_router(export_router)
+app.include_router(scoring_router)
+app.include_router(alert_router)
+app.include_router(kpi_router)
 
 if ADDITIONAL_ROUTES_AVAILABLE:
     app.include_router(additional_router)
+
+# Configuración del logo para exportación PDF
+_company_logo_path: Optional[str] = None
+
+@app.post("/config/logo", tags=["Config"])
+async def upload_company_logo(file: UploadFile = File(...)):
+    """Sube un logo de empresa para incluir en reportes PDF."""
+    global _company_logo_path
+    allowed_ext = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"Formato no soportado: {ext}. Use: {', '.join(allowed_ext)}")
+    logo_dir = os.path.join(os.path.dirname(__file__), "data")
+    os.makedirs(logo_dir, exist_ok=True)
+    logo_path = os.path.join(logo_dir, f"company_logo{ext}")
+    with open(logo_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    _company_logo_path = logo_path
+    return {"status": "success", "message": "Logo guardado", "path": logo_path}
+
+@app.get("/config/logo", tags=["Config"])
+async def get_company_logo_status():
+    """Verifica si hay un logo configurado."""
+    if _company_logo_path and os.path.exists(_company_logo_path):
+        return {"has_logo": True, "path": _company_logo_path}
+    return {"has_logo": False}
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard():
@@ -256,10 +290,12 @@ async def startup_event():
     else:
         logger.warning("⚠️  GPU NO DETECTADA - Usando CPU (procesamiento más lento)")
     
-    # Precargar Whisper
-    models = load_models()
-    device = models.get("device", "cpu")
-    logger.info(f"✅ Whisper cargado en: {device.upper()}")
+    # Precargar WhisperX
+    try:
+        get_whisperx_service()
+        logger.info("✅ WhisperX Service inicializado")
+    except Exception as e:
+        logger.error(f"❌ Error inicializando WhisperX: {e}")
     
     # Modelos de emoción se cargarán bajo demanda
     logger.info("ℹ️  Modelos de emoción: Carga bajo demanda")
@@ -304,77 +340,7 @@ async def validate_request_params(lite_mode: bool, audio_weight: float) -> Tuple
         logger.warning(f"Parámetros ajustados: {warnings}")
     return audio_weight, warnings, lite_mode
 
-@retry_with_backoff_async(max_retries=2, base_delay=1.0)
-async def safe_transcribe(model, path: str) -> Dict[str, Any]:
-    """Transcribe audio con circuit breaker y retry."""
-    def _wrapped_transcribe():
-        return WHISPER_BREAKER.call(
-            model.transcribe,
-            path,
-            language="es",
-            fallback=lambda *a, **k: {"text": "", "segments": []}
-        )
-    return await run_blocking(_wrapped_transcribe)
-
-async def perform_diarization(
-    audio_data: np.ndarray, 
-    sr: int, 
-    num_speakers: Optional[int]
-) -> Tuple[Dict[Tuple[float, float], int], int]:
-    """
-    Realiza diarización de hablantes.
-    
-    Returns:
-        Tuple de (speaker_labels dict, num_speakers detectados)
-    """
-    speaker_labels = {}
-    num_speakers_detected = 1
-    
-    if len(audio_data) == 0:
-        return speaker_labels, num_speakers_detected
-    
-    try:
-        logger.info("Ejecutando diarización de hablantes...")
-        encoder = get_voice_encoder()
-        
-        duration = len(audio_data) / sr
-        windows = []
-        t = 0.0
-        while t < duration:
-            end_t = min(t + WINDOW_SEC, duration)
-            windows.append((t, end_t))
-            t += HOP_SEC
-        
-        if len(windows) < 2:
-            logger.info("Audio muy corto para diarización")
-            return speaker_labels, 1
-        
-        embeddings, starts = await run_blocking(
-            compute_embeddings_with_vad, audio_data, sr, windows, encoder, WINDOW_SEC
-        )
-        
-        if len(embeddings) < 2:
-            logger.info("Pocos segmentos de voz detectados")
-            return speaker_labels, 1
-        
-        _, labels = detect_speaker_changes(
-            embeddings, 
-            CHANGE_SIM_THRESHOLD,
-            num_speakers=num_speakers
-        )
-        
-        for i, start_t in enumerate(starts):
-            end_t = start_t + WINDOW_SEC
-            speaker_labels[(start_t, end_t)] = int(labels[i])
-        
-        num_speakers_detected = len(set(labels))
-        logger.info(f"Detectados {num_speakers_detected} hablante(s)")
-        
-        return speaker_labels, num_speakers_detected
-        
-    except Exception as e:
-        logger.warning(f"Error en diarización: {e}")
-        return {}, 1
+# Removed safe_transcribe and perform_diarization
 
 async def analyze_segments_with_emotions(
     segments_raw: List[Dict],
@@ -701,19 +667,38 @@ async def transcribe_full_analysis(
         if validation_result.warnings:
             warnings.extend(validation_result.warnings)
         
-        # Transcribir con WhisperX (incluye alineación y diarización si aplica)
+        # 1. Transcribir con WhisperX (solo transcripción + alineación)
         logger.info(f"Procesando con WhisperX (lite={lite_mode}, audio_weight={audio_weight})...")
         
         service = get_whisperx_service()
         
         # Ejecutar en threadpool para no bloquear event loop
-        # WhisperX gestiona su propia memoria GPU, pero la ejecucion es bloqueante
         wx_result = await run_blocking(service.process_audio, tmp_path)
         
         segments_raw = wx_result["segments"]
         tx_full = " ".join([s["text"].strip() for s in segments_raw])
         
-        # Cargar audio completo para análisis
+        # 2. Diarización local (MFCC + clustering, sin HuggingFace)
+        if enable_diarization:
+            try:
+                logger.info("Ejecutando diarización local (MFCC + clustering)...")
+                diarizer = get_local_diarizer()
+                segments_raw = await run_blocking(
+                    diarizer.diarize_from_segments, tmp_path, segments_raw, num_speakers
+                )
+                unique_spk = len(set(s.get("speaker", "SPEAKER_00") for s in segments_raw))
+                logger.info(f"Diarización completada: {unique_spk} hablantes detectados")
+            except Exception as diar_err:
+                logger.warning(f"Diarización falló, continuando sin ella: {diar_err}")
+                for seg in segments_raw:
+                    if "speaker" not in seg:
+                        seg["speaker"] = "SPEAKER_00"
+        else:
+            for seg in segments_raw:
+                if "speaker" not in seg:
+                    seg["speaker"] = "SPEAKER_00"
+        
+        # 3. Cargar audio completo para análisis emocional
         audio_data = np.array([])
         sr = 16000
         
@@ -721,15 +706,14 @@ async def transcribe_full_analysis(
             y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
             audio_data = y
         
-        # Analizar emociones
-        # WhisperX ya devuelve 'speaker' en los segmentos si la diarización funcionó
+        # 4. Analizar emociones por segmento
         enriched_segments = await analyze_segments_with_emotions(
             segments_raw,
             audio_data,
             sr,
             lite_mode,
             audio_weight,
-            speaker_labels={}, # Ya no usamos etiquetas separadas
+            speaker_labels={},
             enable_diarization=enable_diarization
         )
         
@@ -740,13 +724,43 @@ async def transcribe_full_analysis(
         
         # Transcripción con etiquetas de hablante
         labeled_transcription = ""
-        # WhisperX segments come properly ordered, so we can just format them
         if enable_diarization and not lite_mode:
-            # Reusamos la logica de merge para unificar bloques
             merged_blocks = merge_consecutive_same_speaker(enriched_segments)
             labeled_transcription = format_labeled_transcription(merged_blocks)
             
         num_speakers_detected = len(speaker_stats)
+        
+        # Quality Score
+        scoring_result = calculate_quality_score(enriched_segments, global_emotions, speaker_stats)
+        quality_score_data = {
+            "total_score": scoring_result.total_score,
+            "classification": scoring_result.classification,
+            "breakdown": scoring_result.breakdown,
+            "recommendations": scoring_result.recommendations
+        }
+        
+        # Resumen de Llamada
+        call_summary_data = generate_call_summary(
+            segments=enriched_segments,
+            global_emotions=global_emotions,
+            speaker_stats=speaker_stats,
+            duration=validation_result.duration_sec,
+            filename=file.filename
+        ).to_dict()
+        
+        # Alertas de Escalamiento
+        emotion_dist = global_emotions.get("emotion_distribution", {})
+        sentiment_score = round(
+            emotion_dist.get("feliz", 0) - (emotion_dist.get("enojado", 0) + emotion_dist.get("triste", 0)), 4
+        )
+        alert = check_alerts(
+            segments=enriched_segments,
+            global_emotions=global_emotions,
+            filename=file.filename,
+            quality_score=scoring_result.total_score,
+            sentiment_score=sentiment_score
+        )
+        alert_data = alert.to_dict() if alert else None
         
         # Resultado final
         processing_time = time.time() - start_time
@@ -769,6 +783,10 @@ async def transcribe_full_analysis(
                 "num_speakers": num_speakers_detected,
                 "speaker_stats": speaker_stats
             },
+            "quality_score": quality_score_data,
+            "call_summary": call_summary_data,
+            "alert": alert_data,
+            "sentiment_score": sentiment_score,
             "metadata": {
                 "total_duration": validation_result.duration_sec,
                 "processing_time": round(processing_time, 2),
@@ -959,19 +977,36 @@ async def _process_single_audio(
                 "error": ", ".join(validation_result.errors)
             }
 
-        models = load_models()
-        whisper_model = models["whisper"]
-
-        result = await safe_transcribe(whisper_model, tmp_path)
-        tx_full = result.get("text", "")
-        segments_raw = result.get("segments", [])
+        # Transcribir con WhisperX
+        service = get_whisperx_service()
+        wx_result = await run_blocking(service.process_audio, tmp_path)
+        
+        segments_raw = wx_result["segments"]
+        tx_full = " ".join([s["text"].strip() for s in segments_raw])
 
         if not segments_raw:
-            return {
+             return {
                 "filename": file.filename,
                 "status": "error",
                 "error": "No se detectó voz en el audio"
             }
+
+        # Diarización local
+        if enable_diarization:
+            try:
+                diarizer = get_local_diarizer()
+                segments_raw = await run_blocking(
+                    diarizer.diarize_from_segments, tmp_path, segments_raw, num_speakers
+                )
+            except Exception as diar_err:
+                logger.warning(f"Diarización falló en batch para {file.filename}: {diar_err}")
+                for seg in segments_raw:
+                    if "speaker" not in seg:
+                        seg["speaker"] = "SPEAKER_00"
+        else:
+            for seg in segments_raw:
+                if "speaker" not in seg:
+                    seg["speaker"] = "SPEAKER_00"
 
         audio_data = np.array([])
         sr = 16000
@@ -980,22 +1015,15 @@ async def _process_single_audio(
             y, sr = await run_blocking(librosa.load, tmp_path, sr=16000)
             audio_data = y
 
-        speaker_labels = {}
-        num_speakers_detected = 1
-
-        if enable_diarization and not lite_mode:
-            speaker_labels, num_speakers_detected = await perform_diarization(
-                audio_data, sr, num_speakers
-            )
-
         enriched_segments = await analyze_segments_with_emotions(
             segments_raw, audio_data, sr, lite_mode,
-            audio_weight, speaker_labels, enable_diarization
+            audio_weight, speaker_labels={}, enable_diarization=enable_diarization
         )
 
         global_emotions = calculate_global_stats(enriched_segments)
-        speaker_stats = calculate_speaker_stats(enriched_segments) if enable_diarization else {}
+        speaker_stats = calculate_speaker_stats(enriched_segments)
         timeline = create_emotion_timeline(enriched_segments)
+        num_speakers_detected = len(speaker_stats)
 
         labeled_transcription = ""
         if enable_diarization and not lite_mode:
@@ -1008,6 +1036,34 @@ async def _process_single_audio(
         triste = emotion_dist.get("triste", 0.0)
         neutral = emotion_dist.get("neutral", 0.0)
         sentiment_score = round(feliz - (enojado + triste), 4)
+
+        # Quality Score
+        scoring_result = calculate_quality_score(enriched_segments, global_emotions, speaker_stats)
+        quality_score_data = {
+            "total_score": scoring_result.total_score,
+            "classification": scoring_result.classification,
+            "breakdown": scoring_result.breakdown,
+            "recommendations": scoring_result.recommendations
+        }
+
+        # esumen de Llamada
+        call_summary_data = generate_call_summary(
+            segments=enriched_segments,
+            global_emotions=global_emotions,
+            speaker_stats=speaker_stats,
+            duration=validation_result.duration_sec,
+            filename=file.filename
+        ).to_dict()
+
+        #  Alertas
+        alert = check_alerts(
+            segments=enriched_segments,
+            global_emotions=global_emotions,
+            filename=file.filename,
+            quality_score=scoring_result.total_score,
+            sentiment_score=sentiment_score
+        )
+        alert_data = alert.to_dict() if alert else None
 
         cleanup_memory()
 
@@ -1035,7 +1091,10 @@ async def _process_single_audio(
                 "enabled": enable_diarization,
                 "num_speakers": num_speakers_detected,
                 "speaker_stats": speaker_stats
-            }
+            },
+            "quality_score": quality_score_data,
+            "call_summary": call_summary_data,
+            "alert": alert_data
         }
 
     except Exception as e:
@@ -1062,8 +1121,8 @@ async def transcribe_batch_scoring(
 ):
     start_time = time.time()
 
-    if len(files) > 10:
-        raise HTTPException(status_code=400, detail="Máximo 10 archivos por batch")
+    if len(files) > 50:
+        raise HTTPException(status_code=400, detail="Máximo 50 archivos por batch")
 
     if len(files) == 0:
         raise HTTPException(status_code=400, detail="Debe enviar al menos 1 archivo")

@@ -1,15 +1,15 @@
 # =====================================================
 # Dockerfile - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 7.0.0 (Optimizada con gestión de memoria)
+# Versión: 8.0.0 (Migración WhisperX)
 # =====================================================
 
 # Base image con soporte CUDA para NVIDIA GPU
-FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 
 # Metadatos
 LABEL maintainer="Christian"
 LABEL description="API de transcripción de voz a texto con análisis emocional"
-LABEL version="7.0.0"
+LABEL version="8.0.0"
 
 # Evitar prompts interactivos durante instalación
 ENV DEBIAN_FRONTEND=noninteractive
@@ -46,9 +46,41 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 
 # Instalar dependencias de Python
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir httpx psutil && \
-    pip install --no-cache-dir git+https://github.com/m-bain/whisperx.git
+# NOTA: La base image pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime 
+#       ya incluye torch 2.5.1 con CUDA 12.4. NO reinstalar torch.
+
+# Instalar dependencias de Python
+# NOTA: La base image pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime 
+#       ya incluye torch 2.5.1 con CUDA 12.4. NO reinstalar torch.
+
+# Paso 1: Instalar WhisperX y pyannote primero (git repos)
+# Esto asegura que si traen dependencias viejas, requirements.txt las actualice después
+RUN pip install --no-cache-dir git+https://github.com/m-bain/whisperx.git pyannote.audio
+
+# Paso 2: Instalar requisitos estrictos (transformers actualizado, etc.)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Paso 3: Forzar actualización de bibliotecas críticas de ML y corregir binarios de Torch
+# Reinstalamos torchvision y torchaudio para asegurar compatibilidad con torch 2.5.1+cu124 de la base image
+RUN pip install --no-cache-dir --force-reinstall \
+    "torchvision==0.20.1" \
+    "torchaudio==2.5.1" \
+    --index-url https://download.pytorch.org/whl/cu124
+
+RUN pip install --no-cache-dir --upgrade \
+    "transformers>=4.48.1" \
+    accelerate \
+    sentencepiece \
+    protobuf \
+    tokenizers \
+    httpx \
+    psutil
+
+# Paso 4: Verificación exhaustiva de entorno antes de finalizar build
+RUN python -c "import torch; print(f'Torch: {torch.__version__} | CUDA: {torch.cuda.is_available()}'); \
+    import transformers; print(f'Transformers: {transformers.__version__}'); \
+    from transformers import pipeline; print('Pipeline import: OK'); \
+    pipe = pipeline('text-classification', model='distilbert-base-uncased-finetuned-sst-2-english'); print('Pipeline inference: OK')"
 
 # Copiar el código fuente del proyecto
 COPY . .

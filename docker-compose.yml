@@ -1,6 +1,6 @@
 # =====================================================
 # Docker Compose - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 7.0.0
+# Versión: 8.0.0
 # =====================================================
 # Uso:
 #   docker-compose up --build        # Construir e iniciar
@@ -15,8 +15,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transcriptor-emocional-v7
-    image: transcriptor-emocional:7.0.0
+    container_name: transcriptor-emocional-v8
+    image: transcriptor-emocional:8.0.0
+
+    # Shared memory - PyTorch necesita más de los 64MB por defecto
+    # Con 8GB RAM total, usar 1GB para shm es suficiente
+    shm_size: '1gb'
 
     # Runtime NVIDIA para soporte GPU
     runtime: nvidia
@@ -30,10 +34,12 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - HF_TOKEN=${HF_TOKEN}
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-      # Optimizaciones de threads
-      - OMP_NUM_THREADS=4
-      # Modelo Whisper se detecta automáticamente según GPU disponible
-      # Para forzar: WHISPER_MODEL=small|medium|large-v3
+      # Optimizaciones de memoria para 8GB RAM
+      - OMP_NUM_THREADS=2
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+      # Modelo Whisper: small para ahorrar RAM (medium también funciona)
+      - WHISPER_MODEL=small
+      - LOW_MEMORY_MODE=true
       - LOG_LEVEL=INFO
 
     volumes:
@@ -48,6 +54,10 @@ services:
       - ./feedback_data:/app/feedback_data
       # Dashboard HTML (hot-reload en desarrollo)
       - ./dashboard.html:/app/dashboard.html:ro
+      # Código fuente (hot-reload)
+      - ./app_fastapi.py:/app/app_fastapi.py
+      - ./core:/app/core
+      - ./routes:/app/routes
 
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]

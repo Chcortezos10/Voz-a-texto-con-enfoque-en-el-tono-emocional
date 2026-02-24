@@ -35,6 +35,19 @@ echo [*] Esperando a que el servidor inicie (puede tardar 30-60 segundos)...
 timeout /t 10 /nobreak >nul
 
 :check_server
+rem Verificar si el contenedor sigue corriendo
+docker ps -q -f name=transcriptor-emocional-v8 | findstr . >nul
+if errorlevel 1 (
+    echo.
+    echo [!] ERROR CRITICO: El contenedor se ha detenido inesperadamente.
+    echo     Mostrando logs...
+    echo.
+    docker compose logs transcriptor-api
+    pause
+    exit /b 1
+)
+
+rem Verificar si el servidor responde
 curl -s http://localhost:8000/health >nul 2>&1
 if errorlevel 1 (
     echo     Servidor aún cargando modelos...

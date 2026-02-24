@@ -1536,9 +1536,12 @@
     <!-- Main Container -->
     <div class="container">
         <!-- Tabs -->
-        <div class="tabs">
+        <div class="tabs" style="flex-wrap: wrap;">
             <button class="tab active" onclick="switchTab('scoring', event)">📊 Scoring Masivo</button>
             <button class="tab" onclick="switchTab('analyze', event)">🎙️ Análisis</button>
+            <button class="tab" onclick="switchTab('quality', event)">🏆 Quality Score</button>
+            <button class="tab" onclick="switchTab('kpis', event)">📈 KPIs</button>
+            <button class="tab" onclick="switchTab('summary', event)">📋 Resumen</button>
             <button class="tab" onclick="switchTab('history', event)">📜 Historial</button>
             <button class="tab" onclick="switchTab('settings', event)">⚙️ Configuración</button>
         </div>
@@ -1551,7 +1554,7 @@
                         <div style="font-size: 3rem;">📁</div>
                         <h3 style="margin-top: 0.5rem;">Subir audios para scoring</h3>
                         <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">Arrastra archivos o
-                            haz clic (máx 10)</p>
+                            haz clic (máx 50)</p>
                         <input type="file" id="scoringFileInput" hidden accept="audio/*,video/*" multiple />
                     </div>
                     <div class="scoring-file-list" id="scoringFileList">
@@ -1745,6 +1748,14 @@
                         <button class="btn btn-secondary" onclick="exportData('txt')">
                             <i class="fas fa-file-alt"></i> TXT
                         </button>
+                        <button class="btn btn-primary" onclick="exportPDF()"
+                            style="background: linear-gradient(135deg, #ef4444, #ec4899);">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-primary" onclick="exportExcel()"
+                            style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
                     </div>
                 </div>
 
@@ -1890,6 +1901,189 @@
             </div>
         </div>
 
+        <!-- TAB: QUALITY SCORE -->
+        <div id="tab-quality" class="tab-content">
+            <h2>🏆 Score de Calidad del Agente</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Analiza un audio y visualiza el score de calidad
+                automático.</p>
+            <div id="qualityScorePanel" style="display: none;">
+                <div class="metrics-grid" style="margin-bottom: 2rem;">
+                    <div class="metric-card" style="grid-column: span 2;">
+                        <div class="metric-value" id="qsTotal" style="font-size: 3rem;">-</div>
+                        <div class="metric-label">Score Total</div>
+                        <div id="qsClassification" style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 600;">
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsTone">-</div>
+                        <div class="metric-label">Tono Emocional (/30)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsKeywords">-</div>
+                        <div class="metric-label">Palabras Clave (/25)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsResolution">-</div>
+                        <div class="metric-label">Resolución (/25)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsProtocol">-</div>
+                        <div class="metric-label">Protocolo (/20)</div>
+                    </div>
+                </div>
+                <!-- Recommendations -->
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">💡 Recomendaciones</h3>
+                    <div id="qsRecommendations"></div>
+                </div>
+                <!-- Protocol Details -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsGreeting" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Saludo</div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsFarewell" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Despedida</div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsIdentification" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Identificación</div>
+                    </div>
+                </div>
+                <!-- Alert if present -->
+                <div id="qsAlertPanel"
+                    style="display: none; background: rgba(239,68,68,0.1); border: 2px solid var(--danger); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="color: var(--danger);">🚨 Alerta de Escalamiento</h3>
+                    <div id="qsAlertSeverity" style="margin: 0.5rem 0; font-weight: 700;"></div>
+                    <div id="qsAlertReasons"></div>
+                </div>
+            </div>
+            <div id="qualityNoData" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="font-size: 3rem;">🏆</p>
+                <p style="margin-top: 1rem;">Analiza un audio en la pestaña "Análisis" para ver el Quality Score aquí.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB: KPIs -->
+        <div id="tab-kpis" class="tab-content">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2>📈 Dashboard de KPIs</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" onclick="loadKPIs('7d')" id="kpiBtn7d">7 días</button>
+                    <button class="btn btn-secondary" onclick="loadKPIs('30d')" id="kpiBtn30d">30 días</button>
+                    <button class="btn btn-secondary" onclick="loadKPIs('90d')" id="kpiBtn90d">90 días</button>
+                    <button class="btn btn-primary" onclick="loadKPIs()">
+                        <i class="fas fa-sync"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+            <!-- KPI Summary Cards -->
+            <div class="metrics-grid" style="margin-bottom: 2rem;" id="kpiSummaryCards">
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiTotalCalls">-</div>
+                    <div class="metric-label">Total Llamadas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiAvgScore">-</div>
+                    <div class="metric-label">Score Promedio</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiPositive" style="color: var(--success);">-</div>
+                    <div class="metric-label">% Positivas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiNegative" style="color: var(--danger);">-</div>
+                    <div class="metric-label">% Negativas</div>
+                </div>
+            </div>
+            <!-- Charts Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">📈 Tendencia Emocional</h3>
+                    <div style="height: 280px;"><canvas id="kpiTrendChart"></canvas></div>
+                </div>
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">🍩 Distribución Global</h3>
+                    <div style="height: 280px;"><canvas id="kpiDistChart"></canvas></div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">📊 Comparativa de Scores por Llamada</h3>
+                    <div style="height: 300px;"><canvas id="kpiComparisonChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: RESUMEN -->
+        <div id="tab-summary" class="tab-content">
+            <h2>📋 Resumen de Última Llamada</h2>
+            <div id="summaryPanel" style="display: none; margin-top: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">📞 Motivo de la Llamada</h3>
+                        <p id="sumMotivo" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">📊 Desarrollo</h3>
+                        <p id="sumDesarrollo" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">✅ Resolución</h3>
+                        <p id="sumResolucion" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">😊 Satisfacción Estimada</h3>
+                        <div id="sumSatisfaccion" style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">-</div>
+                        <p id="sumSatisfaccionDetalle" style="color: var(--text-muted);">-</p>
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumTopico">-</div>
+                        <div class="metric-label">Tópico</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumDuracion">-</div>
+                        <div class="metric-label">Duración</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumHablantes">-</div>
+                        <div class="metric-label">Hablantes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumSegmentos">-</div>
+                        <div class="metric-label">Segmentos</div>
+                    </div>
+                </div>
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 0.75rem;">📝 Resumen Breve</h3>
+                    <p id="sumResumenBreve" style="color: var(--text-main); font-size: 1.1rem; line-height: 1.6;">-</p>
+                </div>
+            </div>
+            <div id="summaryNoData" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="font-size: 3rem;">📋</p>
+                <p style="margin-top: 1rem;">Analiza un audio en la pestaña "Análisis" para ver el resumen aquí.</p>
+            </div>
+        </div>
+
         <!-- TAB: CONFIGURACIÓN -->
         <div id="tab-settings" class="tab-content">
             <h2>⚙️ Configuración</h2>
@@ -1913,6 +2107,19 @@
                     <button class="btn btn-secondary" onclick="clearHistory()">
                         <i class="fas fa-trash"></i> Borrar Historial
                     </button>
+                </div>
+
+                <div class="config-card">
+                    <h3>🏢 Logo de Empresa</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Sube un logo para incluir en los reportes PDF exportados
+                    </p>
+                    <input type="file" id="logoFileInput" accept="image/*" style="display: none;"
+                        onchange="uploadLogo(this)" />
+                    <button class="btn btn-secondary" onclick="document.getElementById('logoFileInput').click()">
+                        <i class="fas fa-upload"></i> Subir Logo
+                    </button>
+                    <span id="logoStatus" style="margin-left: 1rem; color: var(--text-muted);"></span>
                 </div>
 
                 <div class="config-card">
@@ -2189,12 +2396,15 @@
                 evt.target.classList.add('active');
             } else {
                 const tabs = document.querySelectorAll('.tab');
-                const tabMap = { 'scoring': 0, 'analyze': 1, 'history': 2, 'settings': 3 };
+                const tabMap = { 'scoring': 0, 'analyze': 1, 'quality': 2, 'kpis': 3, 'summary': 4, 'history': 5, 'settings': 6 };
                 const tabIndex = tabMap[tab] !== undefined ? tabMap[tab] : 0;
                 if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
             }
             document.getElementById(`tab-${tab}`).classList.add('active');
             if (tab === 'history') loadHistory();
+            if (tab === 'kpis') loadKPIs();
+            if (tab === 'quality' && currentResults) displayQualityScore(currentResults);
+            if (tab === 'summary' && currentResults) displayCallSummary(currentResults);
         }
 
         // ============================================
@@ -2315,6 +2525,8 @@
                     currentResults = data;
                     saveToHistory(data, selectedFile.name);
                     displayResults(data);
+                    displayQualityScore(data);
+                    displayCallSummary(data);
                     document.getElementById('resultsSection').style.display = 'block';
                     progressBar.hide();
                     toast.success('Análisis completado exitosamente');
@@ -2534,7 +2746,15 @@
                         dominant_emotion: data.global_emotions?.top_emotion || 'neutral',
                         global_emotions: data.global_emotions,
                         segments: data.segments,
-                        transcription: data.transcription
+                        transcription: data.transcription,
+                        labeled_transcription: data.labeled_transcription || '',
+                        quality_score: data.quality_score || null,
+                        call_summary: data.call_summary || null,
+                        alert: data.alert || null,
+                        sentiment_score: data.sentiment_score || 0,
+                        diarization: data.diarization || {},
+                        emotion_timeline: data.emotion_timeline || [],
+                        metadata: data.metadata || {}
                     })
                 });
             } catch (e) {
@@ -2927,7 +3147,7 @@
 
         function addScoringFiles(fileList) {
             for (const f of fileList) {
-                if (scoringFiles.length >= 10) { toast.warning('Máximo 10 archivos'); break; }
+                if (scoringFiles.length >= 50) { toast.warning('Máximo 50 archivos'); break; }
                 if (!scoringFiles.find(sf => sf.name === f.name)) scoringFiles.push(f);
             }
             renderScoringFileList();
@@ -3007,6 +3227,16 @@
                 }
 
                 const data = await resp.json();
+                console.log("Full API Response:", data); // Log full response for debugging
+
+                if (data.failed > 0) {
+                    console.error("Failed files:", data.results.filter(r => r.status === 'error'));
+                    data.results.filter(r => r.status === 'error').forEach(r => {
+                        console.error(`Error en ${r.filename}:`, r.error);
+                    });
+                    toast.warning(`Atención: ${data.failed} archivos fallaron. Revisa la consola (F12) para detalles.`);
+                }
+
                 scoringResults = data.results || [];
                 displayScoringResults(data);
                 toast.success(`Scoring completado: ${data.successful} de ${data.total_files} audios`);
@@ -3131,8 +3361,9 @@
             const backBtn = document.getElementById('backToScoringBtn');
             if (backBtn) backBtn.style.display = 'inline-flex';
 
-            // Display results using the main render function
             displayResults(result);
+            displayQualityScore(result);
+            displayCallSummary(result);
             document.getElementById('resultsSection').style.display = 'block';
 
             // Re-initialize player explicitly if we have the file
@@ -3161,6 +3392,291 @@
 
         // function backToScoring() { ... } // Removed as we use the new flow
 
+        // ============================================
+        // QUALITY SCORE DISPLAY
+        // ============================================
+        function displayQualityScore(results) {
+            const qs = results.quality_score;
+            if (!qs || typeof qs !== 'object') {
+                document.getElementById('qualityNoData').style.display = 'block';
+                document.getElementById('qualityScorePanel').style.display = 'none';
+                return;
+            }
+            document.getElementById('qualityNoData').style.display = 'none';
+            document.getElementById('qualityScorePanel').style.display = 'block';
+
+            const score = qs.total_score || 0;
+            const scoreColor = score >= 70 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+            document.getElementById('qsTotal').textContent = `${score}/100`;
+            document.getElementById('qsTotal').style.color = scoreColor;
+            document.getElementById('qsClassification').textContent = qs.classification || '';
+            document.getElementById('qsClassification').style.color = scoreColor;
+
+            const bd = qs.breakdown || {};
+            document.getElementById('qsTone').textContent = bd.emotional_tone ? `${bd.emotional_tone.score}/${bd.emotional_tone.max}` : '-';
+            document.getElementById('qsKeywords').textContent = bd.keywords ? `${bd.keywords.score}/${bd.keywords.max}` : '-';
+            document.getElementById('qsResolution').textContent = bd.resolution ? `${bd.resolution.score}/${bd.resolution.max}` : '-';
+            document.getElementById('qsProtocol').textContent = bd.protocol ? `${bd.protocol.score}/${bd.protocol.max}` : '-';
+
+            // Recommendations
+            const recsEl = document.getElementById('qsRecommendations');
+            const recs = qs.recommendations || [];
+            recsEl.innerHTML = recs.length > 0
+                ? recs.map(r => `<div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border); color: var(--text-muted);">💡 ${r}</div>`).join('')
+                : '<p style="color: var(--text-muted);">Sin recomendaciones</p>';
+
+            // Protocol indicators
+            const proto = bd.protocol || {};
+            const details = proto.details || {};
+            document.getElementById('qsGreeting').textContent = details.has_greeting ? '✅' : '❌';
+            document.getElementById('qsFarewell').textContent = details.has_farewell ? '✅' : '❌';
+            document.getElementById('qsIdentification').textContent = details.has_identification ? '✅' : '❌';
+
+            // Alert panel
+            const alert = results.alert;
+            const alertPanel = document.getElementById('qsAlertPanel');
+            if (alert && typeof alert === 'object' && alert.requires_escalation) {
+                alertPanel.style.display = 'block';
+                const sevColor = alert.severity === 'alta' ? 'var(--danger)' : alert.severity === 'media' ? 'var(--warning)' : 'var(--primary)';
+                document.getElementById('qsAlertSeverity').textContent = `Severidad: ${(alert.severity || '').toUpperCase()}`;
+                document.getElementById('qsAlertSeverity').style.color = sevColor;
+                document.getElementById('qsAlertReasons').innerHTML = (alert.reasons || [])
+                    .map(r => `<div style="padding: 0.4rem 0; color: var(--text-muted);">⚠️ ${r}</div>`).join('');
+            } else {
+                alertPanel.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // CALL SUMMARY DISPLAY
+        // ============================================
+        function displayCallSummary(results) {
+            const sum = results.call_summary;
+            if (!sum || typeof sum !== 'object') {
+                document.getElementById('summaryNoData').style.display = 'block';
+                document.getElementById('summaryPanel').style.display = 'none';
+                return;
+            }
+            document.getElementById('summaryNoData').style.display = 'none';
+            document.getElementById('summaryPanel').style.display = 'block';
+
+            document.getElementById('sumMotivo').textContent = sum.motivo || 'No detectado';
+            document.getElementById('sumDesarrollo').textContent = sum.desarrollo || 'No detectado';
+            document.getElementById('sumResolucion').textContent = sum.resolucion || 'No detectado';
+
+            const sat = sum.satisfaccion_estimada || 'desconocida';
+            const satEmoji = { 'alta': '😊', 'media': '😐', 'baja': '😟' };
+            const satColor = { 'alta': 'var(--success)', 'media': 'var(--warning)', 'baja': 'var(--danger)' };
+            document.getElementById('sumSatisfaccion').textContent = `${satEmoji[sat] || '❓'} ${sat.charAt(0).toUpperCase() + sat.slice(1)}`;
+            document.getElementById('sumSatisfaccion').style.color = satColor[sat] || 'var(--text-main)';
+            document.getElementById('sumSatisfaccionDetalle').textContent = `Basado en el tono de los segmentos finales`;
+
+            document.getElementById('sumTopico').textContent = sum.topico_detectado || '-';
+            document.getElementById('sumDuracion').textContent = sum.duracion_seg ? Utils.formatDuration(sum.duracion_seg) : '-';
+            document.getElementById('sumHablantes').textContent = sum.num_hablantes || '-';
+            document.getElementById('sumSegmentos').textContent = sum.num_segmentos || '-';
+            document.getElementById('sumResumenBreve').textContent = sum.resumen_breve || '-';
+        }
+
+        // ============================================
+        // KPI DASHBOARD
+        // ============================================
+        let kpiTrendChartInstance = null;
+        let kpiDistChartInstance = null;
+        let kpiComparisonChartInstance = null;
+
+        async function loadKPIs(period = '30d') {
+            try {
+                // Fetch summary, trends, and comparison in parallel
+                const [summaryRes, trendsRes, compRes] = await Promise.all([
+                    fetch(`${CONFIG.API_URL}/kpi/summary`),
+                    fetch(`${CONFIG.API_URL}/kpi/trends?period=${period}`),
+                    fetch(`${CONFIG.API_URL}/kpi/comparison`)
+                ]);
+
+                const summary = await summaryRes.json();
+                const trends = await trendsRes.json();
+                const comparison = await compRes.json();
+
+                // Update summary cards
+                document.getElementById('kpiTotalCalls').textContent = summary.total_calls || 0;
+                document.getElementById('kpiAvgScore').textContent = summary.avg_sentiment_score !== undefined
+                    ? (summary.avg_sentiment_score * 100).toFixed(1) + '%' : '-';
+
+                const dist = summary.emotion_distribution || {};
+                const pct = (v) => ((v || 0) * 100).toFixed(1);
+                document.getElementById('kpiPositive').textContent = pct(dist.feliz) + '%';
+                document.getElementById('kpiNegative').textContent = pct((dist.enojado || 0) + (dist.triste || 0)) + '%';
+
+                // Trend chart
+                renderKPITrendChart(trends);
+                // Distribution chart
+                renderKPIDistChart(dist);
+                // Comparison chart
+                renderKPIComparisonChart(comparison);
+
+                toast.success('KPIs actualizados');
+            } catch (err) {
+                console.error('Error loading KPIs:', err);
+                toast.error('Error cargando KPIs: ' + err.message);
+            }
+        }
+
+        function renderKPITrendChart(trends) {
+            const ctx = document.getElementById('kpiTrendChart');
+            if (kpiTrendChartInstance) kpiTrendChartInstance.destroy();
+
+            const dailyData = trends.daily_trends || [];
+            const labels = dailyData.map(d => d.date || d.day);
+            const emotions = ['feliz', 'neutral', 'triste', 'enojado'];
+            const colorMap = CONFIG.EMOTION_COLORS;
+
+            kpiTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: emotions.map(emo => ({
+                        label: emo.charAt(0).toUpperCase() + emo.slice(1),
+                        data: dailyData.map(d => ((d.emotions || {})[emo] || 0) * 100),
+                        borderColor: colorMap[emo],
+                        backgroundColor: colorMap[emo] + '22',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#2a2a3a' } },
+                        y: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: '#2a2a3a' }, min: 0, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function renderKPIDistChart(dist) {
+            const ctx = document.getElementById('kpiDistChart');
+            if (kpiDistChartInstance) kpiDistChartInstance.destroy();
+
+            const emotions = ['feliz', 'neutral', 'triste', 'enojado'];
+            kpiDistChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)),
+                    datasets: [{
+                        data: emotions.map(e => ((dist[e] || 0) * 100).toFixed(1)),
+                        backgroundColor: emotions.map(e => CONFIG.EMOTION_COLORS[e]),
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 15 } } }
+                }
+            });
+        }
+
+        function renderKPIComparisonChart(comparison) {
+            const ctx = document.getElementById('kpiComparisonChart');
+            if (kpiComparisonChartInstance) kpiComparisonChartInstance.destroy();
+
+            const calls = comparison.calls || [];
+            kpiComparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: calls.map((c, i) => c.filename ? c.filename.slice(0, 15) : `Llamada ${i + 1}`),
+                    datasets: [{
+                        label: 'Score Sentimiento',
+                        data: calls.map(c => ((c.sentiment_score || 0) * 100).toFixed(1)),
+                        backgroundColor: calls.map(c => (c.sentiment_score || 0) >= 0 ? '#10b981' : '#ef4444'),
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', maxRotation: 45 }, grid: { color: '#2a2a3a' } },
+                        y: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: '#2a2a3a' } }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // PDF / EXCEL EXPORT
+        // ============================================
+        async function exportPDF() {
+            if (!currentResults) { toast.warning('No hay resultados para exportar'); return; }
+            try {
+                toast.info('Generando PDF...');
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(currentResults));
+                formData.append('filename', `reporte_${(currentResults.filename || 'analisis').replace(/\.[^.]+$/, '')}`);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/pdf`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Error del servidor');
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `reporte_analisis_${new Date().toISOString().slice(0, 10)}.pdf`;
+                a.click();
+                toast.success('PDF exportado correctamente');
+            } catch (err) {
+                toast.error('Error exportando PDF: ' + err.message);
+            }
+        }
+
+        async function exportExcel() {
+            if (!currentResults) { toast.warning('No hay resultados para exportar'); return; }
+            try {
+                toast.info('Generando Excel...');
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(currentResults));
+                formData.append('filename', `reporte_${(currentResults.filename || 'analisis').replace(/\.[^.]+$/, '')}`);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/excel`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Error del servidor');
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `reporte_analisis_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                a.click();
+                toast.success('Excel exportado correctamente');
+            } catch (err) {
+                toast.error('Error exportando Excel: ' + err.message);
+            }
+        }
+
+        // ============================================
+        // LOGO UPLOAD
+        // ============================================
+        async function uploadLogo(input) {
+            const file = input.files[0];
+            if (!file) return;
+            try {
+                const formData = new FormData();
+                formData.append('logo', file);
+                const response = await fetch(`${CONFIG.API_URL}/config/logo`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Error subiendo logo');
+                document.getElementById('logoStatus').textContent = `✅ ${file.name}`;
+                toast.success('Logo actualizado correctamente');
+            } catch (err) {
+                toast.error('Error subiendo logo: ' + err.message);
+            }
+        }
+
+
+        // ============================================
+        // SCORING EXPORT FUNCTIONS
+        // ============================================
         function exportScoringCSV() {
             const successful = scoringResults.filter(r => r.status === 'success');
             if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }

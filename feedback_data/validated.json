@@ -774,5 +774,101 @@
     "correct_label": "neutral",
     "user_comment": "Corrección manual desde dashboard",
     "validation_timestamp": "2026-02-09T22:43:20.409023"
+  },
+  "ad856ec5-cdef-4273-b366-44d89c80ada1": {
+    "audio_path": "./feedback_data/audio/ad856ec5-cdef-4273-b366-44d89c80ada1.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.82,
+    "metadata": {
+      "text_es": "Mire, yo estoy bien molesta y tengo un problema muy serio.",
+      "text_en": "Mire, yo estoy bien molesta y tengo un problema muy serio.",
+      "start": 3.283,
+      "end": 6.528
+    },
+    "timestamp": "2026-02-23T19:14:17.716461",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:20:57.344188"
+  },
+  "1d56f164-f608-4ad4-84e8-b48af5e22898": {
+    "audio_path": "./feedback_data/audio/1d56f164-f608-4ad4-84e8-b48af5e22898.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.817,
+    "metadata": {
+      "text_es": "Nosotros ya cancelamos la deuda con ustedes.",
+      "text_en": "Nosotros ya cancelamos la deuda con ustedes.",
+      "start": 7.128,
+      "end": 9.312
+    },
+    "timestamp": "2026-02-23T19:14:17.963752",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:20:59.299513"
+  },
+  "709d516f-fb92-464a-a4db-b3c79436f362": {
+    "audio_path": "./feedback_data/audio/709d516f-fb92-464a-a4db-b3c79436f362.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8249,
+    "metadata": {
+      "text_es": "¿Cómo es de eso que están llamando las amigas y a todos los familiares de mi hija?",
+      "text_en": "¿Cómo es de eso que están llamando las amigas y a todos los familiares de mi hija?",
+      "start": 9.332,
+      "end": 14.54
+    },
+    "timestamp": "2026-02-23T19:14:27.381911",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:01.598059"
+  },
+  "fe516ae9-a141-4cd1-b3d0-92e4fd5a6a48": {
+    "audio_path": "./feedback_data/audio/fe516ae9-a141-4cd1-b3d0-92e4fd5a6a48.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8114,
+    "metadata": {
+      "text_es": "Tenga la bondad, las personas hay que ser serias.",
+      "text_en": "Tenga la bondad, las personas hay que ser serias.",
+      "start": 14.56,
+      "end": 16.603
+    },
+    "timestamp": "2026-02-23T19:14:27.166564",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:04.738643"
+  },
+  "2e99642f-2e66-45d2-9ff3-9097e2ca32e1": {
+    "audio_path": "./feedback_data/audio/2e99642f-2e66-45d2-9ff3-9097e2ca32e1.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8099,
+    "metadata": {
+      "text_es": "Nosotros cancelamos el día que le dijimos, se canceló eso y si ustedes no otorgaron un certificado y todo es cuestión suya.",
+      "text_en": "Nosotros cancelamos el día que le dijimos, se canceló eso y si ustedes no otorgaron un certificado y todo es cuestión suya.",
+      "start": 16.663,
+      "end": 24.435
+    },
+    "timestamp": "2026-02-23T19:14:27.599733",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:06.683290"
+  },
+  "638d82b2-ce58-4cde-a2ab-7e8da3e16b08": {
+    "audio_path": "./feedback_data/audio/638d82b2-ce58-4cde-a2ab-7e8da3e16b08.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8082,
+    "metadata": {
+      "text_es": "a nosotros nosotros ya tenemos la conciencia tranquila que no sea que ya se canceló eso y no debemos a ustedes como es posible que después de un año y medio quieran nosotros cobrarnos algo que ya está pagado que les pasa tarea de ladrones",
+      "text_en": "a nosotros nosotros ya tenemos la conciencia tranquila que no sea que ya se canceló eso y no debemos a ustedes como es posible que después de un año y medio quieran nosotros cobrarnos algo que ya está pagado que les pasa tarea de ladrones",
+      "start": 24.415,
+      "end": 37.918
+    },
+    "timestamp": "2026-02-23T19:14:32.309431",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:08.307704"
   }
 }

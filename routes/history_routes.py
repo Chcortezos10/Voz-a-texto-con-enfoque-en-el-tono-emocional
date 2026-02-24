@@ -82,10 +82,16 @@ async def save_to_history(data: Dict[str, Any]):
             "global_emotions": data.get("global_emotions", {}),
             "segments": data.get("segments", []),
             "transcription": data.get("transcription", ""),
+            "labeled_transcription": data.get("labeled_transcription", ""),
             "diarization": data.get("diarization", {}),
             "metadata": data.get("metadata", {}),
             "emotion_timeline": data.get("emotion_timeline", []),
-            "speaker_stats": data.get("speaker_stats", {})
+            "speaker_stats": data.get("speaker_stats", {}),
+            "quality_score": data.get("quality_score"),
+            "call_summary": data.get("call_summary"),
+            "alert": data.get("alert"),
+            "sentiment_score": data.get("sentiment_score", 0),
+            "has_alert": bool(data.get("alert"))
         }
         
         history.append(entry)
