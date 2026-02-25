@@ -1903,9 +1903,85 @@
 
         <!-- TAB: QUALITY SCORE -->
         <div id="tab-quality" class="tab-content">
-            <h2>🏆 Score de Calidad del Agente</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Analiza un audio y visualiza el score de calidad
-                automático.</p>
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2>🏆 Score de Calidad del Agente</h2>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Visualiza el score general de todos los
+                        audios o el detalle del último análisis.</p>
+                </div>
+                <button class="btn btn-primary" onclick="loadGeneralScore()">
+                    <i class="fas fa-sync"></i> Actualizar General
+                </button>
+            </div>
+
+            <!-- Panel de Score General -->
+            <div id="qualityGeneralPanel"
+                style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: none;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3 style="color: var(--primary);">📊 Score General Acumulado</h3>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Basado en <span
+                            id="qsgTotalAudios">0</span> audios</div>
+                </div>
+
+                <div class="metrics-grid" style="margin-bottom: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgPromedio" style="color: var(--primary); font-size: 2.5rem;">-
+                        </div>
+                        <div class="metric-label">Promedio Global / 100</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgMinMax" style="font-size: 1.8rem; margin-top: 0.5rem;">-</div>
+                        <div class="metric-label">Mínimo / Máximo</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgStdDev" style="font-size: 1.8rem; margin-top: 0.5rem;">-</div>
+                        <div class="metric-label">Desviación Estándar</div>
+                    </div>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: var(--surface-hover); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">📈 Por Dimensión</h4>
+                        <div id="qsgDimensions" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- llenado por JS -->
+                        </div>
+                    </div>
+                    <div style="background: var(--surface-hover); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">🎯 Clasificación Global</h4>
+                        <div id="qsgClassifications" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- llenado por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">📥 Exportar Reporte Consolidado (PDF)</h4>
+                    <div
+                        style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--surface-hover); padding: 1rem; border-radius: 8px;">
+                        <input type="text" id="pdfGeneralFilename" placeholder="Nombre del reporte (opcional)"
+                            style="padding: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); min-width: 250px;" />
+                        <div class="toggle-container" style="margin: 0;">
+                            <span style="font-size: 0.9rem; margin-right: 0.5rem;">Interpretar con IA (Ollama)</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pdfIncludeAi" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateConsolidatedPDF()"
+                            style="background: linear-gradient(135deg, #10b981, #06b6d4); margin-left: auto;">
+                            <i class="fas fa-file-pdf"></i> Generar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border); margin-bottom: 2rem;" />
+
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-muted);">🔍 Detalle de Último Análisis Individual</h3>
+
             <div id="qualityScorePanel" style="display: none;">
                 <div class="metrics-grid" style="margin-bottom: 2rem;">
                     <div class="metric-card" style="grid-column: span 2;">
@@ -2403,7 +2479,10 @@
             document.getElementById(`tab-${tab}`).classList.add('active');
             if (tab === 'history') loadHistory();
             if (tab === 'kpis') loadKPIs();
-            if (tab === 'quality' && currentResults) displayQualityScore(currentResults);
+            if (tab === 'quality') {
+                loadGeneralScore();
+                if (currentResults) displayQualityScore(currentResults);
+            }
             if (tab === 'summary' && currentResults) displayCallSummary(currentResults);
         }
 
@@ -3240,6 +3319,35 @@
                 scoringResults = data.results || [];
                 displayScoringResults(data);
                 toast.success(`Scoring completado: ${data.successful} de ${data.total_files} audios`);
+
+                // Guardar cada resultado exitoso en el historial para que los KPIs y Quality Score lo reflejen
+                const successfulResults = (data.results || []).filter(r => r.status === 'success');
+                if (successfulResults.length > 0) {
+                    const savePromises = successfulResults.map(r => fetch(`${CONFIG.API_URL}/history/save`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: r.filename,
+                            timestamp: new Date().toISOString(),
+                            duration: r.duration_sec || 0,
+                            num_segments: r.total_segments || (r.segments || []).length,
+                            dominant_emotion: r.dominant_emotion || r.global_emotions?.top_emotion || 'neutral',
+                            global_emotions: r.global_emotions || {},
+                            segments: r.segments || [],
+                            transcription: r.transcription || '',
+                            labeled_transcription: r.labeled_transcription || '',
+                            quality_score: r.quality_score || null,
+                            call_summary: r.call_summary || null,
+                            alert: r.alert || null,
+                            sentiment_score: r.sentiment_score || 0,
+                            diarization: r.diarization || {},
+                            emotion_timeline: r.emotion_timeline || [],
+                            metadata: { total_duration: r.duration_sec || 0 }
+                        })
+                    }).catch(err => console.error(`Error guardando historial para ${r.filename}:`, err)));
+                    await Promise.all(savePromises);
+                    console.log(`${successfulResults.length} resultados guardados en historial`);
+                }
             } catch (e) {
                 clearInterval(fakeInterval);
                 toast.error('Error: ' + e.message);
@@ -3620,7 +3728,11 @@
                 formData.append('filename', `reporte_${(currentResults.filename || 'analisis').replace(/\.[^.]+$/, '')}`);
 
                 const response = await fetch(`${CONFIG.API_URL}/export/pdf`, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error('Error del servidor');
+                if (!response.ok) {
+                    let errMsg = `Error del servidor (${response.status})`;
+                    try { const e = await response.json(); if (e.detail) errMsg = e.detail; } catch (_) {}
+                    throw new Error(errMsg);
+                }
 
                 const blob = await response.blob();
                 const a = document.createElement('a');
@@ -3702,6 +3814,120 @@
             a.download = `scoring_emocional_${new Date().toISOString().slice(0, 10)}.json`;
             a.click();
             toast.success('JSON exportado');
+        }
+
+        // ============================================
+        // QUALITY SCORE GENERAL & CONSOLIDATED PDF
+        // ============================================
+        async function loadGeneralScore() {
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/scoring/general`);
+                if (!res.ok) {
+                    document.getElementById('qualityGeneralPanel').style.display = 'none';
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!data || data.total_audios === 0) {
+                    document.getElementById('qualityGeneralPanel').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('qualityGeneralPanel').style.display = 'block';
+                document.getElementById('qsgTotalAudios').textContent = data.total_audios;
+
+                const avg = data.average_score || 0;
+                const scoreColor = avg >= 70 ? 'var(--success)' : avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+                const elPromedio = document.getElementById('qsgPromedio');
+                elPromedio.textContent = avg.toFixed(1);
+                elPromedio.style.color = scoreColor;
+
+                document.getElementById('qsgMinMax').textContent = `${(data.min_score || 0).toFixed(1)} / ${(data.max_score || 0).toFixed(1)}`;
+                document.getElementById('qsgStdDev').textContent = `± ${(data.std_dev || 0).toFixed(1)}`;
+
+                const dimEl = document.getElementById('qsgDimensions');
+                dimEl.innerHTML = '';
+                if (data.dimension_averages) {
+                    for (const [key, val] of Object.entries(data.dimension_averages)) {
+                        const width = val;
+                        const color = val >= 70 ? 'var(--success)' : val >= 50 ? 'var(--warning)' : 'var(--danger)';
+                        const formattedKey = key.replace(/_/g, ' ');
+                        dimEl.innerHTML += `
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.2rem;">
+                                <span style="text-transform: capitalize;">${formattedKey}</span>
+                                <strong>${val.toFixed(1)}</strong>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: var(--surface); border-radius: 3px; margin-bottom: 0.8rem;">
+                                <div style="width: ${width}%; height: 100%; background: ${color}; border-radius: 3px;"></div>
+                            </div>
+                        `;
+                    }
+                }
+
+                const classEl = document.getElementById('qsgClassifications');
+                classEl.innerHTML = '';
+                if (data.score_distribution) {
+                    const total = data.total_audios;
+                    for (const [key, count] of Object.entries(data.score_distribution)) {
+                        const pct = total > 0 ? (count / total) * 100 : 0;
+                        let badgeColor = '#ef4444';
+                        if (key.match(/excelente|buen/i)) badgeColor = '#10b981';
+                        else if (key.match(/aceptable|regular/i)) badgeColor = '#f59e0b';
+
+                        classEl.innerHTML += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; background: ${badgeColor}22; color: ${badgeColor}; font-weight: 600;">${key.toUpperCase()}</span>
+                                <span>${count} audios (${pct.toFixed(1)}%)</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading general score:", err);
+            }
+        }
+
+        async function generateConsolidatedPDF() {
+            try {
+                toast.info('Generando PDF Consolidado... (Puede tardar si usa IA)');
+                progressBar.show('Generando reporte PDF...');
+
+                const filenameInput = document.getElementById('pdfGeneralFilename').value;
+                const filename = filenameInput ? filenameInput : 'Reporte_Consolidado';
+                const includeAi = document.getElementById('pdfIncludeAi').checked;
+
+                const params = new URLSearchParams();
+                if (filenameInput) params.append('filename', filenameInput);
+                params.append('include_ai_interpretation', includeAi);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/pdf-general?${params.toString()}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    let errMessage = 'Error al generar el PDF consolidado';
+                    try {
+                        const err = await response.json();
+                        if (err.detail) errMessage = err.detail;
+                    } catch (e) { }
+                    throw new Error(errMessage);
+                }
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+
+                progressBar.hide();
+                toast.success('PDF Consolidado exportado correctamente');
+            } catch (err) {
+                progressBar.hide();
+                console.error('Error:', err);
+                toast.error('Error exportando PDF: ' + err.message);
+            }
         }
     </script>
 </body>

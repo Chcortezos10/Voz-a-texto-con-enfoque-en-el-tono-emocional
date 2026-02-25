@@ -1,6 +1,6 @@
 # =====================================================
 # Docker Compose - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 8.0.0
+# Versión: 9.0.0 (Quality Score General + PDF Consolidado + Ollama/Qwen2.5)
 # =====================================================
 # Uso:
 #   docker-compose up --build        # Construir e iniciar
@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transcriptor-emocional-v8
-    image: transcriptor-emocional:8.0.0
+    container_name: transcriptor-emocional-v9
+    image: transcriptor-emocional:9.0.0
 
     # Shared memory - PyTorch necesita más de los 64MB por defecto
     # Con 8GB RAM total, usar 1GB para shm es suficiente
@@ -27,6 +27,10 @@ services:
 
     ports:
       - "8000:8000"
+
+    # Permite al contenedor acceder a servicios del host (Ollama)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     environment:
       - PYTHONUNBUFFERED=1
@@ -41,6 +45,8 @@ services:
       - WHISPER_MODEL=small
       - LOW_MEMORY_MODE=true
       - LOG_LEVEL=INFO
+      # Ollama (Qwen2.5) - solo para generación de informes PDF
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
 
     volumes:
       # Persistir modelos descargados (evita re-descargar en cada reinicio)

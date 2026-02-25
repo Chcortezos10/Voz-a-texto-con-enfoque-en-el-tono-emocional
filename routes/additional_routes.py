@@ -8,6 +8,7 @@ en la nube (cloud)
 
 import os
 import json
+import re
 import time
 import uuid
 import logging
@@ -33,6 +34,23 @@ logger = logging.getLogger(__name__)
 _sessions_store: Dict[str, Dict[str, Any]] = {}
 
 router = APIRouter()
+
+# Reportlab (Helvetica) no soporta emoji ni caracteres fuera de Latin-1.
+# Esta función elimina esos caracteres antes de pasarlos a Paragraph.
+_EMOJI_RE = re.compile(
+    r'[\U00010000-\U0010ffff]'       # supplementary planes (emoji, etc.)
+    r'|[\u2600-\u27BF]'              # misc symbols, dingbats
+    r'|[\u2300-\u23FF]'              # misc technical
+    r'|[\uFE00-\uFE0F]'             # variation selectors
+    r'|[\u200D\u200C\u200B\uFEFF]', # zero-width joiners / BOM
+    flags=re.UNICODE
+)
+
+def _safe_pdf_text(text: str) -> str:
+    """Elimina caracteres no soportados por Helvetica en reportlab."""
+    cleaned = _EMOJI_RE.sub('', str(text))
+    # Asegurar que sea Latin-1 compatible
+    return cleaned.encode('latin-1', 'replace').decode('latin-1').strip()
 
 #Trascripcion en la nube 
 
@@ -233,6 +251,598 @@ async def export_pdf_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/export/pdf-general", tags=["export"])
+async def export_pdf_general_endpoint(
+    filename: str = Query("informe_general_calidad"),
+    include_ai_interpretation: bool = Query(True)
+) -> Response:
+    """
+    Genera un informe PDF profesional CONSOLIDADO de TODOS los audios procesados.
+    Lee el historial completo y genera un reporte con:
+    - Score general, KPIs por dimensión
+    - Distribución de calidad y emociones
+    - Top mejores/peores audios
+    - Problemas comunes y recomendaciones
+    - Interpretación AI con Qwen2.5 (si Ollama está disponible)
+    """
+    from pathlib import Path
+    from dataclasses import asdict
+    from core.scoring_engine import calculate_general_quality_metrics
+
+    history_file = Path("data/analysis_history.json")
+
+    try:
+        if not history_file.exists():
+            raise HTTPException(status_code=404, detail="No hay historial de análisis")
+
+        with open(history_file, "r", encoding="utf-8") as f:
+            history = json.load(f)
+
+        if not history:
+            raise HTTPException(status_code=404, detail="El historial está vacío")
+
+        # Calcular métricas generales
+        general_metrics = calculate_general_quality_metrics(history)
+        metrics_dict = asdict(general_metrics)
+
+        # Intentar obtener interpretación AI si se solicita
+        ai_interpretation = None
+        if include_ai_interpretation:
+            try:
+                from core.ollama_interpreter import generate_data_interpretation
+                ai_interpretation = await generate_data_interpretation(metrics_dict)
+            except Exception as e:
+                logger.warning(f"No se pudo generar interpretación AI: {e}")
+
+        # Generar PDF
+        pdf_bytes = _generate_general_pdf(metrics_dict, history, ai_interpretation)
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}.pdf"}
+        )
+    except HTTPException:
+        raise
+    except ImportError:
+        raise HTTPException(status_code=500, detail="reportlab no instalado")
+    except Exception as e:
+        logger.error(f"Error generando PDF general: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _generate_general_pdf(
+    metrics: dict,
+    history: list,
+    ai_interpretation: str = None
+) -> bytes:
+    """Genera un PDF profesional consolidado con todas las métricas generales."""
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import inch
+    from reportlab.platypus import (
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
+        Image, HRFlowable, KeepTogether, PageBreak
+    )
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+    from reportlab.graphics.shapes import Drawing, Rect, String, Circle
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics.charts.piecharts import Pie
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter,
+        leftMargin=0.6*inch, rightMargin=0.6*inch,
+        topMargin=0.5*inch, bottomMargin=0.5*inch
+    )
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # ── Colores corporativos ──
+    PRIMARY = colors.HexColor("#1a237e")
+    ACCENT = colors.HexColor("#42a5f5")
+    SUCCESS = colors.HexColor("#66bb6a")
+    WARNING = colors.HexColor("#ffa726")
+    DANGER = colors.HexColor("#ef5350")
+    LIGHT_BG = colors.HexColor("#f5f5f5")
+    DARK_BG = colors.HexColor("#263238")
+
+    EMOTION_COLORS = {
+        "feliz": colors.HexColor("#4caf50"),
+        "neutral": colors.HexColor("#42a5f5"),
+        "triste": colors.HexColor("#7e57c2"),
+        "enojado": colors.HexColor("#ef5350"),
+    }
+
+    # ── Custom styles ──
+    title_style = ParagraphStyle(
+        'GenTitle', parent=styles['Title'],
+        fontSize=22, textColor=PRIMARY, spaceAfter=4, alignment=TA_CENTER
+    )
+    subtitle_style = ParagraphStyle(
+        'GenSubtitle', parent=styles['Heading2'],
+        fontSize=14, textColor=ACCENT, spaceBefore=14, spaceAfter=6
+    )
+    section_style = ParagraphStyle(
+        'GenSection', parent=styles['Heading3'],
+        fontSize=12, textColor=PRIMARY, spaceBefore=10, spaceAfter=4
+    )
+    body_style = ParagraphStyle(
+        'GenBody', parent=styles['Normal'],
+        fontSize=10, leading=14
+    )
+    small_style = ParagraphStyle(
+        'GenSmall', parent=styles['Normal'],
+        fontSize=8, leading=10, textColor=colors.grey
+    )
+    center_style = ParagraphStyle(
+        'GenCenter', parent=styles['Normal'],
+        fontSize=10, alignment=TA_CENTER
+    )
+
+    date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # ══════════════════════════════════════
+    # PORTADA
+    # ══════════════════════════════════════
+    logo_path = None
+    try:
+        import glob
+        logo_files = glob.glob(os.path.join("data", "company_logo.*"))
+        if logo_files:
+            logo_path = logo_files[0]
+    except:
+        pass
+
+    if logo_path and os.path.exists(logo_path):
+        try:
+            img = Image(logo_path, width=2*inch, height=1*inch)
+            img.hAlign = 'CENTER'
+            elements.append(img)
+            elements.append(Spacer(1, 10))
+        except:
+            pass
+
+    elements.append(Spacer(1, 40))
+    elements.append(Paragraph("INFORME GENERAL DE CALIDAD", title_style))
+    elements.append(Paragraph("Análisis Consolidado de Atención al Cliente", ParagraphStyle(
+        'CoverSub', parent=styles['Normal'],
+        fontSize=14, textColor=ACCENT, alignment=TA_CENTER, spaceAfter=20
+    )))
+    elements.append(HRFlowable(width="60%", thickness=3, color=PRIMARY, spaceAfter=20))
+
+    # Info box de portada
+    total_audios = metrics.get("total_audios", 0)
+    avg_score = metrics.get("avg_score", 0)
+    gen_class = metrics.get("general_classification", "N/A")
+    score_color = SUCCESS if avg_score >= 70 else WARNING if avg_score >= 50 else DANGER
+
+    cover_data = [
+        ["Total Audios Analizados", str(total_audios)],
+        ["Score General Promedio", f"{avg_score}/100"],
+        ["Clasificación General", gen_class],
+        ["Fecha del Informe", date_str],
+    ]
+    cover_table = Table(cover_data, colWidths=[3*inch, 3*inch])
+    cover_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), PRIMARY),
+        ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 11),
+        ('BACKGROUND', (1, 1), (1, 1), score_color),
+        ('TEXTCOLOR', (1, 1), (1, 1), colors.white),
+        ('FONTNAME', (1, 1), (1, 1), 'Helvetica-Bold'),
+        ('FONTSIZE', (1, 1), (1, 1), 14),
+        ('BACKGROUND', (1, 0), (1, 0), LIGHT_BG),
+        ('BACKGROUND', (1, 2), (1, 2), LIGHT_BG),
+        ('BACKGROUND', (1, 3), (1, 3), LIGHT_BG),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.white),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+    ]))
+    elements.append(cover_table)
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════
+    # RESUMEN EJECUTIVO
+    # ══════════════════════════════════════
+    elements.append(Paragraph("1. RESUMEN EJECUTIVO", subtitle_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+    std_dev = metrics.get("std_deviation", 0)
+    min_score = metrics.get("min_score", 0)
+    max_score = metrics.get("max_score", 0)
+
+    exec_data = [
+        ["Métrica", "Valor"],
+        ["Total Audios", str(total_audios)],
+        ["Score Promedio", f"{avg_score}/100"],
+        ["Clasificación", gen_class],
+        ["Desviación Estándar", str(std_dev)],
+        ["Score Mínimo", str(min_score)],
+        ["Score Máximo", str(max_score)],
+    ]
+    exec_table = Table(exec_data, colWidths=[3.5*inch, 3.5*inch])
+    exec_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), PRIMARY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BACKGROUND', (0, 1), (0, -1), LIGHT_BG),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+    ]))
+    elements.append(exec_table)
+    elements.append(Spacer(1, 12))
+
+    # ══════════════════════════════════════
+    # 2. KPIs POR DIMENSIÓN
+    # ══════════════════════════════════════
+    elements.append(Paragraph("2. KPIs POR DIMENSIÓN", subtitle_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+    dim_details = metrics.get("dimension_details", {})
+    if dim_details:
+        dim_header = [["Dimensión", "Promedio", "Máximo", "Cumplimiento"]]
+        for dim_key, details in dim_details.items():
+            if isinstance(details, dict):
+                label = details.get("label", dim_key)
+                avg_val = details.get("average_score", 0)
+                max_val = details.get("max_score", 0)
+                pct = details.get("percentage", 0)
+                dim_header.append([label, f"{avg_val}", f"{max_val}", f"{pct}%"])
+
+        dim_table = Table(dim_header, colWidths=[2.5*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+        style_cmds = [
+            ('BACKGROUND', (0, 0), (-1, 0), PRIMARY),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+        ]
+        # Color-code percentage cells
+        for i, (dim_key, details) in enumerate(dim_details.items()):
+            if isinstance(details, dict):
+                row = i + 1
+                pct = details.get("percentage", 0)
+                if pct >= 70:
+                    style_cmds.append(('BACKGROUND', (3, row), (3, row), SUCCESS))
+                    style_cmds.append(('TEXTCOLOR', (3, row), (3, row), colors.white))
+                elif pct >= 50:
+                    style_cmds.append(('BACKGROUND', (3, row), (3, row), WARNING))
+                    style_cmds.append(('TEXTCOLOR', (3, row), (3, row), colors.white))
+                else:
+                    style_cmds.append(('BACKGROUND', (3, row), (3, row), DANGER))
+                    style_cmds.append(('TEXTCOLOR', (3, row), (3, row), colors.white))
+
+        dim_table.setStyle(TableStyle(style_cmds))
+        elements.append(dim_table)
+
+    # Detalles de protocolo
+    protocol_detail = dim_details.get("protocol", {})
+    if protocol_detail:
+        elements.append(Spacer(1, 8))
+        elements.append(Paragraph("Cumplimiento de Protocolo:", section_style))
+        proto_data = [
+            ["Aspecto", "Cumplimiento"],
+            ["Saludo al inicio", f"{protocol_detail.get('greeting_compliance', 0)}%"],
+            ["Despedida al final", f"{protocol_detail.get('farewell_compliance', 0)}%"],
+            ["Identificación del agente", f"{protocol_detail.get('identification_compliance', 0)}%"],
+        ]
+        proto_table = Table(proto_data, colWidths=[3.5*inch, 3.5*inch])
+        proto_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), ACCENT),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ]))
+        elements.append(proto_table)
+
+    elements.append(Spacer(1, 12))
+
+    # ══════════════════════════════════════
+    # 3. DISTRIBUCIÓN DE CALIDAD (gráfico)
+    # ══════════════════════════════════════
+    class_dist = metrics.get("classification_distribution", {})
+    if class_dist:
+        elements.append(Paragraph("3. DISTRIBUCIÓN DE CALIDAD", subtitle_style))
+        elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+        # Tabla + Gráfico de barras
+        class_data = [["Clasificación", "Cantidad", "Porcentaje"]]
+        class_colors_map = {
+            "Excelente": SUCCESS, "Bueno": ACCENT,
+            "Regular": WARNING, "Deficiente": DANGER
+        }
+        for cls_name in ["Excelente", "Bueno", "Regular", "Deficiente"]:
+            count = class_dist.get(cls_name, 0)
+            pct = round(count / total_audios * 100, 1) if total_audios > 0 else 0
+            class_data.append([cls_name, str(count), f"{pct}%"])
+
+        class_table = Table(class_data, colWidths=[2.5*inch, 2*inch, 2.5*inch])
+        cls_style_cmds = [
+            ('BACKGROUND', (0, 0), (-1, 0), PRIMARY),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+        ]
+        for i, cls_name in enumerate(["Excelente", "Bueno", "Regular", "Deficiente"]):
+            row = i + 1
+            cls_style_cmds.append(('BACKGROUND', (0, row), (0, row), class_colors_map.get(cls_name, LIGHT_BG)))
+            cls_style_cmds.append(('TEXTCOLOR', (0, row), (0, row), colors.white))
+            cls_style_cmds.append(('FONTNAME', (0, row), (0, row), 'Helvetica-Bold'))
+
+        class_table.setStyle(TableStyle(cls_style_cmds))
+        elements.append(class_table)
+
+        # Bar chart
+        drawing = Drawing(400, 140)
+        chart = VerticalBarChart()
+        chart.x = 60
+        chart.y = 20
+        chart.width = 280
+        chart.height = 100
+        chart.data = [[
+            class_dist.get("Excelente", 0),
+            class_dist.get("Bueno", 0),
+            class_dist.get("Regular", 0),
+            class_dist.get("Deficiente", 0),
+        ]]
+        chart.categoryAxis.categoryNames = ['Excelente', 'Bueno', 'Regular', 'Deficiente']
+        chart.categoryAxis.labels.fontSize = 9
+        chart.valueAxis.valueMin = 0
+        chart.valueAxis.labels.fontSize = 8
+        chart.bars[0].fillColor = ACCENT
+        chart.barWidth = 30
+        drawing.add(chart)
+        elements.append(drawing)
+        elements.append(Spacer(1, 12))
+
+    # ══════════════════════════════════════
+    # 4. DISTRIBUCIÓN EMOCIONAL
+    # ══════════════════════════════════════
+    emotion_summary = metrics.get("emotion_summary", {})
+    emotion_dist = emotion_summary.get("distribution", {})
+    if emotion_dist:
+        elements.append(Paragraph("4. DISTRIBUCIÓN EMOCIONAL GENERAL", subtitle_style))
+        elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+        emo_data = [["Emoción", "Porcentaje"]]
+        for emo in ["feliz", "neutral", "triste", "enojado"]:
+            pct = emotion_dist.get(emo, 0)
+            emo_data.append([emo.capitalize(), f"{pct}%"])
+
+        emo_extra = [
+            ["Emoción Predominante", emotion_summary.get("most_common", "N/A").capitalize()],
+            ["Alertas Generadas", str(emotion_summary.get("alert_count", 0))],
+            ["Tasa de Alertas", f"{emotion_summary.get('alert_rate', 0)}%"],
+        ]
+
+        emo_table = Table(emo_data + [["", ""]] + emo_extra, colWidths=[3.5*inch, 3.5*inch])
+        emo_style_cmds = [
+            ('BACKGROUND', (0, 0), (-1, 0), PRIMARY),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ]
+        for i, emo in enumerate(["feliz", "neutral", "triste", "enojado"]):
+            row = i + 1
+            emo_style_cmds.append(('BACKGROUND', (0, row), (0, row), EMOTION_COLORS.get(emo, LIGHT_BG)))
+            emo_style_cmds.append(('TEXTCOLOR', (0, row), (0, row), colors.white))
+
+        emo_table.setStyle(TableStyle(emo_style_cmds))
+        elements.append(emo_table)
+
+        # Bar chart de emociones
+        emo_drawing = Drawing(400, 140)
+        emo_chart = VerticalBarChart()
+        emo_chart.x = 60
+        emo_chart.y = 20
+        emo_chart.width = 280
+        emo_chart.height = 100
+        emo_chart.data = [[
+            emotion_dist.get("feliz", 0),
+            emotion_dist.get("neutral", 0),
+            emotion_dist.get("triste", 0),
+            emotion_dist.get("enojado", 0),
+        ]]
+        emo_chart.categoryAxis.categoryNames = ['Feliz', 'Neutral', 'Triste', 'Enojado']
+        emo_chart.categoryAxis.labels.fontSize = 9
+        emo_chart.valueAxis.valueMin = 0
+        emo_chart.valueAxis.valueMax = 100
+        emo_chart.valueAxis.labels.fontSize = 8
+        emo_chart.bars[0].fillColor = ACCENT
+        emo_chart.barWidth = 30
+        emo_drawing.add(emo_chart)
+        elements.append(emo_drawing)
+        elements.append(Spacer(1, 10))
+
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════
+    # 5. TOP MEJORES Y PEORES AUDIOS
+    # ══════════════════════════════════════
+    elements.append(Paragraph("5. TOP MEJORES Y PEORES AUDIOS", subtitle_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+    best = metrics.get("best_audios", [])
+    worst = metrics.get("worst_audios", [])
+
+    if best:
+        elements.append(Paragraph("Top 5 Mejores:", section_style))
+        best_data = [["#", "Archivo", "Score", "Clasificación", "Emoción"]]
+        for i, a in enumerate(best[:5]):
+            best_data.append([
+                str(i+1),
+                str(a.get("filename", ""))[:40],
+                str(a.get("score", 0)),
+                a.get("classification", ""),
+                a.get("dominant_emotion", "").capitalize()
+            ])
+        best_table = Table(best_data, colWidths=[0.4*inch, 3*inch, 0.8*inch, 1.5*inch, 1.3*inch])
+        best_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), SUCCESS),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(best_table)
+        elements.append(Spacer(1, 10))
+
+    if worst:
+        elements.append(Paragraph("Top 5 Peores:", section_style))
+        worst_data = [["#", "Archivo", "Score", "Clasificación", "Emoción"]]
+        for i, a in enumerate(worst[:5]):
+            worst_data.append([
+                str(i+1),
+                str(a.get("filename", ""))[:40],
+                str(a.get("score", 0)),
+                a.get("classification", ""),
+                a.get("dominant_emotion", "").capitalize()
+            ])
+        worst_table = Table(worst_data, colWidths=[0.4*inch, 3*inch, 0.8*inch, 1.5*inch, 1.3*inch])
+        worst_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), DANGER),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e0e0e0")),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(worst_table)
+
+    elements.append(Spacer(1, 12))
+
+    # ══════════════════════════════════════
+    # 6. PROBLEMAS COMUNES
+    # ══════════════════════════════════════
+    top_issues = metrics.get("top_issues", [])
+    if top_issues:
+        elements.append(Paragraph("6. PROBLEMAS MÁS FRECUENTES", subtitle_style))
+        elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+        for issue in top_issues:
+            elements.append(Paragraph(f"• {_safe_pdf_text(issue)}", body_style))
+        elements.append(Spacer(1, 10))
+
+    # ══════════════════════════════════════
+    # 7. RECOMENDACIONES GLOBALES
+    # ══════════════════════════════════════
+    global_recs = metrics.get("global_recommendations", [])
+    if global_recs:
+        elements.append(Paragraph("7. RECOMENDACIONES GLOBALES", subtitle_style))
+        elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+        for rec in global_recs:
+            elements.append(Paragraph(f"• {_safe_pdf_text(rec)}", body_style))
+        elements.append(Spacer(1, 10))
+
+    # ══════════════════════════════════════
+    # 8. INTERPRETACIÓN AI (si disponible)
+    # ══════════════════════════════════════
+    if ai_interpretation:
+        elements.append(PageBreak())
+        elements.append(Paragraph("8. INTERPRETACIÓN INTELIGENTE (Qwen2.5)", subtitle_style))
+        elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+        elements.append(Paragraph(
+            "<i>Análisis generado por inteligencia artificial:</i>",
+            small_style
+        ))
+        elements.append(Spacer(1, 6))
+
+        # Split interpretation into paragraphs
+        for paragraph in ai_interpretation.split("\n"):
+            paragraph = _safe_pdf_text(paragraph.strip())
+            if paragraph:
+                elements.append(Paragraph(paragraph, body_style))
+                elements.append(Spacer(1, 4))
+
+        elements.append(Spacer(1, 10))
+
+    # ══════════════════════════════════════
+    # 9. DETALLE POR AUDIO
+    # ══════════════════════════════════════
+    elements.append(PageBreak())
+    elements.append(Paragraph("9. DETALLE POR AUDIO ANALIZADO", subtitle_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=8))
+
+    detail_header = [["#", "Archivo", "Score", "Clasif.", "Emoción", "Alertas"]]
+    for i, item in enumerate(history[:100]):  # Máx 100 en el PDF
+        qs = item.get("quality_score", {})
+        score_val = qs.get("total_score", "N/A") if isinstance(qs, dict) else "N/A"
+        cls_val = qs.get("classification", "N/A") if isinstance(qs, dict) else "N/A"
+        detail_header.append([
+            str(i+1),
+            str(item.get("filename", ""))[:35],
+            str(score_val),
+            cls_val[:10],
+            item.get("dominant_emotion", "N/A").capitalize()[:10],
+            "Sí" if item.get("has_alert") else "No"
+        ])
+
+    detail_table = Table(
+        detail_header,
+        colWidths=[0.4*inch, 2.8*inch, 0.6*inch, 0.9*inch, 0.9*inch, 0.6*inch],
+        repeatRows=1
+    )
+    detail_style_cmds = [
+        ('BACKGROUND', (0, 0), (-1, 0), PRIMARY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
+        ('LEADING', (0, 0), (-1, -1), 9),
+        ('GRID', (0, 0), (-1, -1), 0.25, colors.HexColor("#e0e0e0")),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]
+    for i, item in enumerate(history[:100]):
+        row = i + 1
+        if row % 2 == 0:
+            detail_style_cmds.append(('BACKGROUND', (0, row), (-1, row), LIGHT_BG))
+        # Color alert column
+        if item.get("has_alert"):
+            detail_style_cmds.append(('BACKGROUND', (5, row), (5, row), DANGER))
+            detail_style_cmds.append(('TEXTCOLOR', (5, row), (5, row), colors.white))
+
+    detail_table.setStyle(TableStyle(detail_style_cmds))
+    elements.append(detail_table)
+
+    # ── FOOTER ──
+    elements.append(Spacer(1, 20))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey))
+    elements.append(Paragraph(
+        f"Informe General de Calidad | Voz-a-Texto Emocional API | {date_str}",
+        ParagraphStyle('Footer', parent=styles['Normal'], fontSize=7,
+                       textColor=colors.grey, alignment=TA_CENTER)
+    ))
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.read()
+
+
 def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     """Genera un PDF profesional con toda la información del análisis."""
     from reportlab.lib.pagesizes import letter
@@ -311,7 +921,7 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     # === QUALITY SCORE ===
     quality = analysis_data.get("quality_score", {})
     if quality and isinstance(quality, dict):
-        elements.append(Paragraph(" Score de Calidad", subtitle_style))
+        elements.append(Paragraph("Score de Calidad", subtitle_style))
         score = quality.get("total_score", 0)
         classification = quality.get("classification", "N/A")
 
@@ -353,7 +963,7 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
         if recs:
             elements.append(Spacer(1, 6))
             for rec in recs[:4]:
-                elements.append(Paragraph(f"• {rec}", body_style))
+                elements.append(Paragraph(f"• {_safe_pdf_text(rec)}", body_style))
         elements.append(Spacer(1, 10))
 
     # === CALL SUMMARY ===
@@ -361,12 +971,12 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     if summary and isinstance(summary, dict):
         elements.append(Paragraph("Resumen de Llamada", subtitle_style))
         summary_items = [
-            ["Motivo", summary.get("motivo", "N/A")[:120]],
-            ["Desarrollo", summary.get("desarrollo", "N/A")[:120]],
-            ["Resolución", summary.get("resolucion", "N/A")[:120]],
-            ["Satisfacción", summary.get("satisfaccion_estimada", "N/A")],
-            ["Tópico", summary.get("topico_detectado", "N/A")],
-            ["Duración", f"{summary.get('duracion_seg', 0):.0f}s"],
+            ["Motivo", _safe_pdf_text(summary.get("motivo", "N/A"))[:120]],
+            ["Desarrollo", _safe_pdf_text(summary.get("desarrollo", "N/A"))[:120]],
+            ["Resolucion", _safe_pdf_text(summary.get("resolucion", "N/A"))[:120]],
+            ["Satisfaccion", _safe_pdf_text(str(summary.get("satisfaccion_estimada", "N/A")))],
+            ["Topico", _safe_pdf_text(summary.get("topico_detectado", "N/A"))],
+            ["Duracion", f"{summary.get('duracion_seg', 0):.0f}s"],
         ]
         sum_table = Table(summary_items, colWidths=[1.5*inch, 5.5*inch])
         sum_table.setStyle(TableStyle([
@@ -387,7 +997,7 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     global_emotions = analysis_data.get("global_emotions", {})
     emotion_dist = global_emotions.get("emotion_distribution", {})
     if emotion_dist:
-        elements.append(Paragraph("📊 Distribución Emocional", subtitle_style))
+        elements.append(Paragraph("Distribucion Emocional", subtitle_style))
 
         drawing = Drawing(400, 150)
         chart = VerticalBarChart()
@@ -416,7 +1026,7 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     # === ALERT ===
     alert = analysis_data.get("alert")
     if alert and isinstance(alert, dict):
-        elements.append(Paragraph("🚨 Alerta de Escalamiento", subtitle_style))
+        elements.append(Paragraph("Alerta de Escalamiento", subtitle_style))
         sev = alert.get("severity", "media")
         sev_color = DANGER if sev == "alta" else WARNING if sev == "media" else ACCENT
         alert_data_table = [
@@ -442,12 +1052,12 @@ def _generate_professional_pdf(analysis_data: Dict[str, Any]) -> bytes:
     # === SEGMENTS TABLE ===
     segments = analysis_data.get("segments", [])
     if segments:
-        elements.append(Paragraph("📝 Transcripción por Segmentos", subtitle_style))
+        elements.append(Paragraph("Transcripcion por Segmentos", subtitle_style))
         seg_header = [["#", "Tiempo", "Hablante", "Emoción", "Texto"]]
         col_widths = [0.3*inch, 0.7*inch, 1*inch, 0.8*inch, 4.2*inch]
 
         for i, seg in enumerate(segments[:80]):
-            text = seg.get("text_es", seg.get("text", ""))[:80]
+            text = _safe_pdf_text(seg.get("text_es", seg.get("text", "")))[:80]
             seg_header.append([
                 str(i+1),
                 f"{seg.get('start', 0):.1f}s",

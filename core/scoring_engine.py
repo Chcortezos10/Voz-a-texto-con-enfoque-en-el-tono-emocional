@@ -411,3 +411,283 @@ def calculate_quality_score(
             details={"error": str(e)},
             recommendations=["Error en el cálculo. Verificar datos de entrada."]
         )
+
+
+# =====================================================
+# SCORING GENERAL (CONSOLIDADO DE TODOS LOS AUDIOS)
+# =====================================================
+
+@dataclass
+class GeneralScoringResult:
+    """Resultado del scoring general consolidado."""
+    total_audios: int
+    avg_score: float
+    std_deviation: float
+    min_score: int
+    max_score: int
+    general_classification: str
+    classification_distribution: Dict[str, int]
+    dimension_averages: Dict[str, float]
+    dimension_details: Dict[str, Any]
+    emotion_summary: Dict[str, Any]
+    global_recommendations: List[str]
+    top_issues: List[str]
+    best_audios: List[Dict[str, Any]]
+    worst_audios: List[Dict[str, Any]]
+
+
+def calculate_general_quality_metrics(
+    history_items: List[Dict[str, Any]]
+) -> GeneralScoringResult:
+    """
+    Calcula métricas de calidad consolidadas a partir del historial de análisis.
+
+    Args:
+        history_items: Lista de entradas del historial (data/analysis_history.json)
+
+    Returns:
+        GeneralScoringResult con métricas generales, promedios por dimensión,
+        distribución de clasificaciones y recomendaciones globales.
+    """
+    import math
+
+    # Filtrar items que tienen quality_score válido
+    valid_items = []
+    for item in history_items:
+        qs = item.get("quality_score")
+        if isinstance(qs, dict) and "total_score" in qs:
+            valid_items.append(item)
+
+    if not valid_items:
+        return GeneralScoringResult(
+            total_audios=0,
+            avg_score=0.0,
+            std_deviation=0.0,
+            min_score=0,
+            max_score=0,
+            general_classification="Sin datos",
+            classification_distribution={},
+            dimension_averages={},
+            dimension_details={},
+            emotion_summary={},
+            global_recommendations=["No hay audios con quality score para analizar."],
+            top_issues=[],
+            best_audios=[],
+            worst_audios=[]
+        )
+
+    # ─── Scores totales ───
+    scores = [item["quality_score"]["total_score"] for item in valid_items]
+    avg_score = round(sum(scores) / len(scores), 1)
+    std_dev = round(math.sqrt(sum((s - avg_score) ** 2 for s in scores) / len(scores)), 1)
+    min_score = min(scores)
+    max_score = max(scores)
+
+    # ─── Distribución de clasificaciones ───
+    classification_dist = {"Excelente": 0, "Bueno": 0, "Regular": 0, "Deficiente": 0}
+    for s in scores:
+        cls = _classify_score(s)
+        if cls in classification_dist:
+            classification_dist[cls] += 1
+
+    # ─── Promedios por dimensión ───
+    dimension_sums = {
+        "emotional_tone": {"score": 0, "max": 30, "count": 0},
+        "keywords": {"score": 0, "max": 25, "count": 0},
+        "resolution": {"score": 0, "max": 25, "count": 0},
+        "protocol": {"score": 0, "max": 20, "count": 0},
+    }
+
+    # Contadores detallados para dimensiones
+    protocol_has_greeting = 0
+    protocol_has_farewell = 0
+    protocol_has_id = 0
+    total_empathy_count = 0
+    total_prohibited_count = 0
+    total_resolution_kw = 0
+    high_negative_total = 0
+
+    for item in valid_items:
+        breakdown = item["quality_score"].get("breakdown", {})
+        for dim_key, dim_data in breakdown.items():
+            if dim_key in dimension_sums and isinstance(dim_data, dict):
+                dimension_sums[dim_key]["score"] += dim_data.get("score", 0)
+                dimension_sums[dim_key]["count"] += 1
+
+            # Detalles de protocolo
+            if dim_key == "protocol" and isinstance(dim_data, dict):
+                if dim_data.get("has_greeting"):
+                    protocol_has_greeting += 1
+                if dim_data.get("has_farewell"):
+                    protocol_has_farewell += 1
+                if dim_data.get("has_identification"):
+                    protocol_has_id += 1
+
+            # Detalles de keywords
+            if dim_key == "keywords" and isinstance(dim_data, dict):
+                total_empathy_count += dim_data.get("empathy_count", 0)
+                total_prohibited_count += dim_data.get("prohibited_count", 0)
+                total_resolution_kw += dim_data.get("resolution_count", 0)
+
+            # Detalles de resolución
+            if dim_key == "resolution" and isinstance(dim_data, dict):
+                high_negative_total += dim_data.get("high_negative_segments", 0)
+
+    dimension_averages = {}
+    for dim_key, data in dimension_sums.items():
+        if data["count"] > 0:
+            avg = round(data["score"] / data["count"], 1)
+            dimension_averages[dim_key] = avg
+        else:
+            dimension_averages[dim_key] = 0.0
+
+    label_map = {
+        "emotional_tone": "Tono Emocional",
+        "keywords": "Palabras Clave",
+        "resolution": "Resolución",
+        "protocol": "Protocolo"
+    }
+
+    dimension_details = {}
+    for dim_key, avg_val in dimension_averages.items():
+        max_val = dimension_sums[dim_key]["max"]
+        pct = round((avg_val / max_val) * 100, 1) if max_val > 0 else 0
+        dimension_details[dim_key] = {
+            "label": label_map.get(dim_key, dim_key),
+            "average_score": avg_val,
+            "max_score": max_val,
+            "percentage": pct,
+        }
+
+    # Agregar detalles extra de protocolo
+    n = len(valid_items)
+    dimension_details["protocol"]["greeting_compliance"] = round(protocol_has_greeting / n * 100, 1)
+    dimension_details["protocol"]["farewell_compliance"] = round(protocol_has_farewell / n * 100, 1)
+    dimension_details["protocol"]["identification_compliance"] = round(protocol_has_id / n * 100, 1)
+
+    # Detalles extra de keywords
+    dimension_details["keywords"]["avg_empathy_per_call"] = round(total_empathy_count / n, 1)
+    dimension_details["keywords"]["avg_prohibited_per_call"] = round(total_prohibited_count / n, 2)
+    dimension_details["keywords"]["total_prohibited_found"] = total_prohibited_count
+
+    # ─── Resumen emocional global ───
+    emotion_counts = {"feliz": 0, "enojado": 0, "triste": 0, "neutral": 0}
+    for item in valid_items:
+        dom = item.get("dominant_emotion", "neutral")
+        if dom in emotion_counts:
+            emotion_counts[dom] += 1
+
+    emotion_summary = {
+        "distribution": {
+            emo: round(count / n * 100, 1) for emo, count in emotion_counts.items()
+        },
+        "most_common": max(emotion_counts, key=emotion_counts.get),
+        "alert_count": sum(1 for item in valid_items if item.get("has_alert", False)),
+        "alert_rate": round(
+            sum(1 for item in valid_items if item.get("has_alert", False)) / n * 100, 1
+        ),
+    }
+
+    # ─── Top issues (problemas más frecuentes) ───
+    issue_counter: Dict[str, int] = {}
+    for item in valid_items:
+        recs = item["quality_score"].get("recommendations", [])
+        for rec in recs:
+            # Limpiar emoji al inicio para agrupar
+            clean_rec = rec.lstrip("⚠️🔴💬🚫👋🤝🏷️🎯✅ ")
+            if "Excelente desempeño" not in clean_rec:
+                issue_counter[clean_rec] = issue_counter.get(clean_rec, 0) + 1
+
+    top_issues = sorted(issue_counter.items(), key=lambda x: x[1], reverse=True)
+    top_issues_list = [
+        f"{issue} ({count}/{n} audios, {round(count/n*100)}%)"
+        for issue, count in top_issues[:8]
+    ]
+
+    # ─── Mejores y peores audios ───
+    scored_audios = sorted(
+        [
+            {
+                "filename": item.get("filename", "unknown"),
+                "score": item["quality_score"]["total_score"],
+                "classification": item["quality_score"].get("classification", "N/A"),
+                "dominant_emotion": item.get("dominant_emotion", "neutral"),
+                "timestamp": item.get("timestamp", ""),
+            }
+            for item in valid_items
+        ],
+        key=lambda x: x["score"],
+        reverse=True
+    )
+    best_audios = scored_audios[:5]
+    worst_audios = scored_audios[-5:][::-1] if len(scored_audios) >= 5 else scored_audios[::-1]
+
+    # ─── Recomendaciones globales ───
+    global_recs = []
+
+    if avg_score < 50:
+        global_recs.append("🔴 Score general DEFICIENTE. Se requiere capacitación urgente del equipo.")
+    elif avg_score < 70:
+        global_recs.append("⚠️ Score general REGULAR. Plan de mejora continua recomendado.")
+    elif avg_score < 85:
+        global_recs.append("🟢 Score general BUENO. Identificar áreas específicas de mejora.")
+    else:
+        global_recs.append("🏆 Score general EXCELENTE. Mantener los estándares actuales.")
+
+    # Recomendaciones por dimensión débil
+    weakest_dim = min(dimension_averages, key=dimension_averages.get)
+    weakest_pct = dimension_details[weakest_dim]["percentage"]
+    if weakest_pct < 60:
+        global_recs.append(
+            f"📉 Área más débil: {label_map.get(weakest_dim, weakest_dim)} "
+            f"({weakest_pct}%). Requiere atención prioritaria."
+        )
+
+    if dimension_details["protocol"]["greeting_compliance"] < 70:
+        global_recs.append(
+            f"👋 Solo {dimension_details['protocol']['greeting_compliance']}% "
+            f"de las llamadas incluyen saludo. Reforzar protocolo de inicio."
+        )
+
+    if dimension_details["protocol"]["farewell_compliance"] < 70:
+        global_recs.append(
+            f"🤝 Solo {dimension_details['protocol']['farewell_compliance']}% "
+            f"de las llamadas incluyen despedida. Reforzar protocolo de cierre."
+        )
+
+    if total_prohibited_count > 0:
+        global_recs.append(
+            f"🚫 Se detectaron {total_prohibited_count} palabras/frases prohibidas "
+            f"en total. Revisión urgente del lenguaje utilizado."
+        )
+
+    if emotion_summary["alert_rate"] > 20:
+        global_recs.append(
+            f"🚨 Tasa de alertas elevada ({emotion_summary['alert_rate']}%). "
+            f"Revisar manejo de situaciones conflictivas."
+        )
+
+    if std_dev > 20:
+        global_recs.append(
+            f"📊 Alta variabilidad en scores (desv. estándar: {std_dev}). "
+            f"Estandarizar la calidad del servicio."
+        )
+
+    general_classification = _classify_score(round(avg_score))
+
+    return GeneralScoringResult(
+        total_audios=n,
+        avg_score=avg_score,
+        std_deviation=std_dev,
+        min_score=min_score,
+        max_score=max_score,
+        general_classification=general_classification,
+        classification_distribution=classification_dist,
+        dimension_averages=dimension_averages,
+        dimension_details=dimension_details,
+        emotion_summary=emotion_summary,
+        global_recommendations=global_recs,
+        top_issues=top_issues_list,
+        best_audios=best_audios,
+        worst_audios=worst_audios
+    )

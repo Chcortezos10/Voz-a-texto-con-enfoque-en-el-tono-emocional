@@ -4,12 +4,28 @@ Rutas de Scoring de Calidad del Agente.
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List
 import logging
+import json
+from pathlib import Path
+from dataclasses import asdict
 
-from core.scoring_engine import calculate_quality_score
+from core.scoring_engine import calculate_quality_score, calculate_general_quality_metrics
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/scoring", tags=["Scoring"])
+
+history_file = Path("data/analysis_history.json")
+
+
+def _load_history() -> List[Dict]:
+    """Carga el historial de análisis."""
+    try:
+        if history_file.exists():
+            with open(history_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error cargando historial para scoring general: {e}")
+    return []
 
 
 @router.post("/calculate")
@@ -35,6 +51,39 @@ async def calculate_score(data: Dict[str, Any]):
         }
     except Exception as e:
         logger.error(f"Error calculando score: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/general")
+async def get_general_score():
+    """
+    Calcula el score de calidad GENERAL consolidado de TODOS los audios procesados.
+    Lee el historial completo y retorna métricas agregadas:
+    - Score promedio, min, max, desviación estándar
+    - Promedios por dimensión (tono, keywords, resolución, protocolo)
+    - Distribución de clasificaciones
+    - Top issues detectados
+    - Mejores y peores audios
+    - Recomendaciones globales
+    """
+    try:
+        history = _load_history()
+
+        if not history:
+            return {
+                "status": "success",
+                "message": "No hay datos en el historial",
+                "total_audios": 0
+            }
+
+        result = calculate_general_quality_metrics(history)
+
+        return {
+            "status": "success",
+            **asdict(result)
+        }
+    except Exception as e:
+        logger.error(f"Error en scoring general: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

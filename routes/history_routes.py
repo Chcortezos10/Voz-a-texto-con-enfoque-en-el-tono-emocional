@@ -96,7 +96,7 @@ async def save_to_history(data: Dict[str, Any]):
         
         history.append(entry)
         
-        if len(history) > 100:
+        if len(history) > 500:
             history.pop(0)
 
         save_history_to_file(history)

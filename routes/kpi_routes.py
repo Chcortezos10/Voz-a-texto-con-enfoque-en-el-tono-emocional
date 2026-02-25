@@ -5,9 +5,12 @@ Consume el historial de análisis para generar tendencias y comparativas.
 from fastapi import APIRouter, HTTPException, Query
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from dataclasses import asdict
 import logging
 import json
 from pathlib import Path
+
+from core.scoring_engine import calculate_general_quality_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +92,34 @@ async def kpi_summary():
         }
     except Exception as e:
         logger.error(f"Error en KPI summary: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/general-score")
+async def kpi_general_score():
+    """
+    Score de calidad GENERAL consolidado con desglose por dimensión.
+    Retorna métricas completas: promedios, distribución, top issues,
+    mejores/peores audios, y recomendaciones globales.
+    """
+    try:
+        history = _load_history()
+
+        if not history:
+            return {
+                "status": "success",
+                "message": "No hay datos en el historial",
+                "total_audios": 0
+            }
+
+        result = calculate_general_quality_metrics(history)
+
+        return {
+            "status": "success",
+            **asdict(result)
+        }
+    except Exception as e:
+        logger.error(f"Error en KPI general-score: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -1,6 +1,6 @@
 # =====================================================
 # Dockerfile - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 8.0.0 (Migración WhisperX)
+# Versión: 9.0.0 (Quality Score General + PDF Consolidado + Ollama/Qwen2.5)
 # =====================================================
 
 # Base image con soporte CUDA para NVIDIA GPU
@@ -9,7 +9,7 @@ FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 # Metadatos
 LABEL maintainer="Christian"
 LABEL description="API de transcripción de voz a texto con análisis emocional"
-LABEL version="8.0.0"
+LABEL version="9.0.0"
 
 # Evitar prompts interactivos durante instalación
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,7 +23,9 @@ ENV PYTHONUNBUFFERED=1 \
     OMP_NUM_THREADS=4 \
     # Configuración del servidor
     HOST=0.0.0.0 \
-    PORT=8000
+    PORT=8000 \
+    # Ollama (Qwen2.5) - solo para informes, no en flujo de procesamiento
+    OLLAMA_BASE_URL=http://host.docker.internal:11434
 
 # Directorio de trabajo
 WORKDIR /app

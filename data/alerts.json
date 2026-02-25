@@ -1121,5 +1121,843 @@
     "dominant_emotion": "neutral",
     "reviewed": false,
     "review_notes": ""
+  },
+  {
+    "id": "72514618",
+    "timestamp": "2026-02-24T21:06:34.139139",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.086,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "54bd823a",
+    "timestamp": "2026-02-24T21:13:19.938244",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.1993,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "58d5325e",
+    "timestamp": "2026-02-24T21:15:47.557665",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "4e20bce8",
+    "timestamp": "2026-02-24T21:17:47.177576",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1342,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "f0ac9282",
+    "timestamp": "2026-02-24T21:19:34.070750",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.123,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8d8cf0d0",
+    "timestamp": "2026-02-24T21:21:38.849339",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1152,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "79d649f0",
+    "timestamp": "2026-02-24T21:23:41.697657",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.17,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c61018b2",
+    "timestamp": "2026-02-24T21:25:11.507321",
+    "filename": "Spanish_Sample%20-%2002__SPEAKER_00.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1367,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "22816d14",
+    "timestamp": "2026-02-24T21:35:23.149046",
+    "filename": "test.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.0598,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c31b7eb6",
+    "timestamp": "2026-02-24T21:37:08.071210",
+    "filename": "Un periodista de A24 lloró en vivo por los datos de la pobreza.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 44/100"
+    ],
+    "quality_score": 44,
+    "sentiment_score": -0.0943,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "688ebd1c",
+    "timestamp": "2026-02-24T22:43:19.677790",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "bc42cf8d",
+    "timestamp": "2026-02-24T22:45:29.156578",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1317,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c74716e1",
+    "timestamp": "2026-02-24T22:47:08.773567",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8ae024e1",
+    "timestamp": "2026-02-24T22:49:10.150420",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1152,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "727c7d0a",
+    "timestamp": "2026-02-24T22:50:52.961444",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1705,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "46230951",
+    "timestamp": "2026-02-24T23:03:05.243622",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0862,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "24a39e4f",
+    "timestamp": "2026-02-24T23:08:39.764930",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2005,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "d74cb292",
+    "timestamp": "2026-02-24T23:10:44.283096",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "0644c288",
+    "timestamp": "2026-02-24T23:12:28.203280",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1341,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "21d665c0",
+    "timestamp": "2026-02-24T23:13:57.318237",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1232,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "122ff72d",
+    "timestamp": "2026-02-24T23:15:45.222674",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1153,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "30176b32",
+    "timestamp": "2026-02-24T23:17:23.959585",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1711,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c3f80f7c",
+    "timestamp": "2026-02-24T23:18:55.142070",
+    "filename": "test.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.0609,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "fef6c7a8",
+    "timestamp": "2026-02-24T23:20:29.711227",
+    "filename": "Un periodista de A24 lloró en vivo por los datos de la pobreza.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 44/100"
+    ],
+    "quality_score": 44,
+    "sentiment_score": -0.0981,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c46af0dc",
+    "timestamp": "2026-02-25T00:12:10.188180",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0866,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "7261a9ad",
+    "timestamp": "2026-02-25T00:17:32.650727",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2006,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "9d30b1f6",
+    "timestamp": "2026-02-25T00:19:28.022016",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1019,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "2a4a75e7",
+    "timestamp": "2026-02-25T00:21:10.524175",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.134,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "fde61114",
+    "timestamp": "2026-02-25T00:22:37.356305",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "97286510",
+    "timestamp": "2026-02-25T00:24:21.991961",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1175,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c9f2596f",
+    "timestamp": "2026-02-25T00:26:04.790890",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1704,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "00306df4",
+    "timestamp": "2026-02-25T01:10:03.402802",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0863,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8982b5ef",
+    "timestamp": "2026-02-25T01:15:32.246646",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2005,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "7c770365",
+    "timestamp": "2026-02-25T01:17:29.982716",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1041,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c1e47920",
+    "timestamp": "2026-02-25T01:19:10.102181",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1342,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "a3499bd0",
+    "timestamp": "2026-02-25T01:20:38.213263",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "59d3cf13",
+    "timestamp": "2026-02-25T01:22:19.806859",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1152,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "78a79368",
+    "timestamp": "2026-02-25T01:23:58.033588",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1698,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "e4d7c961",
+    "timestamp": "2026-02-25T01:52:57.425498",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2007,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "757c2135",
+    "timestamp": "2026-02-25T01:55:00.932223",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "d088b276",
+    "timestamp": "2026-02-25T01:56:41.037064",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1341,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "de93f229",
+    "timestamp": "2026-02-25T01:58:06.500520",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1228,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "96b5bfbd",
+    "timestamp": "2026-02-25T01:59:48.232384",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1151,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "1d3b7d0b",
+    "timestamp": "2026-02-25T02:01:25.718990",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1707,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "f43b4d1e",
+    "timestamp": "2026-02-25T02:56:28.149010",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 10 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2006,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "0a660167",
+    "timestamp": "2026-02-25T02:58:26.197149",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "6c16827e",
+    "timestamp": "2026-02-25T03:18:17.969031",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 10 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2006,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "e28d0d1d",
+    "timestamp": "2026-02-25T03:20:18.302781",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1041,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8b659812",
+    "timestamp": "2026-02-25T03:22:01.908482",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1342,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "caf1882e",
+    "timestamp": "2026-02-25T03:23:28.592402",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.123,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "cc9ab8cd",
+    "timestamp": "2026-02-25T03:25:10.847734",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1153,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "9edc9df6",
+    "timestamp": "2026-02-25T14:58:13.361895",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2006,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "37d2780a",
+    "timestamp": "2026-02-25T15:00:09.148106",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1019,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c3a872c7",
+    "timestamp": "2026-02-25T15:01:45.205246",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1343,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "ea60553e",
+    "timestamp": "2026-02-25T15:03:09.481810",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.123,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "0c191adc",
+    "timestamp": "2026-02-25T15:04:51.625500",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1152,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "757eff05",
+    "timestamp": "2026-02-25T15:06:25.140335",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.17,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
   }
 ]
