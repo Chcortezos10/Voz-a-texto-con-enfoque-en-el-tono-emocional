@@ -1,23 +1,24 @@
-# 🎭 Voz-a-Texto Emocional
+# 🎭 Voz-a-Texto Emocional V9
 
-Sistema avanzado de transcripción y análisis emocional de audio con interfaz visual interactiva, desarrollado con FastAPI y modelos de IA.
+Sistema avanzado de transcripción y análisis emocional de audio con interfaz visual interactiva, desarrollado con FastAPI y modelos de IA. Esta versión incluye capacidades avanzadas de Quality Score, generación de informes consolidados en PDF usando modelos locales (Ollama/Qwen2.5) y un Dashboard rediseñado con Vista General.
 
 ---
 
 ## ✨ Características Principales
 
-| Característica               | Descripción                                            |
-| ---------------------------- | ------------------------------------------------------ |
-| 🎤 **Transcripción**         | OpenAI Whisper local + Cloud (OpenAI, Groq) en español |
-| 😊 **Análisis Emocional**    | 4 categorías: Feliz, Enojado, Triste, Neutral          |
-| 🔀 **Análisis Multi-Modal**  | Combina análisis de texto y tono de voz                |
-| 👥 **Diarización**           | Identificación automática de múltiples hablantes       |
-| 📊 **Dashboard Interactivo** | Métricas, gráficos Timeline y momentos destacados      |
-| 📁 **Historial**             | Almacenamiento persistente de análisis anteriores      |
-| 📤 **Exportación**           | JSON, CSV, SRT, VTT, TXT                               |
-| 🐳 **Docker Ready**          | Despliegue containerizado con soporte GPU NVIDIA       |
-| 🛡️ **Resiliencia**           | Circuit Breaker, Retry Logic y Graceful Degradation    |
-| ✅ **Validación**            | Validación completa de audio, segmentos y parámetros   |
+| Característica               | Descripción                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| 🎤 **Transcripción**         | OpenAI Whisper local + Cloud (OpenAI, Groq) en español                               |
+| 😊 **Análisis Emocional**    | 4 categorías: Feliz, Enojado, Triste, Neutral                                        |
+| 🔀 **Análisis Multi-Modal**  | Combina análisis de texto y tono de voz                                              |
+| 👥 **Diarización**           | Identificación automática multihablante Local (MFCC + Clustering) sin límite de lote |
+| 📊 **Dashboard Interactivo** | Métricas, gráficos Timeline y Vista General integral de KPIs e Historial             |
+| 🌟 **Quality Score**         | Motor de evaluación automatizada de calidad de llamada, con alertas y recomendaciones|
+| 📄 **Informes PDF**          | Exportación de reportes consolidados nutridos por LLM local (Ollama / Qwen2.5)       |
+| 📁 **Historial**             | Almacenamiento persistente de análisis anteriores con búsqueda avanzada              |
+| 📤 **Exportación**           | PDF, JSON, CSV, SRT, VTT, TXT                                                        |
+| 🐳 **Docker Ready**          | Despliegue containerizado con soporte GPU NVIDIA y conexión a Ollama en host         |
+| 🛡️ **Resiliencia**           | Circuit Breaker, Retry Logic y Graceful Degradation                                  |
 
 ---
 
@@ -56,6 +57,7 @@ uvicorn app_fastapi:app --reload --host 0.0.0.0 --port 8000
 
 - Docker Desktop instalado y corriendo
 - Puerto 8000 disponible
+- (Opcional para Informes PDF) Ollama corriendo en el host en puerto 11434 con el modelo `qwen2.5`.
 
 #### 🚀 Inicio Rápido
 
@@ -72,20 +74,11 @@ docker-compose up --build
 #### 📋 Comandos Docker útiles
 
 ```bash
-# Iniciar en segundo plano (detached)
-docker-compose up -d
-
-# Ver logs en tiempo real
-docker-compose logs -f
-
-# Reiniciar el contenedor
-docker-compose restart
-
-# Detener el contenedor
-docker-compose down
-
-# Detener y eliminar volúmenes (limpieza completa)
-docker-compose down -v
+docker-compose up -d         # Iniciar en segundo plano
+docker-compose logs -f       # Ver logs en tiempo real
+docker-compose restart       # Reiniciar el contenedor
+docker-compose down          # Detener el contenedor
+docker-compose down -v       # Detener y eliminar volúmenes (limpieza completa)
 ```
 
 ---
@@ -94,16 +87,17 @@ docker-compose down -v
 
 El dashboard HTML5 incluye:
 
-| Característica           | Descripción                                       |
-| ------------------------ | ------------------------------------------------- |
-| **Presets**              | Lite (solo texto), Balanceado, Tono (audio)       |
-| **Slider**               | Control manual del peso audio/texto (0-100%)      |
-| **Gráfico Timeline**     | Evolución de emociones en el tiempo               |
-| **Gráfico Distribución** | Pie chart con % de cada emoción                   |
-| **Momentos Destacados**  | Top 3 picos emocionales con texto exacto          |
-| **Métricas**             | Emoción dominante, intensidad, cambios de emoción |
-| **Historial**            | Acceso a análisis anteriores con búsqueda         |
-| **Exportación**          | Descarga en múltiples formatos                    |
+| Característica            | Descripción                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| **Vista General**         | Tabla maestra que resume el historial de llamadas, puntaje Quality Score y Alertas   |
+| **PDF Consolidado**       | Generación de informes PDF estilizados con feedback generado por LLM                 |
+| **Presets**               | Lite (solo texto), Balanceado, Tono (audio)                                          |
+| **Slider**                | Control manual del peso audio/texto (0-100%)                                         |
+| **Gráfico Timeline**      | Evolución de emociones en el tiempo                                                  |
+| **Momentos Destacados**   | Top 3 picos emocionales con texto exacto                                             |
+| **Quality Score**         | Análisis semántico de la interacción para obtener una calificación del 0-100%        |
+| **Alertas Inteligentes**  | Indicadores de riesgo de pérdida y sentimiento crítico                               |
+| **Exportación**           | Descarga en múltiples formatos (incluyendo Reportes PDF)                             |
 
 ---
 
@@ -112,37 +106,30 @@ El dashboard HTML5 incluye:
 ```
 ├── core/                     # Módulos principales
 │   ├── emotion_analysis.py   # Análisis emocional multi-modal
-│   ├── translation.py        # Traducción ES→EN (Helsinki-NLP)
-│   ├── audio_processing.py   # Procesamiento de audio
-│   ├── transcription.py      # Transcripción local con Whisper
-│   ├── transcription_cloud.py# Transcripción cloud (OpenAI, Groq)
-│   ├── diarization.py        # Diarización de hablantes
-│   ├── model_manager.py      # Gestión centralizada de modelos
-│   ├── export_manager.py     # Exportación a múltiples formatos
-│   └── models.py             # Carga de modelos Whisper
+│   ├── transcription.py      # Transcripción local con Whisper (WhisperX)
+│   ├── diarization.py        # Diarización de hablantes y formatos
+│   ├── pyannote_diarizer.py  # Módulo local de diarización (MFCC + Clustering)
+│   ├── scoring_engine.py     # Motor de cálculo de Quality Score
+│   ├── alert_system.py       # Sistema de alertas de sentimiento
+│   ├── export_manager.py     # Exportación a múltiples formatos (incluye PDF base)
+│   └── call_summary.py       # Generación de resúmenes consolidados
 │
 ├── routes/                   # Rutas API modulares
 │   ├── history_routes.py     # Historial de análisis
-│   ├── export_routes.py      # Exportación de datos
-│   └── additional_routes.py  # Transcripción cloud y sesiones
+│   ├── export_routes.py      # Exportación de datos y PDF
+│   ├── scoring_routes.py     # Endpoints de Quality Score
+│   ├── alert_routes.py       # Endpoints de Alertas
+│   └── kpi_routes.py         # Endpoints de Reportes Generales
 │
 ├── app_fastapi.py            # API REST unificada (puerto 8000)
-├── config.py                 # Configuración y mapeo de emociones
+├── config.py                 # Configuración general y de memoria
 ├── Validators.py             # Validación de audio y parámetros
 ├── Resilience.py             # Circuit Breaker y Retry Logic
 │
 ├── dashboard.html            # Dashboard web interactivo
-├── run_system_v2.bat         # Script de inicio (Windows)
-├── run_system.sh             # Script de inicio (Linux/Mac)
-│
-├── Dockerfile                # Configuración Docker
-├── docker-compose.yml        # Orquestación de contenedores
+├── docker-compose.yml        # Orquestación de contenedores (v9.0.0, soporte Ollama host)
 ├── requirements.txt          # Dependencias Python
-│
-├── data/                     # Archivos de datos e historial
-├── history/                  # Almacenamiento de historial
-├── output/                   # Archivos de salida
-└── pruebas/                  # Archivos de prueba
+└── ...                       # Carpetas de datos (history, output, feedback)
 ```
 
 ---
@@ -150,164 +137,73 @@ El dashboard HTML5 incluye:
 ## 🔌 API Endpoints
 
 ### Transcripción y Análisis
-
 | Método | Endpoint                    | Descripción                            |
 | ------ | --------------------------- | -------------------------------------- |
-| POST   | `/transcribe/full-analysis` | Análisis completo con emociones        |
+| POST   | `/transcribe/full-analysis` | Análisis completo con WhispeX y emociones |
 | POST   | `/transcribe/with-provider` | Transcripción con proveedor específico |
-| GET    | `/providers`                | Lista proveedores disponibles          |
-| POST   | `/api-key`                  | Configura clave API para cloud         |
-| POST   | `/validate-api-key`         | Valida clave API                       |
-| GET    | `/estimate-cost`            | Estima costo de transcripción cloud    |
+
+### Quality Score y KPIs (Nuevos)
+| Método | Endpoint               | Descripción                            |
+| ------ | ---------------------- | -------------------------------------- |
+| GET    | `/kpis/summary`        | Obtiene KPIs globales del sistema      |
+| POST   | `/scoring/calculate`   | Calcula Quality Score de una sesión    |
+| GET    | `/alert/active`        | Analiza alertas críticas activas       |
+
+### Exportación y Reportes
+| Método | Endpoint          | Descripción                                |
+| ------ | ----------------- | ------------------------------------------ |
+| POST   | `/export/pdf`     | Exporta reporte maestro a PDF con insights |
+| POST   | `/export/json`    | Exporta a JSON                             |
+| POST   | `/config/logo`    | Sube un logo de empresa para el PDF        |
+| GET    | `/config/logo`    | Verifica estado del logo para reportes     |
 
 ### Historial
-
 | Método | Endpoint             | Descripción                       |
 | ------ | -------------------- | --------------------------------- |
 | GET    | `/history`           | Obtiene lista de análisis previos |
-| GET    | `/history/{item_id}` | Obtiene un análisis específico    |
 | POST   | `/history/save`      | Guarda nuevo análisis             |
-| DELETE | `/history/{item_id}` | Elimina un análisis               |
 | DELETE | `/history/clear`     | Limpia todo el historial          |
-
-### Exportación
-
-| Método | Endpoint          | Descripción                 |
-| ------ | ----------------- | --------------------------- |
-| POST   | `/export/json`    | Exporta a JSON              |
-| POST   | `/export/csv`     | Exporta a CSV               |
-| POST   | `/export/srt`     | Exporta subtítulos SRT      |
-| POST   | `/export/vtt`     | Exporta subtítulos VTT      |
-| POST   | `/export/txt`     | Exporta transcripción TXT   |
-| POST   | `/export/summary` | Genera resumen del análisis |
-
-### Sesiones
-
-| Método | Endpoint                | Descripción                |
-| ------ | ----------------------- | -------------------------- |
-| POST   | `/session/store`        | Almacena nueva sesión      |
-| GET    | `/session/{session_id}` | Obtiene sesión por ID      |
-| PUT    | `/session/{session_id}` | Actualiza sesión existente |
-| DELETE | `/session/{session_id}` | Elimina sesión             |
-| GET    | `/sessions`             | Lista todas las sesiones   |
-| PUT    | `/segment/update`       | Actualiza segmento         |
-| POST   | `/speakers/merge`       | Fusiona hablantes          |
-
-### Sistema
-
-| Método | Endpoint             | Descripción                      |
-| ------ | -------------------- | -------------------------------- |
-| GET    | `/health`            | Estado básico del servidor       |
-| GET    | `/health/detailed`   | Estado detallado con métricas    |
-| POST   | `/admin/cleanup`     | Limpieza manual de memoria       |
-| GET    | `/admin/model-stats` | Estadísticas de modelos cargados |
-
-### Ejemplo de uso
-
-```bash
-curl -X POST "http://127.0.0.1:8000/transcribe/full-analysis" \
-  -F "file=@audio.mp3" \
-  -F "audio_weight=0.4" \
-  -F "lite_mode=false" \
-  -F "enable_diarization=true"
-```
 
 ---
 
 ## ⚙️ Configuración de Emociones
 
 Las emociones se simplifican a 4 categorías en `config.py`:
-
-| Salida         | Emociones Incluidas             |
-| -------------- | ------------------------------- |
-| 😊 **feliz**   | alegría, sorpresa, positividad  |
-| 😠 **enojado** | ira, disgusto, rechazo          |
-| 😢 **triste**  | tristeza, miedo, vulnerabilidad |
-| 😐 **neutral** | neutral, otros                  |
+- 😊 **feliz**: alegría, sorpresa, positividad
+- 😠 **enojado**: ira, disgusto, rechazo
+- 😢 **triste**: tristeza, miedo, vulnerabilidad
+- 😐 **neutral**: neutral, otros
 
 ---
 
-## 🛡️ Módulos de Resiliencia
-
-### Circuit Breaker
-
-Protege contra fallos en cascada con estados: CLOSED, OPEN, HALF_OPEN.
-
-### Retry with Backoff
-
-Reintentos automáticos con delay exponencial y jitter.
-
-### Graceful Degradation
-
-Valores por defecto cuando fallan servicios externos.
-
-### Fallback Chain
-
-Cadena de handlers alternativos para operaciones críticas.
-
----
-
-## ✅ Validación
-
-| Validador             | Función                                           |
-| --------------------- | ------------------------------------------------- |
-| `AudioValidator`      | Valida formato, duración, sample rate y contenido |
-| `SegmentValidator`    | Valida segmentos de transcripción                 |
-| `ParametersValidator` | Valida parámetros de API                          |
-
----
-
-## 🛠️ Requisitos
-
-| Requisito | Especificación                                    |
-| --------- | ------------------------------------------------- |
-| Python    | 3.10+                                             |
-| RAM       | 4GB mínimo (8GB recomendado)                      |
-| GPU       | NVIDIA con CUDA (opcional, acelera procesamiento) |
-| SO        | Windows 10/11, Linux, macOS                       |
-
----
-
-## 🐳 Docker
+## 🐳 Docker y Hardware
 
 El proyecto incluye soporte completo para Docker con:
 
-- **GPU NVIDIA**: Habilitado por defecto (comentar si no hay GPU)
-- **Volúmenes persistentes**: Cache de modelos Whisper y HuggingFace
-- **Health checks**: Monitoreo automático del servicio
-- **Auto-restart**: Reinicio automático en caso de fallo
+- **GPU NVIDIA**: Habilitado por defecto (`runtime: nvidia`).
+- **Ollama LLM (Qwen2.5)**: Conectividad configurable usando `host.docker.internal:11434` para la generación local y privada de insights en PDF sin depender de APIs en nube.
+- **Volúmenes persistentes**: Caché optimizada para Whisper, Torch y HuggingFace.
 
 ---
 
 ## 📋 Modelos Utilizados
 
-| Modelo                                        | Propósito                          |
-| --------------------------------------------- | ---------------------------------- |
-| OpenAI Whisper (small)                        | Transcripción de audio en español  |
-| Helsinki-NLP/opus-mt-es-en                    | Traducción español → inglés        |
-| daveni/twitter-xlm-roberta-emotion-es         | Análisis emocional en español      |
-| j-hartmann/emotion-english-distilroberta-base | Análisis emocional en inglés       |
-| Resemblyzer VoiceEncoder                      | Embeddings de voz para diarización |
-
----
-
-## 🔊 Proveedores de Transcripción
-
-| Proveedor  | Descripción                           | Requiere API Key |
-| ---------- | ------------------------------------- | ---------------- |
-| **local**  | Whisper local (gratuito, usa GPU/CPU) | No               |
-| **openai** | OpenAI Whisper API (cloud)            | Sí               |
-| **groq**   | Groq API (cloud, rápido)              | Sí               |
+| Modelo                                        | Propósito                                            |
+| --------------------------------------------- | ---------------------------------------------------- |
+| OpenAI Whisper (small/medium)                 | Transcripción de audio ultra-rápida (integración WhisperX) |
+| daveni/twitter-xlm-roberta-emotion-es         | Análisis emocional en español                        |
+| j-hartmann/emotion-english-distilroberta-base | Análisis emocional en inglés                         |
+| Modelo Local (MFCC + Clustering)              | Diarización de código abierto sin límite de lote     |
+| **Ollama / Qwen2.5** (Recomendado/Host)       | Resúmenes en lenguaje natural y validación de scores |
 
 ---
 
 ## 📝 Notas Importantes
 
-1. **Primera ejecución**: Descarga ~1-2GB de modelos automáticamente
-2. **Audio mínimo**: 2-3 segundos para análisis correcto
-3. **GPU**: Detecta CUDA automáticamente para acelerar procesamiento
-4. **Historial**: Se almacena en `data/analysis_history.json` (máximo 100 entradas)
-5. **CORS**: Configurado para desarrollo local, ajustar para producción
+1. **Memoria (RAM/VRAM)**: Se ha optimizado la gestión de memoria y se introdujo un Endpoint `/admin/cleanup-memory` para liberación agresiva en GPUs moderadas (< 8GB VRAM).
+2. **Audio mínimo**: 2-3 segundos para análisis correcto.
+3. **GPU**: Detecta CUDA automáticamente para acelerar procesamiento.
+4. **Historial**: Se almacena en `data/analysis_history.json`. La *Vista General* permite explorarlo fácilmente.
 
 ---
 
