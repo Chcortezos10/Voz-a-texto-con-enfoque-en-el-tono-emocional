@@ -11,11 +11,13 @@ import traceback
 import time
 import torch
 import gc
+import io
+import json
 import psutil
 from core.feedback_system import FeedbackCollector
 import soundfile as sf
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, Any, List, Tuple
@@ -320,6 +322,13 @@ async def save_upload_to_tempfile(upload_file: UploadFile) -> str:
             return tmp.name
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al guardar archivo: {e}")
+
+
+class _MockUploadFile:
+    """Envuelve bytes en un objeto compatible con UploadFile para batch SSE."""
+    def __init__(self, filename: str, content: bytes):
+        self.filename = filename
+        self.file = io.BytesIO(content)
 
 def validate_upload(file: UploadFile):
     """Valida extensión del archivo."""
@@ -1212,6 +1221,121 @@ async def transcribe_batch_scoring(
             ]
         }
     }
+
+@app.post("/transcribe/batch-scoring/stream", tags=["Batch"])
+async def transcribe_batch_scoring_stream(
+    files: List[UploadFile] = File(...),
+    lite_mode: bool = Form(False),
+    audio_weight: float = Form(0.4),
+    enable_diarization: bool = Form(True),
+    num_speakers: Optional[int] = Form(None)
+):
+    """
+    Igual que /batch-scoring pero usa Server-Sent Events (SSE).
+    Envía un evento JSON por cada archivo procesado, sin esperar al final.
+    Evita timeouts del navegador en batches grandes (>15 archivos).
+    Soporta hasta 100 archivos.
+    """
+    if len(files) > 100:
+        raise HTTPException(status_code=400, detail="Máximo 100 archivos por batch")
+    if len(files) == 0:
+        raise HTTPException(status_code=400, detail="Debe enviar al menos 1 archivo")
+    for f in files:
+        validate_upload(f)
+
+    # Leer todos los bytes ANTES de iniciar el stream
+    # (los UploadFile se vuelven inválidos una vez que el generador async empieza)
+    file_data: List[Tuple[str, bytes]] = []
+    for f in files:
+        content = await f.read()
+        file_data.append((f.filename, content))
+
+    async def event_generator():
+        results = []
+        start_time = time.time()
+        total = len(file_data)
+
+        yield f"data: {json.dumps({'type': 'start', 'total': total})}\n\n"
+
+        for i, (filename, content) in enumerate(file_data):
+            # Heartbeat antes de cada archivo para mantener la conexión viva
+            yield f"data: {json.dumps({'type': 'heartbeat', 'index': i, 'total': total, 'filename': filename})}\n\n"
+
+            mock_file = _MockUploadFile(filename, content)
+            try:
+                result = await _process_single_audio(
+                    mock_file, lite_mode, audio_weight, enable_diarization, num_speakers
+                )
+            except Exception as e:
+                result = {"filename": filename, "status": "error", "error": str(e)}
+            results.append(result)
+
+            yield f"data: {json.dumps({'type': 'file_complete', 'index': i + 1, 'total': total, 'result': result})}\n\n"
+
+        # Calcular resumen final (misma lógica que el endpoint síncrono)
+        successful = [r for r in results if r.get("status") == "success"]
+        failed = [r for r in results if r.get("status") == "error"]
+
+        avg_sentiment = 0.0
+        emotion_totals: Dict[str, float] = {"feliz": 0.0, "enojado": 0.0, "triste": 0.0, "neutral": 0.0}
+        dominant_counts: Dict[str, int] = {}
+
+        if successful:
+            avg_sentiment = round(
+                sum(r.get("sentiment_score", 0) for r in successful) / len(successful), 4
+            )
+            for r in successful:
+                for emo, val in r.get("emotion_scores", {}).items():
+                    emotion_totals[emo] = emotion_totals.get(emo, 0.0) + val
+                dom = r.get("dominant_emotion", "neutral")
+                dominant_counts[dom] = dominant_counts.get(dom, 0) + 1
+            total_emo = sum(emotion_totals.values())
+            if total_emo > 0:
+                emotion_totals = {k: round(v / total_emo, 4) for k, v in emotion_totals.items()}
+
+        alerts = [r["filename"] for r in successful if r.get("sentiment_score", 0) < -0.3]
+        ranking_positive = sorted(successful, key=lambda x: x.get("sentiment_score", 0), reverse=True)
+        ranking_negative = sorted(successful, key=lambda x: x.get("sentiment_score", 0))
+
+        summary_event = {
+            "type": "complete",
+            "status": "completed",
+            "total_files": total,
+            "successful": len(successful),
+            "failed": len(failed),
+            "total_processing_time": round(time.time() - start_time, 2),
+            "results": results,
+            "summary": {
+                "average_sentiment": avg_sentiment,
+                "emotion_averages": emotion_totals,
+                "dominant_emotion_distribution": dominant_counts,
+                "negative_alerts": alerts,
+                "negative_alert_count": len(alerts)
+            },
+            "ranking": {
+                "most_positive": [
+                    {"filename": r["filename"], "sentiment_score": r.get("sentiment_score", 0)}
+                    for r in ranking_positive[:5]
+                ],
+                "most_negative": [
+                    {"filename": r["filename"], "sentiment_score": r.get("sentiment_score", 0)}
+                    for r in ranking_negative[:5]
+                ]
+            }
+        }
+        yield f"data: {json.dumps(summary_event)}\n\n"
+        cleanup_memory()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        }
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

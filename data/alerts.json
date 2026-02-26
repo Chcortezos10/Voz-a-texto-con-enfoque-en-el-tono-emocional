@@ -1959,5 +1959,150 @@
     "dominant_emotion": "neutral",
     "reviewed": false,
     "review_notes": ""
+  },
+  {
+    "id": "aa14ab30",
+    "timestamp": "2026-02-26T01:59:47.208981",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0862,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "9736aeb8",
+    "timestamp": "2026-02-26T02:05:24.974890",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 10 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2005,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "b52522ed",
+    "timestamp": "2026-02-26T02:07:32.899956",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.104,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "f4f8b5c7",
+    "timestamp": "2026-02-26T02:09:13.641800",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.134,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c8962dd5",
+    "timestamp": "2026-02-26T02:10:43.254614",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "71a28a64",
+    "timestamp": "2026-02-26T02:12:27.891231",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1182,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "adf5f78d",
+    "timestamp": "2026-02-26T02:14:05.363631",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1701,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "999b8eca",
+    "timestamp": "2026-02-26T02:15:37.228501",
+    "filename": "test.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.0615,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "6d1be1d6",
+    "timestamp": "2026-02-26T02:17:23.338325",
+    "filename": "Un periodista de A24 lloró en vivo por los datos de la pobreza.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 44/100"
+    ],
+    "quality_score": 44,
+    "sentiment_score": -0.0981,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "ef128468",
+    "timestamp": "2026-02-26T02:20:22.300836",
+    "filename": "WhatsApp Audio 2026-02-25 at 5.39.31 PM.mp3",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: supervisor, quiero hablar con, voy a cancelar"
+    ],
+    "quality_score": 65,
+    "sentiment_score": -0.0606,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
   }
 ]

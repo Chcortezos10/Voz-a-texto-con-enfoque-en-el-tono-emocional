@@ -3226,7 +3226,7 @@
 
         function addScoringFiles(fileList) {
             for (const f of fileList) {
-                if (scoringFiles.length >= 50) { toast.warning('Máximo 50 archivos'); break; }
+                if (scoringFiles.length >= 100) { toast.warning('Máximo 100 archivos'); break; }
                 if (!scoringFiles.find(sf => sf.name === f.name)) scoringFiles.push(f);
             }
             renderScoringFileList();
@@ -3270,87 +3270,110 @@
             const textEl = document.getElementById('scoringProgressText');
             const pctEl = document.getElementById('scoringProgressPercent');
             progEl.style.display = 'block';
-            fillEl.style.width = '5%';
-            textEl.textContent = `Procesando 0 de ${scoringFiles.length}...`;
-            pctEl.textContent = '5%';
+            fillEl.style.width = '0%';
+            textEl.textContent = `Iniciando... 0 de ${scoringFiles.length}`;
+            pctEl.textContent = '0%';
             document.getElementById('scoringStartBtn').disabled = true;
 
             const formData = new FormData();
             scoringFiles.forEach(f => formData.append('files', f));
 
-            let fakeProgress = 5;
-            const fakeInterval = setInterval(() => {
-                if (fakeProgress < 85) {
-                    fakeProgress += Math.random() * 8;
-                    fillEl.style.width = fakeProgress + '%';
-                    pctEl.textContent = Math.round(fakeProgress) + '%';
-                    const done = Math.floor(fakeProgress / 100 * scoringFiles.length);
-                    textEl.textContent = `Procesando ${done} de ${scoringFiles.length}...`;
-                }
-            }, 2000);
+            // Acumula resultados parciales para mostrar tabla incremental
+            const partialResults = [];
+            let finalData = null;
 
             try {
-                const resp = await fetch(`${CONFIG.API_URL}/transcribe/batch-scoring`, {
+                const resp = await fetch(`${CONFIG.API_URL}/transcribe/batch-scoring/stream`, {
                     method: 'POST',
                     body: formData
                 });
-
-                clearInterval(fakeInterval);
-                fillEl.style.width = '100%';
-                pctEl.textContent = '100%';
-                textEl.textContent = 'Completado';
 
                 if (!resp.ok) {
                     const err = await resp.json();
                     throw new Error(err.detail || 'Error en el servidor');
                 }
 
-                const data = await resp.json();
-                console.log("Full API Response:", data); // Log full response for debugging
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
 
-                if (data.failed > 0) {
-                    console.error("Failed files:", data.results.filter(r => r.status === 'error'));
-                    data.results.filter(r => r.status === 'error').forEach(r => {
-                        console.error(`Error en ${r.filename}:`, r.error);
-                    });
-                    toast.warning(`Atención: ${data.failed} archivos fallaron. Revisa la consola (F12) para detalles.`);
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Procesar líneas completas del buffer SSE
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Guardar línea incompleta
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        let event;
+                        try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+                        if (event.type === 'heartbeat') {
+                            textEl.textContent = `Procesando "${event.filename}"... (${event.index} de ${event.total})`;
+
+                        } else if (event.type === 'file_complete') {
+                            const pct = Math.round((event.index / event.total) * 100);
+                            fillEl.style.width = pct + '%';
+                            pctEl.textContent = pct + '%';
+                            textEl.textContent = `Completado ${event.index} de ${event.total}`;
+                            partialResults.push(event.result);
+
+                            // Guardar en historial inmediatamente si fue exitoso
+                            if (event.result.status === 'success') {
+                                const r = event.result;
+                                fetch(`${CONFIG.API_URL}/history/save`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        filename: r.filename,
+                                        timestamp: new Date().toISOString(),
+                                        duration: r.duration_sec || 0,
+                                        num_segments: r.total_segments || (r.segments || []).length,
+                                        dominant_emotion: r.dominant_emotion || r.global_emotions?.top_emotion || 'neutral',
+                                        global_emotions: r.global_emotions || {},
+                                        segments: r.segments || [],
+                                        transcription: r.transcription || '',
+                                        labeled_transcription: r.labeled_transcription || '',
+                                        quality_score: r.quality_score || null,
+                                        call_summary: r.call_summary || null,
+                                        alert: r.alert || null,
+                                        sentiment_score: r.sentiment_score || 0,
+                                        diarization: r.diarization || {},
+                                        emotion_timeline: r.emotion_timeline || [],
+                                        metadata: { total_duration: r.duration_sec || 0 }
+                                    })
+                                }).catch(err => console.error(`Error guardando historial para ${r.filename}:`, err));
+                            }
+
+                        } else if (event.type === 'complete') {
+                            finalData = event;
+                            fillEl.style.width = '100%';
+                            pctEl.textContent = '100%';
+                            textEl.textContent = 'Completado';
+                        }
+                    }
                 }
 
-                scoringResults = data.results || [];
-                displayScoringResults(data);
-                toast.success(`Scoring completado: ${data.successful} de ${data.total_files} audios`);
-
-                // Guardar cada resultado exitoso en el historial para que los KPIs y Quality Score lo reflejen
-                const successfulResults = (data.results || []).filter(r => r.status === 'success');
-                if (successfulResults.length > 0) {
-                    const savePromises = successfulResults.map(r => fetch(`${CONFIG.API_URL}/history/save`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            filename: r.filename,
-                            timestamp: new Date().toISOString(),
-                            duration: r.duration_sec || 0,
-                            num_segments: r.total_segments || (r.segments || []).length,
-                            dominant_emotion: r.dominant_emotion || r.global_emotions?.top_emotion || 'neutral',
-                            global_emotions: r.global_emotions || {},
-                            segments: r.segments || [],
-                            transcription: r.transcription || '',
-                            labeled_transcription: r.labeled_transcription || '',
-                            quality_score: r.quality_score || null,
-                            call_summary: r.call_summary || null,
-                            alert: r.alert || null,
-                            sentiment_score: r.sentiment_score || 0,
-                            diarization: r.diarization || {},
-                            emotion_timeline: r.emotion_timeline || [],
-                            metadata: { total_duration: r.duration_sec || 0 }
-                        })
-                    }).catch(err => console.error(`Error guardando historial para ${r.filename}:`, err)));
-                    await Promise.all(savePromises);
-                    console.log(`${successfulResults.length} resultados guardados en historial`);
+                if (finalData) {
+                    console.log("Batch SSE completo:", finalData);
+                    if (finalData.failed > 0) {
+                        finalData.results.filter(r => r.status === 'error').forEach(r => {
+                            console.error(`Error en ${r.filename}:`, r.error);
+                        });
+                        toast.warning(`Atención: ${finalData.failed} archivos fallaron. Revisa la consola (F12).`);
+                    }
+                    scoringResults = finalData.results || [];
+                    displayScoringResults(finalData);
+                    toast.success(`Scoring completado: ${finalData.successful} de ${finalData.total_files} audios`);
                 }
+
             } catch (e) {
-                clearInterval(fakeInterval);
                 toast.error('Error: ' + e.message);
+                console.error(e);
             } finally {
                 document.getElementById('scoringStartBtn').disabled = false;
                 setTimeout(() => { progEl.style.display = 'none'; }, 3000);
