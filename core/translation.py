@@ -6,7 +6,7 @@ import logging
 from functools import lru_cache
 from typing import Optional, List
 import torch
-from transformers import MarianMTModel, MarianTokenizer
+
 
 from config import TRANSLATION_MODEL, DEVICE
 
@@ -30,6 +30,8 @@ def load_translation_model():
     """
     device = get_device()
     logger.info(f"Cargando modelo de traducción en {device}...")
+    
+    from transformers import MarianMTModel, MarianTokenizer
     
     tokenizer = MarianTokenizer.from_pretrained(TRANSLATION_MODEL)
     model = MarianMTModel.from_pretrained(TRANSLATION_MODEL)
@@ -76,7 +78,7 @@ def translate_es_to_en(text: str, max_length: int = 512) -> str:
             translated = model.generate(
                 **inputs,
                 max_length=max_length,
-                num_beams=4,
+                num_beams=2,
                 early_stopping=True
             )
         
@@ -150,7 +152,7 @@ def translate_batch(texts: List[str], max_length: int = 512) -> List[str]:
             translated = model.generate(
                 **inputs,
                 max_length=max_length,
-                num_beams=4,
+                num_beams=2,
                 early_stopping=True
             )
         

@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voz-a-Texto Emocional V5 - Dashboard Pro</title>
-    
+    <title>Voz-a-Texto Emocional V7 - Dashboard Pro</title>
+
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Embedded Styles -->
     <style>
         /* VARIABLES Y RESET */
@@ -90,8 +92,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .theme-toggle-btn {
@@ -156,8 +165,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* UPLOAD SECTION */
@@ -295,7 +311,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .progress-container {
@@ -390,12 +408,12 @@
             border-radius: 50%;
         }
 
-        .toggle-switch input:checked + .toggle-slider {
+        .toggle-switch input:checked+.toggle-slider {
             background-color: var(--primary);
             border-color: var(--primary);
         }
 
-        .toggle-switch input:checked + .toggle-slider:before {
+        .toggle-switch input:checked+.toggle-slider:before {
             transform: translateX(24px);
         }
 
@@ -504,12 +522,100 @@
             background: var(--surface-hover);
             border-left: 3px solid var(--border);
             transition: all 0.3s;
-            cursor: pointer;
         }
 
         .transcript-segment:hover {
             background: rgba(99, 102, 241, 0.1);
             border-left-color: var(--primary);
+        }
+
+        .segment-header-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .segment-text-content {
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .edit-emotion-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .edit-emotion-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .emotion-picker {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--surface);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .picker-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .emotion-option {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: var(--surface-hover);
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .emotion-option:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .emotion-option[data-emotion="feliz"]:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+        }
+
+        .emotion-option[data-emotion="triste"]:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .emotion-option[data-emotion="enojado"]:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .emotion-option[data-emotion="neutral"]:hover {
+            background: rgba(167, 139, 250, 0.2);
+            border-color: #a78bfa;
+        }
+
+        .emotion-display {
+            font-weight: 500;
         }
 
         .transcript-segment.active-segment {
@@ -720,7 +826,8 @@
             cursor: pointer;
         }
 
-        .speaker-input, .emotion-select {
+        .speaker-input,
+        .emotion-select {
             padding: 0.4rem 0.8rem;
             background: var(--surface);
             border: 1px solid var(--border);
@@ -728,7 +835,8 @@
             color: var(--text-main);
         }
 
-        .speaker-input:focus, .emotion-select:focus {
+        .speaker-input:focus,
+        .emotion-select:focus {
             border-color: var(--primary);
             outline: none;
         }
@@ -862,7 +970,8 @@
             border-collapse: collapse;
         }
 
-        .data-table th, .data-table td {
+        .data-table th,
+        .data-table td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
@@ -881,10 +990,25 @@
             font-weight: 600;
         }
 
-        .emotion-badge.feliz { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .emotion-badge.enojado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .emotion-badge.triste { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-        .emotion-badge.neutral { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+        .emotion-badge.feliz {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .emotion-badge.enojado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .emotion-badge.triste {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .emotion-badge.neutral {
+            background: rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+        }
 
         /* TOAST */
         #toastContainer {
@@ -909,7 +1033,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
             color: var(--text-main);
             opacity: 0;
@@ -934,10 +1058,21 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .charts-grid { grid-template-columns: 1fr; }
-            .stats-charts-grid { grid-template-columns: 1fr; }
-            .header { padding: 1rem; }
-            .container { padding: 0 1rem; }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
         }
 
         /* DIARIZATION TIMELINE */
@@ -961,7 +1096,7 @@
             color: white;
             font-size: 0.75rem;
             font-weight: 600;
-            border-right: 1px solid rgba(255,255,255,0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -972,7 +1107,7 @@
         }
 
         .timeline-segment.active {
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             filter: brightness(1.3);
             border: 2px solid white;
         }
@@ -1094,15 +1229,292 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
+
+        .scoring-upload {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .scoring-dropzone {
+            flex: 1;
+            min-width: 300px;
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scoring-dropzone:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .scoring-dropzone.active {
+            border-color: var(--success);
+        }
+
+        .scoring-file-list {
+            flex: 1;
+            min-width: 300px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .scoring-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .scoring-file-item:last-child {
+            border-bottom: none;
+        }
+
+        .scoring-file-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .scoring-progress {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .scoring-progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--surface-hover);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .scoring-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s;
+            border-radius: 5px;
+        }
+
+        .scoring-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .scoring-metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .scoring-metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .scoring-metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .scoring-metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .scoring-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scoring-search {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .scoring-search:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .scoring-filter-chip {
+            padding: 0.4rem 0.9rem;
+            background: var(--surface-hover);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .scoring-filter-chip:hover {
+            border-color: var(--primary);
+        }
+
+        .scoring-filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .scoring-table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .scoring-table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .scoring-table th:hover {
+            color: var(--primary);
+        }
+
+        .scoring-table th .sort-icon {
+            margin-left: 0.3rem;
+            font-size: 0.7rem;
+        }
+
+        .scoring-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .scoring-table tr:hover {
+            background: var(--surface-hover);
+        }
+
+        .score-bar {
+            display: inline-block;
+            height: 6px;
+            border-radius: 3px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+
+        .sentiment-pill {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .sentiment-negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .sentiment-neutral {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .sentiment-positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .scoring-detail-view {
+            display: none;
+        }
+
+        .scoring-detail-view.active {
+            display: block;
+        }
+
+        .scoring-main-view.hidden {
+            display: none;
+        }
+
+        .back-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .scoring-export-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
     </style>
 </head>
+
 <body>
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
     <!-- Header -->
     <header class="header">
-        <div class="brand">Transcriptor Emocional Pro V5</div>
+        <div class="brand">Transcriptor Emocional Pro V7</div>
         <div id="apiStatus" class="status-badge">Conectando...</div>
     </header>
 
@@ -1124,14 +1536,126 @@
     <!-- Main Container -->
     <div class="container">
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('analyze', event)">Análisis</button>
-            <button class="tab" onclick="switchTab('history', event)">Historial</button>
-            <button class="tab" onclick="switchTab('settings', event)">Configuración</button>
+        <div class="tabs" style="flex-wrap: wrap;">
+            <button class="tab active" onclick="switchTab('scoring', event)">📊 Scoring Masivo</button>
+            <button class="tab" onclick="switchTab('analyze', event)">🎙️ Análisis</button>
+            <button class="tab" onclick="switchTab('quality', event)">🏆 Quality Score</button>
+            <button class="tab" onclick="switchTab('kpis', event)">📈 KPIs</button>
+            <button class="tab" onclick="switchTab('summary', event)">📋 Resumen</button>
+            <button class="tab" onclick="switchTab('history', event)">📜 Historial</button>
+            <button class="tab" onclick="switchTab('settings', event)">⚙️ Configuración</button>
+        </div>
+
+        <!-- TAB: SCORING MASIVO -->
+        <div id="tab-scoring" class="tab-content active">
+            <div class="scoring-main-view" id="scoringMainView">
+                <div class="scoring-upload">
+                    <div class="scoring-dropzone" id="scoringDropzone">
+                        <div style="font-size: 3rem;">📁</div>
+                        <h3 style="margin-top: 0.5rem;">Subir audios para scoring</h3>
+                        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">Arrastra archivos o
+                            haz clic (máx 50)</p>
+                        <input type="file" id="scoringFileInput" hidden accept="audio/*,video/*" multiple />
+                    </div>
+                    <div class="scoring-file-list" id="scoringFileList">
+                        <p style="color: var(--text-muted); text-align: center;">Sin archivos seleccionados</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="scoringStartBtn" onclick="startBatchScoring()" disabled>
+                        <i class="fas fa-play"></i> Iniciar Scoring
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearScoringFiles()">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+                <div class="scoring-progress" id="scoringProgress">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="scoringProgressText">Procesando...</span>
+                        <span id="scoringProgressPercent">0%</span>
+                    </div>
+                    <div class="scoring-progress-bar">
+                        <div class="scoring-progress-fill" id="scoringProgressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="scoring-metrics" id="scoringMetrics" style="display: none;">
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricTotalAudios" style="color: var(--primary);">0</div>
+                        <div class="scoring-metric-label">Total Audios</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricDominantEmotion">-</div>
+                        <div class="scoring-metric-label">Emoción Predominante</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricAvgSentiment" style="color: var(--success);">-</div>
+                        <div class="scoring-metric-label">Sentimiento Promedio</div>
+                    </div>
+                    <div class="scoring-metric-card">
+                        <div class="scoring-metric-value" id="metricAlerts" style="color: var(--danger);">0</div>
+                        <div class="scoring-metric-label">Alertas Negativas</div>
+                    </div>
+                </div>
+                <div id="scoringResultsSection" style="display: none;">
+                    <div class="scoring-controls">
+                        <input type="text" class="scoring-search" id="scoringSearch"
+                            placeholder="🔍 Buscar por nombre de archivo..." oninput="filterScoringTable()">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="scoring-filter-chip active" data-filter="all"
+                                onclick="setScoringFilter('all', this)">Todos</span>
+                            <span class="scoring-filter-chip" data-filter="feliz"
+                                onclick="setScoringFilter('feliz', this)">😊 Feliz</span>
+                            <span class="scoring-filter-chip" data-filter="enojado"
+                                onclick="setScoringFilter('enojado', this)">😠 Enojado</span>
+                            <span class="scoring-filter-chip" data-filter="triste"
+                                onclick="setScoringFilter('triste', this)">😢 Triste</span>
+                            <span class="scoring-filter-chip" data-filter="neutral"
+                                onclick="setScoringFilter('neutral', this)">😐 Neutral</span>
+                        </div>
+                        <div class="scoring-export-btns">
+                            <button class="btn btn-secondary btn-sm" onclick="exportScoringCSV()"><i
+                                    class="fas fa-file-csv"></i> CSV</button>
+                            <button class="btn btn-secondary btn-sm" onclick="exportScoringJSON()"><i
+                                    class="fas fa-file-code"></i> JSON</button>
+                        </div>
+                    </div>
+                    <div class="scoring-table-wrap">
+                        <table class="scoring-table" id="scoringTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortScoringTable('index')"># <span class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('filename')">Archivo <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('duration')">Duración <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('feliz')">😊 Feliz <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('enojado')">😠 Enojado <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('triste')">😢 Triste <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th onclick="sortScoringTable('neutral')">😐 Neutral <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('sentiment')">Sentimiento <span
+                                            class="sort-icon">↕</span></th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoringTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="scoring-detail-view" id="scoringDetailView">
+                <button class="back-btn" onclick="backToScoring()"><i class="fas fa-arrow-left"></i> Volver al
+                    Scoring</button>
+                <h2 id="detailFileName" style="margin-bottom: 1.5rem;"></h2>
+                <div id="detailContent"></div>
+            </div>
         </div>
 
         <!-- TAB: ANÁLISIS -->
-        <div id="tab-analyze" class="tab-content active">
+        <div id="tab-analyze" class="tab-content">
             <!-- Upload Section -->
             <div class="upload-section" id="uploadArea">
                 <div style="font-size: 4rem;">🎙️</div>
@@ -1157,8 +1681,8 @@
                         </div>
                     </div>
                     <div id="apiKeySection" style="display: none; margin-top: 1rem;">
-                        <input type="password" id="openaiApiKey" placeholder="sk-..." 
-                               style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
+                        <input type="password" id="openaiApiKey" placeholder="sk-..."
+                            style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);" />
                     </div>
                 </div>
 
@@ -1202,7 +1726,14 @@
 
             <!-- Results Section -->
             <div id="resultsSection" style="display: none; margin-top: 3rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <!-- Back to Scoring Button (Hidden by default) -->
+                <button id="backToScoringBtn" class="back-btn" onclick="backToScoringFromAnalyze()"
+                    style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Volver al Scoring
+                </button>
+
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <h2>📊 Resultados</h2>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn btn-secondary" onclick="exportData('json')">
@@ -1216,6 +1747,14 @@
                         </button>
                         <button class="btn btn-secondary" onclick="exportData('txt')">
                             <i class="fas fa-file-alt"></i> TXT
+                        </button>
+                        <button class="btn btn-primary" onclick="exportPDF()"
+                            style="background: linear-gradient(135deg, #ef4444, #ec4899);">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-primary" onclick="exportExcel()"
+                            style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                            <i class="fas fa-file-excel"></i> Excel
                         </button>
                     </div>
                 </div>
@@ -1267,16 +1806,18 @@
                 <div class="audio-player" id="audioPlayerSection" style="display: none;">
                     <h3 style="margin-bottom: 1rem;">🎧 Reproductor con Diarización</h3>
                     <audio id="audioElement" style="display: none;"></audio>
-                    
+
                     <!-- Player Controls -->
                     <div class="player-controls">
                         <button class="player-btn" onclick="audioPlayer.toggle()" id="playPauseBtn">
                             <i class="fas fa-play"></i>
                         </button>
-                        <button class="player-btn" onclick="audioPlayer.skip(-10)" style="background: var(--surface-hover);">
+                        <button class="player-btn" onclick="audioPlayer.skip(-10)"
+                            style="background: var(--surface-hover);">
                             <i class="fas fa-backward"></i>
                         </button>
-                        <button class="player-btn" onclick="audioPlayer.skip(10)" style="background: var(--surface-hover);">
+                        <button class="player-btn" onclick="audioPlayer.skip(10)"
+                            style="background: var(--surface-hover);">
                             <i class="fas fa-forward"></i>
                         </button>
                         <div class="time-display">
@@ -1285,18 +1826,18 @@
                             <span id="totalTimeDisplay">0:00</span>
                         </div>
                     </div>
-                    
+
                     <!-- Seek Bar -->
                     <div class="player-progress">
-                        <input type="range" id="seekBar" min="0" max="100" value="0" 
-                               oninput="audioPlayer.seek(this.value)">
+                        <input type="range" id="seekBar" min="0" max="100" value="0"
+                            oninput="audioPlayer.seek(this.value)">
                     </div>
-                    
+
                     <!-- Diarization Timeline -->
                     <div class="diarization-timeline" id="diarizationTimeline">
                         <!-- Timeline segments will be generated dynamically -->
                     </div>
-                    
+
                     <!-- Current Segment Panel -->
                     <div class="current-segment-panel" id="currentSegmentPanel">
                         <div class="panel-speaker">
@@ -1312,7 +1853,7 @@
                             Selecciona o reproduce un segmento para ver su contenido aquí...
                         </div>
                     </div>
-                    
+
                     <!-- Player Extras -->
                     <div class="player-extras" style="margin-top: 1rem;">
                         <div class="speed-control">
@@ -1328,8 +1869,8 @@
                         </div>
                         <div class="volume-control">
                             <i class="fas fa-volume-up"></i>
-                            <input type="range" min="0" max="100" value="100" 
-                                   oninput="audioPlayer.setVolume(this.value)">
+                            <input type="range" min="0" max="100" value="100"
+                                oninput="audioPlayer.setVolume(this.value)">
                         </div>
                     </div>
                 </div>
@@ -1344,7 +1885,8 @@
 
         <!-- TAB: HISTORIAL -->
         <div id="tab-history" class="tab-content">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                 <h2>📁 Historial de Análisis</h2>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" onclick="loadHistory()">
@@ -1359,6 +1901,265 @@
             </div>
         </div>
 
+        <!-- TAB: QUALITY SCORE -->
+        <div id="tab-quality" class="tab-content">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2>🏆 Score de Calidad del Agente</h2>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Visualiza el score general de todos los
+                        audios o el detalle del último análisis.</p>
+                </div>
+                <button class="btn btn-primary" onclick="loadGeneralScore()">
+                    <i class="fas fa-sync"></i> Actualizar General
+                </button>
+            </div>
+
+            <!-- Panel de Score General -->
+            <div id="qualityGeneralPanel"
+                style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: none;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3 style="color: var(--primary);">📊 Score General Acumulado</h3>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Basado en <span
+                            id="qsgTotalAudios">0</span> audios</div>
+                </div>
+
+                <div class="metrics-grid" style="margin-bottom: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgPromedio" style="color: var(--primary); font-size: 2.5rem;">-
+                        </div>
+                        <div class="metric-label">Promedio Global / 100</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgMinMax" style="font-size: 1.8rem; margin-top: 0.5rem;">-</div>
+                        <div class="metric-label">Mínimo / Máximo</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsgStdDev" style="font-size: 1.8rem; margin-top: 0.5rem;">-</div>
+                        <div class="metric-label">Desviación Estándar</div>
+                    </div>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: var(--surface-hover); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">📈 Por Dimensión</h4>
+                        <div id="qsgDimensions" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- llenado por JS -->
+                        </div>
+                    </div>
+                    <div style="background: var(--surface-hover); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">🎯 Clasificación Global</h4>
+                        <div id="qsgClassifications" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- llenado por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">📥 Exportar Reporte Consolidado (PDF)</h4>
+                    <div
+                        style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--surface-hover); padding: 1rem; border-radius: 8px;">
+                        <input type="text" id="pdfGeneralFilename" placeholder="Nombre del reporte (opcional)"
+                            style="padding: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); min-width: 250px;" />
+                        <div class="toggle-container" style="margin: 0;">
+                            <span style="font-size: 0.9rem; margin-right: 0.5rem;">Interpretar con IA (Ollama)</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pdfIncludeAi" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateConsolidatedPDF()"
+                            style="background: linear-gradient(135deg, #10b981, #06b6d4); margin-left: auto;">
+                            <i class="fas fa-file-pdf"></i> Generar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border); margin-bottom: 2rem;" />
+
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-muted);">🔍 Detalle de Último Análisis Individual</h3>
+
+            <div id="qualityScorePanel" style="display: none;">
+                <div class="metrics-grid" style="margin-bottom: 2rem;">
+                    <div class="metric-card" style="grid-column: span 2;">
+                        <div class="metric-value" id="qsTotal" style="font-size: 3rem;">-</div>
+                        <div class="metric-label">Score Total</div>
+                        <div id="qsClassification" style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 600;">
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsTone">-</div>
+                        <div class="metric-label">Tono Emocional (/30)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsKeywords">-</div>
+                        <div class="metric-label">Palabras Clave (/25)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsResolution">-</div>
+                        <div class="metric-label">Resolución (/25)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qsProtocol">-</div>
+                        <div class="metric-label">Protocolo (/20)</div>
+                    </div>
+                </div>
+                <!-- Recommendations -->
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">💡 Recomendaciones</h3>
+                    <div id="qsRecommendations"></div>
+                </div>
+                <!-- Protocol Details -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsGreeting" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Saludo</div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsFarewell" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Despedida</div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div id="qsIdentification" style="font-size: 2rem;">❓</div>
+                        <div style="color: var(--text-muted); margin-top: 0.5rem;">Identificación</div>
+                    </div>
+                </div>
+                <!-- Alert if present -->
+                <div id="qsAlertPanel"
+                    style="display: none; background: rgba(239,68,68,0.1); border: 2px solid var(--danger); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="color: var(--danger);">🚨 Alerta de Escalamiento</h3>
+                    <div id="qsAlertSeverity" style="margin: 0.5rem 0; font-weight: 700;"></div>
+                    <div id="qsAlertReasons"></div>
+                </div>
+            </div>
+            <div id="qualityNoData" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="font-size: 3rem;">🏆</p>
+                <p style="margin-top: 1rem;">Analiza un audio en la pestaña "Análisis" para ver el Quality Score aquí.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB: KPIs -->
+        <div id="tab-kpis" class="tab-content">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2>📈 Dashboard de KPIs</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" onclick="loadKPIs('7d')" id="kpiBtn7d">7 días</button>
+                    <button class="btn btn-secondary" onclick="loadKPIs('30d')" id="kpiBtn30d">30 días</button>
+                    <button class="btn btn-secondary" onclick="loadKPIs('90d')" id="kpiBtn90d">90 días</button>
+                    <button class="btn btn-primary" onclick="loadKPIs()">
+                        <i class="fas fa-sync"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+            <!-- KPI Summary Cards -->
+            <div class="metrics-grid" style="margin-bottom: 2rem;" id="kpiSummaryCards">
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiTotalCalls">-</div>
+                    <div class="metric-label">Total Llamadas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiAvgScore">-</div>
+                    <div class="metric-label">Score Promedio</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiPositive" style="color: var(--success);">-</div>
+                    <div class="metric-label">% Positivas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="kpiNegative" style="color: var(--danger);">-</div>
+                    <div class="metric-label">% Negativas</div>
+                </div>
+            </div>
+            <!-- Charts Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">📈 Tendencia Emocional</h3>
+                    <div style="height: 280px;"><canvas id="kpiTrendChart"></canvas></div>
+                </div>
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">🍩 Distribución Global</h3>
+                    <div style="height: 280px;"><canvas id="kpiDistChart"></canvas></div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">📊 Comparativa de Scores por Llamada</h3>
+                    <div style="height: 300px;"><canvas id="kpiComparisonChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: RESUMEN -->
+        <div id="tab-summary" class="tab-content">
+            <h2>📋 Resumen de Última Llamada</h2>
+            <div id="summaryPanel" style="display: none; margin-top: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">📞 Motivo de la Llamada</h3>
+                        <p id="sumMotivo" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">📊 Desarrollo</h3>
+                        <p id="sumDesarrollo" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">✅ Resolución</h3>
+                        <p id="sumResolucion" style="color: var(--text-muted); line-height: 1.6;">-</p>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.75rem;">😊 Satisfacción Estimada</h3>
+                        <div id="sumSatisfaccion" style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">-</div>
+                        <p id="sumSatisfaccionDetalle" style="color: var(--text-muted);">-</p>
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumTopico">-</div>
+                        <div class="metric-label">Tópico</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumDuracion">-</div>
+                        <div class="metric-label">Duración</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumHablantes">-</div>
+                        <div class="metric-label">Hablantes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="sumSegmentos">-</div>
+                        <div class="metric-label">Segmentos</div>
+                    </div>
+                </div>
+                <div
+                    style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 0.75rem;">📝 Resumen Breve</h3>
+                    <p id="sumResumenBreve" style="color: var(--text-main); font-size: 1.1rem; line-height: 1.6;">-</p>
+                </div>
+            </div>
+            <div id="summaryNoData" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="font-size: 3rem;">📋</p>
+                <p style="margin-top: 1rem;">Analiza un audio en la pestaña "Análisis" para ver el resumen aquí.</p>
+            </div>
+        </div>
+
         <!-- TAB: CONFIGURACIÓN -->
         <div id="tab-settings" class="tab-content">
             <h2>⚙️ Configuración</h2>
@@ -1366,14 +2167,14 @@
                 <div class="config-card">
                     <h3>API Keys</h3>
                     <label>OpenAI API Key:</label>
-                    <input type="password" id="settingsApiKey" 
-                           style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;" 
-                           placeholder="sk-..." />
+                    <input type="password" id="settingsApiKey"
+                        style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin: 0.5rem 0;"
+                        placeholder="sk-..." />
                     <button class="btn btn-primary" onclick="saveApiKey()">
                         <i class="fas fa-save"></i> Guardar
                     </button>
                 </div>
-                
+
                 <div class="config-card">
                     <h3>Datos</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
@@ -1382,6 +2183,19 @@
                     <button class="btn btn-secondary" onclick="clearHistory()">
                         <i class="fas fa-trash"></i> Borrar Historial
                     </button>
+                </div>
+
+                <div class="config-card">
+                    <h3>🏢 Logo de Empresa</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Sube un logo para incluir en los reportes PDF exportados
+                    </p>
+                    <input type="file" id="logoFileInput" accept="image/*" style="display: none;"
+                        onchange="uploadLogo(this)" />
+                    <button class="btn btn-secondary" onclick="document.getElementById('logoFileInput').click()">
+                        <i class="fas fa-upload"></i> Subir Logo
+                    </button>
+                    <span id="logoStatus" style="margin-left: 1rem; color: var(--text-muted);"></span>
                 </div>
 
                 <div class="config-card">
@@ -1435,20 +2249,24 @@
             API_URL: (() => {
                 const protocol = window.location.protocol;
                 const hostname = window.location.hostname;
-        
+
                 // Si se abre como archivo local (file://)
                 if (protocol === "file:") {
                     return "http://localhost:8000";
                 }
-        
+
                 // Si el hostname es 0.0.0.0 o está vacío, usar localhost
                 if (hostname === "0.0.0.0" || hostname === "") {
                     return "http://localhost:8000";
                 }
-        
+
                 // En producción o Docker, usar el origin actual
                 return window.location.origin;
             })(),
+            POSSIBLE_URLS: [
+                'http://localhost:8000',
+                'http://127.0.0.1:8000'
+            ],
             ENDPOINTS: {
                 HEALTH: '/health',
                 TRANSCRIBE_LOCAL: '/transcribe/full-analysis',
@@ -1511,11 +2329,11 @@
             show(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
-                const icons = { 
-                    success: 'fa-check-circle', error: 'fa-times-circle', 
-                    warning: 'fa-exclamation-triangle', info: 'fa-info-circle' 
+                const icons = {
+                    success: 'fa-check-circle', error: 'fa-times-circle',
+                    warning: 'fa-exclamation-triangle', info: 'fa-info-circle'
                 };
-                
+
                 const toastEl = document.createElement('div');
                 toastEl.className = 'toast';
                 toastEl.style.borderLeft = `4px solid ${colors[type]}`;
@@ -1524,7 +2342,7 @@
                     <div style="flex: 1; font-weight: 500;">${message}</div>
                     <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
                 `;
-                
+
                 container.appendChild(toastEl);
                 setTimeout(() => toastEl.classList.add('show'), 10);
                 setTimeout(() => {
@@ -1575,30 +2393,72 @@
         };
 
         // ============================================
-        // API CHECK
+        // API CHECK - Con detección automática y try/catch robusto
         // ============================================
         async function checkAPI() {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}/health`);
-                const statusEl = document.getElementById('apiStatus');
-                const connEl = document.getElementById('connectionStatus');
-                if (response.ok) {
-                    statusEl.textContent = '🟢 Online';
-                    statusEl.classList.add('online');
-                    if (connEl) connEl.textContent = 'Conectado ✅';
-                } else {
-                    statusEl.textContent = '🔴 Error';
-                    statusEl.classList.remove('online');
-                    if (connEl) connEl.textContent = 'Error ❌';
+            const statusEl = document.getElementById('apiStatus');
+            const connEl = document.getElementById('connectionStatus');
+
+            // Incluir CONFIG.API_URL (ya calculado) + posibles alternativas
+            let urlsToTry = [
+                CONFIG.API_URL,  // Primero la URL calculada según el entorno
+                window.location.origin,  // Luego el origin actual
+                'http://localhost:8000',
+                'http://127.0.0.1:8000'
+            ];
+
+            // Filtrar URLs vacías, duplicadas o inválidas
+            urlsToTry = [...new Set(urlsToTry)].filter(url => url && url !== 'null' && url !== 'file://' && !url.startsWith('file:'));
+
+            console.log('🔍 Buscando servidor en:', urlsToTry);
+
+            for (const url of urlsToTry) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                    const response = await fetch(`${url}/health`, {
+                        method: 'GET',
+                        signal: controller.signal,
+                        mode: 'cors'
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        // Actualizar CONFIG.API_URL con la URL que funcionó
+                        CONFIG.API_URL = url;
+                        console.log(`✅ Servidor conectado en: ${url}`);
+
+                        if (statusEl) {
+                            statusEl.textContent = '🟢 Online';
+                            statusEl.classList.add('online');
+                        }
+                        if (connEl) connEl.textContent = 'Conectado ✅';
+
+                        // Actualizar el display del backend URL si existe
+                        const backendUrlEl = document.getElementById('backendUrl');
+                        if (backendUrlEl) backendUrlEl.textContent = url;
+
+                        return true;
+                    }
+                } catch (e) {
+                    // Capturar cualquier error silenciosamente y probar la siguiente URL
+                    console.log(`❌ No responde: ${url} - ${e.name || e.message}`);
+                    continue;
                 }
-            } catch (e) {
-                const statusEl = document.getElementById('apiStatus');
-                const connEl = document.getElementById('connectionStatus');
+            }
+
+            // Si ninguna URL funcionó
+            console.error('❌ No se pudo conectar al servidor. URLs probadas:', urlsToTry);
+            if (statusEl) {
                 statusEl.textContent = '🔴 Offline';
                 statusEl.classList.remove('online');
-                if (connEl) connEl.textContent = 'Desconectado ❌';
             }
+            if (connEl) connEl.textContent = 'Desconectado ❌';
+            return false;
         }
+
+        // Ejecutar checkAPI al cargar y cada 5 segundos
         checkAPI();
         setInterval(checkAPI, 5000);
 
@@ -1612,11 +2472,18 @@
                 evt.target.classList.add('active');
             } else {
                 const tabs = document.querySelectorAll('.tab');
-                const tabIndex = tab === 'analyze' ? 0 : tab === 'history' ? 1 : 2;
+                const tabMap = { 'scoring': 0, 'analyze': 1, 'quality': 2, 'kpis': 3, 'summary': 4, 'history': 5, 'settings': 6 };
+                const tabIndex = tabMap[tab] !== undefined ? tabMap[tab] : 0;
                 if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
             }
             document.getElementById(`tab-${tab}`).classList.add('active');
             if (tab === 'history') loadHistory();
+            if (tab === 'kpis') loadKPIs();
+            if (tab === 'quality') {
+                loadGeneralScore();
+                if (currentResults) displayQualityScore(currentResults);
+            }
+            if (tab === 'summary' && currentResults) displayCallSummary(currentResults);
         }
 
         // ============================================
@@ -1646,7 +2513,7 @@
         // MODEL SELECTOR
         // ============================================
         document.querySelectorAll('.model-option').forEach(opt => {
-            opt.addEventListener('click', function() {
+            opt.addEventListener('click', function () {
                 document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById('apiKeySection').style.display = this.dataset.model === 'cloud' ? 'block' : 'none';
@@ -1656,10 +2523,10 @@
         // ============================================
         // SLIDERS
         // ============================================
-        document.getElementById('numSpeakers').addEventListener('input', function() {
+        document.getElementById('numSpeakers').addEventListener('input', function () {
             document.getElementById('numSpeakersValue').textContent = this.value == 0 ? 'Auto' : this.value;
         });
-        document.getElementById('audioWeight').addEventListener('input', function() {
+        document.getElementById('audioWeight').addEventListener('input', function () {
             document.getElementById('audioWeightValue').textContent = this.value + '%';
         });
 
@@ -1704,7 +2571,7 @@
                 formData.append('lite_mode', document.getElementById('liteMode').checked);
                 formData.append('audio_weight', parseInt(document.getElementById('audioWeight').value) / 100);
                 formData.append('enable_diarization', document.getElementById('enableDiarization').checked);
-                
+
                 const numSpeakers = parseInt(document.getElementById('numSpeakers').value);
                 if (numSpeakers > 0) formData.append('num_speakers', numSpeakers);
 
@@ -1722,12 +2589,12 @@
                 }
 
                 const res = await fetch(CONFIG.API_URL + endpoint, { method: 'POST', body: formData });
-                
+
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
                     throw new Error(errData.detail || errData.error || 'Error en API');
                 }
-                
+
                 const data = await res.json();
 
                 clearInterval(simInterval);
@@ -1737,6 +2604,8 @@
                     currentResults = data;
                     saveToHistory(data, selectedFile.name);
                     displayResults(data);
+                    displayQualityScore(data);
+                    displayCallSummary(data);
                     document.getElementById('resultsSection').style.display = 'block';
                     progressBar.hide();
                     toast.success('Análisis completado exitosamente');
@@ -1756,7 +2625,7 @@
         function displayResults(data) {
             const top = data.global_emotions?.top_emotion || 'neutral';
             const emoji = CONFIG.EMOTIONS[top] || '😐';
-            
+
             document.getElementById('metricEmotion').textContent = emoji + ' ' + top.toUpperCase();
             document.getElementById('metricIntensity').textContent = Math.round((data.global_emotions?.top_score || 0) * 100) + '%';
             document.getElementById('metricSpeakers').textContent = data.diarization?.num_speakers || 1;
@@ -1764,7 +2633,7 @@
 
             renderCharts(data);
             renderTranscript(data.segments || []);
-            
+
             // Initialize audio player with the file and segments
             if (selectedFile) {
                 audioPlayer.init(selectedFile, data.segments || [], data.metadata?.total_duration || 0);
@@ -1774,7 +2643,7 @@
         function renderCharts(data) {
             const timeline = data.emotion_timeline || [];
             const emotions = [...new Set(timeline.map(t => t.emotion))];
-            
+
             if (timelineChartInstance) timelineChartInstance.destroy();
             if (distributionChartInstance) distributionChartInstance.destroy();
 
@@ -1782,7 +2651,7 @@
             if (timelineCtx && timeline.length > 0) {
                 const step = Math.max(1, Math.floor(timeline.length / 20));
                 const sampledTimeline = timeline.filter((_, i) => i % step === 0);
-                
+
                 timelineChartInstance = new Chart(timelineCtx, {
                     type: 'line',
                     data: {
@@ -1798,24 +2667,24 @@
                             pointHoverRadius: 5
                         }))
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: { duration: 500 },
                         plugins: {
-                            legend: { 
+                            legend: {
                                 position: 'top',
-                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 }
                             }
                         },
                         scales: {
-                            y: { 
+                            y: {
                                 min: 0,
                                 max: 100,
                                 ticks: { color: '#94a3b8', callback: v => v + '%' },
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' }
                             },
-                            x: { 
+                            x: {
                                 ticks: { color: '#94a3b8', maxRotation: 0 },
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' }
                             }
@@ -1838,14 +2707,14 @@
                             borderColor: '#16161d'
                         }]
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: { duration: 500 },
                         plugins: {
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 } 
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#f8fafc', usePointStyle: true, padding: 15 }
                             }
                         }
                     }
@@ -1856,17 +2725,88 @@
         function renderTranscript(segments) {
             const box = document.getElementById('transcriptBox');
             if (!box) return;
-            
+
             box.innerHTML = segments.map((seg, idx) => `
-                <div class="transcript-segment" data-index="${idx}">
-                    <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
-                    <span style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
-                        (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
-                    </span>
-                    <br>
-                    ${seg.text_es || seg.text}
+                <div class="transcript-segment" data-index="${idx}" data-prediction-id="${seg.prediction_id || ''}">
+                    <div class="segment-header-row">
+                        <strong>[${seg.start.toFixed(1)}s] ${seg.speaker_label || 'Hablante 1'}</strong> 
+                        <span class="emotion-display" id="emotion-display-${idx}" style="color: ${CONFIG.EMOTION_COLORS[seg.emotion] || '#a78bfa'}">
+                            (${CONFIG.EMOTIONS[seg.emotion] || '😐'} ${seg.emotion || 'neutral'})
+                        </span>
+                        <button class="edit-emotion-btn" onclick="toggleEmotionPicker(${idx})" title="Editar emoción">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </div>
+                    <div class="emotion-picker" id="emotion-picker-${idx}" style="display: none;">
+                        <span class="picker-label">Corregir emoción:</span>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'feliz')" data-emotion="feliz">😊 Feliz</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'triste')" data-emotion="triste">😢 Triste</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'enojado')" data-emotion="enojado">😠 Enojado</button>
+                        <button class="emotion-option" onclick="updateEmotion(${idx}, 'neutral')" data-emotion="neutral">😐 Neutral</button>
+                    </div>
+                    <div class="segment-text-content">${seg.text_es || seg.text}</div>
                 </div>
             `).join('');
+        }
+
+        // Mostrar/ocultar selector de emoción
+        function toggleEmotionPicker(idx) {
+            const picker = document.getElementById(`emotion-picker-${idx}`);
+            if (picker) {
+                picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        // Actualizar emoción y enviar feedback
+        async function updateEmotion(idx, newEmotion) {
+            const segment = currentResults?.segments?.[idx];
+            if (!segment) {
+                toast.error('Segmento no encontrado');
+                return;
+            }
+
+            const predictionId = segment.prediction_id;
+            if (!predictionId) {
+                toast.warning('Este segmento no tiene ID de predicción');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/validate_prediction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prediction_id: predictionId,
+                        correct_label: newEmotion,
+                        comment: `Corrección manual desde dashboard`
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Actualizar la UI
+                    const emotionDisplay = document.getElementById(`emotion-display-${idx}`);
+                    if (emotionDisplay) {
+                        emotionDisplay.innerHTML = `(${CONFIG.EMOTIONS[newEmotion] || '😐'} ${newEmotion}) ✓`;
+                        emotionDisplay.style.color = CONFIG.EMOTION_COLORS[newEmotion] || '#a78bfa';
+                    }
+
+                    // Ocultar picker
+                    toggleEmotionPicker(idx);
+
+                    // Actualizar datos locales
+                    segment.emotion = newEmotion;
+
+                    toast.success(`Emoción corregida a "${newEmotion}" (${result.total_validated} validados)`);
+                } else {
+                    const error = await response.json();
+                    toast.error(error.detail || 'Error al validar');
+                }
+            } catch (e) {
+                console.error('Error actualizando emoción:', e);
+                toast.error('Error de conexión');
+            }
         }
 
         // ============================================
@@ -1885,7 +2825,15 @@
                         dominant_emotion: data.global_emotions?.top_emotion || 'neutral',
                         global_emotions: data.global_emotions,
                         segments: data.segments,
-                        transcription: data.transcription
+                        transcription: data.transcription,
+                        labeled_transcription: data.labeled_transcription || '',
+                        quality_score: data.quality_score || null,
+                        call_summary: data.call_summary || null,
+                        alert: data.alert || null,
+                        sentiment_score: data.sentiment_score || 0,
+                        diarization: data.diarization || {},
+                        emotion_timeline: data.emotion_timeline || [],
+                        metadata: data.metadata || {}
                     })
                 });
             } catch (e) {
@@ -1898,7 +2846,7 @@
                 const res = await fetch(`${CONFIG.API_URL}/history/`);
                 const history = await res.json();
                 const grid = document.getElementById('historyGrid');
-                
+
                 if (!Array.isArray(history) || history.length === 0) {
                     grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay transcripciones guardadas</p>';
                     return;
@@ -1972,7 +2920,7 @@
                 a.download = `transcripcion_${Date.now()}.${format}`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
+
                 toast.success(`Exportado a ${format.toUpperCase()}`);
             } catch (e) {
                 toast.error('Error exportando: ' + e.message);
@@ -1992,26 +2940,26 @@
             segments: [],
             duration: 0,
             currentSegmentIndex: -1,
-            
+
             init(audioFile, segments, duration) {
                 this.audio = document.getElementById('audioElement');
                 this.segments = segments || [];
                 this.duration = duration || 0;
-                
+
                 if (audioFile) {
                     this.audio.src = URL.createObjectURL(audioFile);
                     document.getElementById('audioPlayerSection').style.display = 'block';
-                    
+
                     this.audio.addEventListener('loadedmetadata', () => {
                         this.duration = this.audio.duration;
                         document.getElementById('totalTimeDisplay').textContent = Utils.formatTime(this.duration);
                         buildDiarizationTimeline(this.segments, this.duration);
                     });
-                    
+
                     this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 }
             },
-            
+
             toggle() {
                 if (!this.audio) return;
                 const btn = document.getElementById('playPauseBtn');
@@ -2023,41 +2971,41 @@
                     btn.innerHTML = '<i class="fas fa-play"></i>';
                 }
             },
-            
+
             skip(seconds) {
                 if (!this.audio) return;
                 this.audio.currentTime = Math.max(0, Math.min(this.audio.currentTime + seconds, this.duration));
             },
-            
+
             seek(percent) {
                 if (!this.audio) return;
                 this.audio.currentTime = (percent / 100) * this.duration;
             },
-            
+
             seekToTime(time) {
                 if (!this.audio) return;
                 this.audio.currentTime = time;
                 if (this.audio.paused) this.toggle();
             },
-            
+
             setSpeed(speed) {
                 if (this.audio) this.audio.playbackRate = parseFloat(speed);
             },
-            
+
             setVolume(volume) {
                 if (this.audio) this.audio.volume = volume / 100;
             },
-            
+
             onTimeUpdate() {
                 const currentTime = this.audio.currentTime;
                 document.getElementById('currentTimeDisplay').textContent = Utils.formatTime(currentTime);
                 document.getElementById('seekBar').value = (currentTime / this.duration) * 100;
                 this.updateCurrentSegment(currentTime);
             },
-            
+
             updateCurrentSegment(currentTime) {
                 let segmentIndex = -1;
-                
+
                 for (let i = 0; i < this.segments.length; i++) {
                     const seg = this.segments[i];
                     if (currentTime >= seg.start && currentTime < seg.end) {
@@ -2065,35 +3013,35 @@
                         break;
                     }
                 }
-                
+
                 // Update transcript highlighting
                 document.querySelectorAll('.transcript-segment').forEach((el, idx) => {
                     el.classList.toggle('active-segment', idx === segmentIndex);
                 });
-                
+
                 // Highlight segment in the timeline
                 document.querySelectorAll('.timeline-segment').forEach(seg => {
                     seg.classList.remove('active');
                 });
-                
+
                 if (segmentIndex >= 0) {
                     const timelineSegments = document.querySelectorAll('.timeline-segment');
                     if (timelineSegments[segmentIndex]) {
                         timelineSegments[segmentIndex].classList.add('active');
                     }
-                    
+
                     // Update current segment panel
                     const seg = this.segments[segmentIndex];
                     const emotion = seg.emotion || 'neutral';
                     const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
                     const intensity = seg.emotion_score || seg.intensity || 0;
-                    
+
                     document.getElementById('currentSpeaker').textContent = seg.speaker_label || 'Hablante 1';
                     document.getElementById('currentEmotionIcon').textContent = emotionIcon;
                     document.getElementById('currentEmotion').textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
                     document.getElementById('currentIntensity').textContent = Math.round(intensity * 100) + '%';
                     document.getElementById('currentText').textContent = seg.text_es || seg.text || '';
-                    
+
                     this.currentSegmentIndex = segmentIndex;
                 }
             }
@@ -2114,16 +3062,16 @@
         function buildDiarizationTimeline(segments, audioDuration) {
             const timeline = document.getElementById('diarizationTimeline');
             if (!timeline || !segments || segments.length === 0) return;
-            
+
             timeline.innerHTML = '';
-            
+
             segments.forEach((seg, idx) => {
                 const startPercent = (seg.start / audioDuration) * 100;
                 const widthPercent = ((seg.end - seg.start) / audioDuration) * 100;
                 const speaker = seg.speaker_label || 'Hablante 1';
                 const emotion = seg.emotion || 'neutral';
                 const emotionIcon = CONFIG.EMOTIONS[emotion] || '😐';
-                
+
                 const segmentDiv = document.createElement('div');
                 segmentDiv.className = 'timeline-segment';
                 segmentDiv.style.left = startPercent + '%';
@@ -2132,10 +3080,10 @@
                 segmentDiv.innerHTML = `<span>${emotionIcon}</span>`;
                 segmentDiv.title = `${speaker} - ${emotion} (${seg.start.toFixed(1)}s - ${seg.end.toFixed(1)}s)`;
                 segmentDiv.dataset.index = idx;
-                
+
                 // Click to jump to segment
                 segmentDiv.onclick = () => audioPlayer.seekToTime(seg.start);
-                
+
                 timeline.appendChild(segmentDiv);
             });
         }
@@ -2151,7 +3099,7 @@
                 toast.warning('No hay datos para mostrar');
                 return;
             }
-            
+
             document.getElementById('advancedChartsModal').style.display = 'flex';
             renderAdvancedCharts(currentResults);
         }
@@ -2162,11 +3110,11 @@
 
         function renderAdvancedCharts(data) {
             const segments = data.segments || [];
-            
+
             // Destroy previous chart instances
             if (intensityChartInstance) intensityChartInstance.destroy();
             if (speakerComparisonChartInstance) speakerComparisonChartInstance.destroy();
-            
+
             // Intensity Chart
             const intensityCtx = document.getElementById('intensityChart');
             if (intensityCtx && segments.length > 0) {
@@ -2191,8 +3139,8 @@
                             legend: { labels: { color: '#f8fafc' } }
                         },
                         scales: {
-                            y: { 
-                                min: 0, 
+                            y: {
+                                min: 0,
                                 max: 100,
                                 ticks: { color: '#94a3b8', callback: v => v + '%' }
                             },
@@ -2201,7 +3149,7 @@
                     }
                 });
             }
-            
+
             // Speaker Comparison Chart
             const speakerCtx = document.getElementById('speakerComparisonChart');
             if (speakerCtx && segments.length > 0) {
@@ -2218,10 +3166,10 @@
                     }
                     speakerData[speaker].count++;
                 });
-                
+
                 const speakers = Object.keys(speakerData);
                 const emotions = ['feliz', 'enojado', 'triste', 'neutral'];
-                
+
                 speakerComparisonChartInstance = new Chart(speakerCtx, {
                     type: 'bar',
                     data: {
@@ -2248,14 +3196,763 @@
         }
 
         // Close modal on outside click
-        document.getElementById('advancedChartsModal')?.addEventListener('click', function(e) {
+        document.getElementById('advancedChartsModal')?.addEventListener('click', function (e) {
             if (e.target === this) hideAdvancedCharts();
         });
 
         // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') hideAdvancedCharts();
         });
+
+        let scoringFiles = [];
+        let scoringResults = [];
+        let scoringSortCol = 'index';
+        let scoringSortAsc = true;
+        let scoringFilterEmo = 'all';
+
+        const scoringDropzone = document.getElementById('scoringDropzone');
+        const scoringFileInput = document.getElementById('scoringFileInput');
+
+        scoringDropzone.addEventListener('click', () => scoringFileInput.click());
+        scoringFileInput.addEventListener('change', (e) => addScoringFiles(e.target.files));
+        scoringDropzone.addEventListener('dragover', (e) => { e.preventDefault(); scoringDropzone.classList.add('active'); });
+        scoringDropzone.addEventListener('dragleave', () => scoringDropzone.classList.remove('active'));
+        scoringDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            scoringDropzone.classList.remove('active');
+            addScoringFiles(e.dataTransfer.files);
+        });
+
+        function addScoringFiles(fileList) {
+            for (const f of fileList) {
+                if (scoringFiles.length >= 100) { toast.warning('Máximo 100 archivos'); break; }
+                if (!scoringFiles.find(sf => sf.name === f.name)) scoringFiles.push(f);
+            }
+            renderScoringFileList();
+        }
+
+        function removeScoringFile(idx) {
+            scoringFiles.splice(idx, 1);
+            renderScoringFileList();
+        }
+
+        function clearScoringFiles() {
+            scoringFiles = [];
+            renderScoringFileList();
+        }
+
+        function renderScoringFileList() {
+            const el = document.getElementById('scoringFileList');
+            const btn = document.getElementById('scoringStartBtn');
+            if (scoringFiles.length === 0) {
+                el.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Sin archivos seleccionados</p>';
+                btn.disabled = true;
+                return;
+            }
+            btn.disabled = false;
+            el.innerHTML = scoringFiles.map((f, i) => `
+                <div class="scoring-file-item">
+                    <span>🎵 ${f.name}</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="color:var(--text-muted);font-size:0.8rem;">${(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                        <button class="scoring-file-remove" onclick="removeScoringFile(${i})"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function startBatchScoring() {
+            if (scoringFiles.length === 0) return;
+
+            const progEl = document.getElementById('scoringProgress');
+            const fillEl = document.getElementById('scoringProgressFill');
+            const textEl = document.getElementById('scoringProgressText');
+            const pctEl = document.getElementById('scoringProgressPercent');
+            progEl.style.display = 'block';
+            fillEl.style.width = '0%';
+            textEl.textContent = `Iniciando... 0 de ${scoringFiles.length}`;
+            pctEl.textContent = '0%';
+            document.getElementById('scoringStartBtn').disabled = true;
+
+            const formData = new FormData();
+            scoringFiles.forEach(f => formData.append('files', f));
+
+            // Acumula resultados parciales para mostrar tabla incremental
+            const partialResults = [];
+            let finalData = null;
+
+            try {
+                const resp = await fetch(`${CONFIG.API_URL}/transcribe/batch-scoring/stream`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.detail || 'Error en el servidor');
+                }
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Procesar líneas completas del buffer SSE
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Guardar línea incompleta
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        let event;
+                        try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+                        if (event.type === 'heartbeat') {
+                            textEl.textContent = `Procesando "${event.filename}"... (${event.index} de ${event.total})`;
+
+                        } else if (event.type === 'file_complete') {
+                            const pct = Math.round((event.index / event.total) * 100);
+                            fillEl.style.width = pct + '%';
+                            pctEl.textContent = pct + '%';
+                            textEl.textContent = `Completado ${event.index} de ${event.total}`;
+                            partialResults.push(event.result);
+
+                            // Guardar en historial inmediatamente si fue exitoso
+                            if (event.result.status === 'success') {
+                                const r = event.result;
+                                fetch(`${CONFIG.API_URL}/history/save`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        filename: r.filename,
+                                        timestamp: new Date().toISOString(),
+                                        duration: r.duration_sec || 0,
+                                        num_segments: r.total_segments || (r.segments || []).length,
+                                        dominant_emotion: r.dominant_emotion || r.global_emotions?.top_emotion || 'neutral',
+                                        global_emotions: r.global_emotions || {},
+                                        segments: r.segments || [],
+                                        transcription: r.transcription || '',
+                                        labeled_transcription: r.labeled_transcription || '',
+                                        quality_score: r.quality_score || null,
+                                        call_summary: r.call_summary || null,
+                                        alert: r.alert || null,
+                                        sentiment_score: r.sentiment_score || 0,
+                                        diarization: r.diarization || {},
+                                        emotion_timeline: r.emotion_timeline || [],
+                                        metadata: { total_duration: r.duration_sec || 0 }
+                                    })
+                                }).catch(err => console.error(`Error guardando historial para ${r.filename}:`, err));
+                            }
+
+                        } else if (event.type === 'complete') {
+                            finalData = event;
+                            fillEl.style.width = '100%';
+                            pctEl.textContent = '100%';
+                            textEl.textContent = 'Completado';
+                        }
+                    }
+                }
+
+                if (finalData) {
+                    console.log("Batch SSE completo:", finalData);
+                    if (finalData.failed > 0) {
+                        finalData.results.filter(r => r.status === 'error').forEach(r => {
+                            console.error(`Error en ${r.filename}:`, r.error);
+                        });
+                        toast.warning(`Atención: ${finalData.failed} archivos fallaron. Revisa la consola (F12).`);
+                    }
+                    scoringResults = finalData.results || [];
+                    displayScoringResults(finalData);
+                    toast.success(`Scoring completado: ${finalData.successful} de ${finalData.total_files} audios`);
+                }
+
+            } catch (e) {
+                toast.error('Error: ' + e.message);
+                console.error(e);
+            } finally {
+                document.getElementById('scoringStartBtn').disabled = false;
+                setTimeout(() => { progEl.style.display = 'none'; }, 3000);
+            }
+        }
+
+        function displayScoringResults(data) {
+            document.getElementById('scoringMetrics').style.display = 'grid';
+            document.getElementById('scoringResultsSection').style.display = 'block';
+
+            document.getElementById('metricTotalAudios').textContent = data.successful || 0;
+
+            const domDist = data.summary?.dominant_emotion_distribution || {};
+            const topDom = Object.entries(domDist).sort((a, b) => b[1] - a[1])[0];
+            const emoIcons = { 'feliz': '😊', 'enojado': '😠', 'triste': '😢', 'neutral': '😐' };
+            document.getElementById('metricDominantEmotion').textContent = topDom ? `${emoIcons[topDom[0]] || ''} ${topDom[0]}` : '-';
+
+            const avgS = data.summary?.average_sentiment || 0;
+            const avgEl = document.getElementById('metricAvgSentiment');
+            avgEl.textContent = avgS.toFixed(2);
+            avgEl.style.color = avgS < -0.3 ? 'var(--danger)' : avgS > 0.3 ? 'var(--success)' : 'var(--warning)';
+
+            document.getElementById('metricAlerts').textContent = data.summary?.negative_alert_count || 0;
+
+            renderScoringTable();
+        }
+
+        function renderScoringTable() {
+            let filtered = scoringResults.filter(r => r.status === 'success');
+            const search = document.getElementById('scoringSearch').value.toLowerCase();
+            if (search) filtered = filtered.filter(r => r.filename.toLowerCase().includes(search));
+            if (scoringFilterEmo !== 'all') filtered = filtered.filter(r => r.dominant_emotion === scoringFilterEmo);
+
+            filtered.sort((a, b) => {
+                let va, vb;
+                switch (scoringSortCol) {
+                    case 'filename': va = a.filename; vb = b.filename; break;
+                    case 'duration': va = a.duration_sec || 0; vb = b.duration_sec || 0; break;
+                    case 'feliz': va = a.emotion_scores?.feliz || 0; vb = b.emotion_scores?.feliz || 0; break;
+                    case 'enojado': va = a.emotion_scores?.enojado || 0; vb = b.emotion_scores?.enojado || 0; break;
+                    case 'triste': va = a.emotion_scores?.triste || 0; vb = b.emotion_scores?.triste || 0; break;
+                    case 'neutral': va = a.emotion_scores?.neutral || 0; vb = b.emotion_scores?.neutral || 0; break;
+                    case 'sentiment': va = a.sentiment_score || 0; vb = b.sentiment_score || 0; break;
+                    default: va = 0; vb = 0;
+                }
+                if (typeof va === 'string') return scoringSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+                return scoringSortAsc ? va - vb : vb - va;
+            });
+
+            const tbody = document.getElementById('scoringTableBody');
+            tbody.innerHTML = filtered.map((r, i) => {
+                const s = r.emotion_scores || {};
+                const sent = r.sentiment_score || 0;
+                const sentClass = sent < -0.3 ? 'sentiment-negative' : sent > 0.3 ? 'sentiment-positive' : 'sentiment-neutral';
+                const sentIcon = sent < -0.3 ? '🔴' : sent > 0.3 ? '🟢' : '🟡';
+                const dur = r.duration_sec ? Utils.formatDuration(r.duration_sec) : '-';
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td title="${r.filename}">${r.filename.length > 30 ? r.filename.slice(0, 27) + '...' : r.filename}</td>
+                    <td>${dur}</td>
+                    <td><span class="score-bar" style="width:${(s.feliz || 0) * 60}px;background:#10b981;"></span>${((s.feliz || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.enojado || 0) * 60}px;background:#ef4444;"></span>${((s.enojado || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.triste || 0) * 60}px;background:#3b82f6;"></span>${((s.triste || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="score-bar" style="width:${(s.neutral || 0) * 60}px;background:#a78bfa;"></span>${((s.neutral || 0) * 100).toFixed(0)}%</td>
+                    <td><span class="sentiment-pill ${sentClass}">${sentIcon} ${sent.toFixed(2)}</span></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="showScoringDetail('${r.filename}')">Ver →</button></td>
+                </tr>`;
+            }).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin resultados</td></tr>';
+            }
+        }
+
+        function sortScoringTable(col) {
+            if (scoringSortCol === col) { scoringSortAsc = !scoringSortAsc; } else { scoringSortCol = col; scoringSortAsc = false; }
+            renderScoringTable();
+        }
+
+        function filterScoringTable() { renderScoringTable(); }
+
+        function setScoringFilter(emo, el) {
+            scoringFilterEmo = emo;
+            document.querySelectorAll('.scoring-filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderScoringTable();
+        }
+
+        function showScoringDetail(filename) {
+            const result = scoringResults.find(r => r.filename === filename);
+            if (!result) return;
+
+            // Fix 1: Normalize metadata for duration display
+            if (!result.metadata) {
+                result.metadata = { total_duration: result.duration_sec || 0 };
+            } else if (!result.metadata.total_duration) {
+                result.metadata.total_duration = result.duration_sec || 0;
+            }
+
+            // Fix 2: Find the original File object for the audio player
+            const originalFile = scoringFiles.find(f => f.name === filename);
+
+            // Set current results for the analyze tab
+            currentResults = result;
+            selectedFile = originalFile || { name: result.filename }; // Use original file if available
+
+            // Switch to Analyze tab
+            switchTab('analyze');
+
+            // Hide upload/config, show results
+            document.getElementById('uploadArea').style.display = 'none';
+            document.querySelector('.config-panel').style.display = 'none';
+            document.getElementById('analyzeBtn').style.display = 'none';
+
+            // Show "Back to Scoring" button
+            const backBtn = document.getElementById('backToScoringBtn');
+            if (backBtn) backBtn.style.display = 'inline-flex';
+
+            displayResults(result);
+            displayQualityScore(result);
+            displayCallSummary(result);
+            document.getElementById('resultsSection').style.display = 'block';
+
+            // Re-initialize player explicitly if we have the file
+            if (originalFile && window.audioPlayer) {
+                setTimeout(() => {
+                    audioPlayer.init(originalFile, result.segments || [], result.metadata.total_duration);
+                }, 100);
+            }
+        }
+
+        function backToScoringFromAnalyze() {
+            // Switch back to Scoring tab
+            switchTab('scoring');
+
+            // Reset Analyze tab state
+            document.getElementById('uploadArea').style.display = 'block';
+            document.querySelector('.config-panel').style.display = 'block'; // Was 'grid' or 'block'? CSS says .config-panel default is block
+            document.getElementById('analyzeBtn').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('backToScoringBtn').style.display = 'none';
+
+            // Clear current results
+            currentResults = null;
+            selectedFile = null;
+        }
+
+        // function backToScoring() { ... } // Removed as we use the new flow
+
+        // ============================================
+        // QUALITY SCORE DISPLAY
+        // ============================================
+        function displayQualityScore(results) {
+            const qs = results.quality_score;
+            if (!qs || typeof qs !== 'object') {
+                document.getElementById('qualityNoData').style.display = 'block';
+                document.getElementById('qualityScorePanel').style.display = 'none';
+                return;
+            }
+            document.getElementById('qualityNoData').style.display = 'none';
+            document.getElementById('qualityScorePanel').style.display = 'block';
+
+            const score = qs.total_score || 0;
+            const scoreColor = score >= 70 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+            document.getElementById('qsTotal').textContent = `${score}/100`;
+            document.getElementById('qsTotal').style.color = scoreColor;
+            document.getElementById('qsClassification').textContent = qs.classification || '';
+            document.getElementById('qsClassification').style.color = scoreColor;
+
+            const bd = qs.breakdown || {};
+            document.getElementById('qsTone').textContent = bd.emotional_tone ? `${bd.emotional_tone.score}/${bd.emotional_tone.max}` : '-';
+            document.getElementById('qsKeywords').textContent = bd.keywords ? `${bd.keywords.score}/${bd.keywords.max}` : '-';
+            document.getElementById('qsResolution').textContent = bd.resolution ? `${bd.resolution.score}/${bd.resolution.max}` : '-';
+            document.getElementById('qsProtocol').textContent = bd.protocol ? `${bd.protocol.score}/${bd.protocol.max}` : '-';
+
+            // Recommendations
+            const recsEl = document.getElementById('qsRecommendations');
+            const recs = qs.recommendations || [];
+            recsEl.innerHTML = recs.length > 0
+                ? recs.map(r => `<div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border); color: var(--text-muted);">💡 ${r}</div>`).join('')
+                : '<p style="color: var(--text-muted);">Sin recomendaciones</p>';
+
+            // Protocol indicators
+            const proto = bd.protocol || {};
+            const details = proto.details || {};
+            document.getElementById('qsGreeting').textContent = details.has_greeting ? '✅' : '❌';
+            document.getElementById('qsFarewell').textContent = details.has_farewell ? '✅' : '❌';
+            document.getElementById('qsIdentification').textContent = details.has_identification ? '✅' : '❌';
+
+            // Alert panel
+            const alert = results.alert;
+            const alertPanel = document.getElementById('qsAlertPanel');
+            if (alert && typeof alert === 'object' && alert.requires_escalation) {
+                alertPanel.style.display = 'block';
+                const sevColor = alert.severity === 'alta' ? 'var(--danger)' : alert.severity === 'media' ? 'var(--warning)' : 'var(--primary)';
+                document.getElementById('qsAlertSeverity').textContent = `Severidad: ${(alert.severity || '').toUpperCase()}`;
+                document.getElementById('qsAlertSeverity').style.color = sevColor;
+                document.getElementById('qsAlertReasons').innerHTML = (alert.reasons || [])
+                    .map(r => `<div style="padding: 0.4rem 0; color: var(--text-muted);">⚠️ ${r}</div>`).join('');
+            } else {
+                alertPanel.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // CALL SUMMARY DISPLAY
+        // ============================================
+        function displayCallSummary(results) {
+            const sum = results.call_summary;
+            if (!sum || typeof sum !== 'object') {
+                document.getElementById('summaryNoData').style.display = 'block';
+                document.getElementById('summaryPanel').style.display = 'none';
+                return;
+            }
+            document.getElementById('summaryNoData').style.display = 'none';
+            document.getElementById('summaryPanel').style.display = 'block';
+
+            document.getElementById('sumMotivo').textContent = sum.motivo || 'No detectado';
+            document.getElementById('sumDesarrollo').textContent = sum.desarrollo || 'No detectado';
+            document.getElementById('sumResolucion').textContent = sum.resolucion || 'No detectado';
+
+            const sat = sum.satisfaccion_estimada || 'desconocida';
+            const satEmoji = { 'alta': '😊', 'media': '😐', 'baja': '😟' };
+            const satColor = { 'alta': 'var(--success)', 'media': 'var(--warning)', 'baja': 'var(--danger)' };
+            document.getElementById('sumSatisfaccion').textContent = `${satEmoji[sat] || '❓'} ${sat.charAt(0).toUpperCase() + sat.slice(1)}`;
+            document.getElementById('sumSatisfaccion').style.color = satColor[sat] || 'var(--text-main)';
+            document.getElementById('sumSatisfaccionDetalle').textContent = `Basado en el tono de los segmentos finales`;
+
+            document.getElementById('sumTopico').textContent = sum.topico_detectado || '-';
+            document.getElementById('sumDuracion').textContent = sum.duracion_seg ? Utils.formatDuration(sum.duracion_seg) : '-';
+            document.getElementById('sumHablantes').textContent = sum.num_hablantes || '-';
+            document.getElementById('sumSegmentos').textContent = sum.num_segmentos || '-';
+            document.getElementById('sumResumenBreve').textContent = sum.resumen_breve || '-';
+        }
+
+        // ============================================
+        // KPI DASHBOARD
+        // ============================================
+        let kpiTrendChartInstance = null;
+        let kpiDistChartInstance = null;
+        let kpiComparisonChartInstance = null;
+
+        async function loadKPIs(period = '30d') {
+            try {
+                // Fetch summary, trends, and comparison in parallel
+                const [summaryRes, trendsRes, compRes] = await Promise.all([
+                    fetch(`${CONFIG.API_URL}/kpi/summary`),
+                    fetch(`${CONFIG.API_URL}/kpi/trends?period=${period}`),
+                    fetch(`${CONFIG.API_URL}/kpi/comparison`)
+                ]);
+
+                const summary = await summaryRes.json();
+                const trends = await trendsRes.json();
+                const comparison = await compRes.json();
+
+                // Update summary cards
+                document.getElementById('kpiTotalCalls').textContent = summary.total_calls || 0;
+                document.getElementById('kpiAvgScore').textContent = summary.avg_sentiment_score !== undefined
+                    ? (summary.avg_sentiment_score * 100).toFixed(1) + '%' : '-';
+
+                const dist = summary.emotion_distribution || {};
+                const pct = (v) => ((v || 0) * 100).toFixed(1);
+                document.getElementById('kpiPositive').textContent = pct(dist.feliz) + '%';
+                document.getElementById('kpiNegative').textContent = pct((dist.enojado || 0) + (dist.triste || 0)) + '%';
+
+                // Trend chart
+                renderKPITrendChart(trends);
+                // Distribution chart
+                renderKPIDistChart(dist);
+                // Comparison chart
+                renderKPIComparisonChart(comparison);
+
+                toast.success('KPIs actualizados');
+            } catch (err) {
+                console.error('Error loading KPIs:', err);
+                toast.error('Error cargando KPIs: ' + err.message);
+            }
+        }
+
+        function renderKPITrendChart(trends) {
+            const ctx = document.getElementById('kpiTrendChart');
+            if (kpiTrendChartInstance) kpiTrendChartInstance.destroy();
+
+            const dailyData = trends.daily_trends || [];
+            const labels = dailyData.map(d => d.date || d.day);
+            const emotions = ['feliz', 'neutral', 'triste', 'enojado'];
+            const colorMap = CONFIG.EMOTION_COLORS;
+
+            kpiTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: emotions.map(emo => ({
+                        label: emo.charAt(0).toUpperCase() + emo.slice(1),
+                        data: dailyData.map(d => ((d.emotions || {})[emo] || 0) * 100),
+                        borderColor: colorMap[emo],
+                        backgroundColor: colorMap[emo] + '22',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#2a2a3a' } },
+                        y: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: '#2a2a3a' }, min: 0, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function renderKPIDistChart(dist) {
+            const ctx = document.getElementById('kpiDistChart');
+            if (kpiDistChartInstance) kpiDistChartInstance.destroy();
+
+            const emotions = ['feliz', 'neutral', 'triste', 'enojado'];
+            kpiDistChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)),
+                    datasets: [{
+                        data: emotions.map(e => ((dist[e] || 0) * 100).toFixed(1)),
+                        backgroundColor: emotions.map(e => CONFIG.EMOTION_COLORS[e]),
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 15 } } }
+                }
+            });
+        }
+
+        function renderKPIComparisonChart(comparison) {
+            const ctx = document.getElementById('kpiComparisonChart');
+            if (kpiComparisonChartInstance) kpiComparisonChartInstance.destroy();
+
+            const calls = comparison.calls || [];
+            kpiComparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: calls.map((c, i) => c.filename ? c.filename.slice(0, 15) : `Llamada ${i + 1}`),
+                    datasets: [{
+                        label: 'Score Sentimiento',
+                        data: calls.map(c => ((c.sentiment_score || 0) * 100).toFixed(1)),
+                        backgroundColor: calls.map(c => (c.sentiment_score || 0) >= 0 ? '#10b981' : '#ef4444'),
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', maxRotation: 45 }, grid: { color: '#2a2a3a' } },
+                        y: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: '#2a2a3a' } }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // PDF / EXCEL EXPORT
+        // ============================================
+        async function exportPDF() {
+            if (!currentResults) { toast.warning('No hay resultados para exportar'); return; }
+            try {
+                toast.info('Generando PDF...');
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(currentResults));
+                formData.append('filename', `reporte_${(currentResults.filename || 'analisis').replace(/\.[^.]+$/, '')}`);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/pdf`, { method: 'POST', body: formData });
+                if (!response.ok) {
+                    let errMsg = `Error del servidor (${response.status})`;
+                    try { const e = await response.json(); if (e.detail) errMsg = e.detail; } catch (_) {}
+                    throw new Error(errMsg);
+                }
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `reporte_analisis_${new Date().toISOString().slice(0, 10)}.pdf`;
+                a.click();
+                toast.success('PDF exportado correctamente');
+            } catch (err) {
+                toast.error('Error exportando PDF: ' + err.message);
+            }
+        }
+
+        async function exportExcel() {
+            if (!currentResults) { toast.warning('No hay resultados para exportar'); return; }
+            try {
+                toast.info('Generando Excel...');
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(currentResults));
+                formData.append('filename', `reporte_${(currentResults.filename || 'analisis').replace(/\.[^.]+$/, '')}`);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/excel`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Error del servidor');
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `reporte_analisis_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                a.click();
+                toast.success('Excel exportado correctamente');
+            } catch (err) {
+                toast.error('Error exportando Excel: ' + err.message);
+            }
+        }
+
+        // ============================================
+        // LOGO UPLOAD
+        // ============================================
+        async function uploadLogo(input) {
+            const file = input.files[0];
+            if (!file) return;
+            try {
+                const formData = new FormData();
+                formData.append('logo', file);
+                const response = await fetch(`${CONFIG.API_URL}/config/logo`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Error subiendo logo');
+                document.getElementById('logoStatus').textContent = `✅ ${file.name}`;
+                toast.success('Logo actualizado correctamente');
+            } catch (err) {
+                toast.error('Error subiendo logo: ' + err.message);
+            }
+        }
+
+
+        // ============================================
+        // SCORING EXPORT FUNCTIONS
+        // ============================================
+        function exportScoringCSV() {
+            const successful = scoringResults.filter(r => r.status === 'success');
+            if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }
+            let csv = 'Archivo,Duración(s),Feliz,Enojado,Triste,Neutral,Sentimiento,Emoción Dominante\n';
+            successful.forEach(r => {
+                const s = r.emotion_scores || {};
+                csv += `"${r.filename}",${r.duration_sec || 0},${((s.feliz || 0) * 100).toFixed(1)},${((s.enojado || 0) * 100).toFixed(1)},${((s.triste || 0) * 100).toFixed(1)},${((s.neutral || 0) * 100).toFixed(1)},${(r.sentiment_score || 0).toFixed(4)},${r.dominant_emotion || 'neutral'}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `scoring_emocional_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            toast.success('CSV exportado');
+        }
+
+        function exportScoringJSON() {
+            const successful = scoringResults.filter(r => r.status === 'success');
+            if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }
+            const blob = new Blob([JSON.stringify(successful, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `scoring_emocional_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            toast.success('JSON exportado');
+        }
+
+        // ============================================
+        // QUALITY SCORE GENERAL & CONSOLIDATED PDF
+        // ============================================
+        async function loadGeneralScore() {
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/scoring/general`);
+                if (!res.ok) {
+                    document.getElementById('qualityGeneralPanel').style.display = 'none';
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!data || data.total_audios === 0) {
+                    document.getElementById('qualityGeneralPanel').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('qualityGeneralPanel').style.display = 'block';
+                document.getElementById('qsgTotalAudios').textContent = data.total_audios;
+
+                const avg = data.average_score || 0;
+                const scoreColor = avg >= 70 ? 'var(--success)' : avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+                const elPromedio = document.getElementById('qsgPromedio');
+                elPromedio.textContent = avg.toFixed(1);
+                elPromedio.style.color = scoreColor;
+
+                document.getElementById('qsgMinMax').textContent = `${(data.min_score || 0).toFixed(1)} / ${(data.max_score || 0).toFixed(1)}`;
+                document.getElementById('qsgStdDev').textContent = `± ${(data.std_dev || 0).toFixed(1)}`;
+
+                const dimEl = document.getElementById('qsgDimensions');
+                dimEl.innerHTML = '';
+                if (data.dimension_averages) {
+                    for (const [key, val] of Object.entries(data.dimension_averages)) {
+                        const width = val;
+                        const color = val >= 70 ? 'var(--success)' : val >= 50 ? 'var(--warning)' : 'var(--danger)';
+                        const formattedKey = key.replace(/_/g, ' ');
+                        dimEl.innerHTML += `
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.2rem;">
+                                <span style="text-transform: capitalize;">${formattedKey}</span>
+                                <strong>${val.toFixed(1)}</strong>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: var(--surface); border-radius: 3px; margin-bottom: 0.8rem;">
+                                <div style="width: ${width}%; height: 100%; background: ${color}; border-radius: 3px;"></div>
+                            </div>
+                        `;
+                    }
+                }
+
+                const classEl = document.getElementById('qsgClassifications');
+                classEl.innerHTML = '';
+                if (data.score_distribution) {
+                    const total = data.total_audios;
+                    for (const [key, count] of Object.entries(data.score_distribution)) {
+                        const pct = total > 0 ? (count / total) * 100 : 0;
+                        let badgeColor = '#ef4444';
+                        if (key.match(/excelente|buen/i)) badgeColor = '#10b981';
+                        else if (key.match(/aceptable|regular/i)) badgeColor = '#f59e0b';
+
+                        classEl.innerHTML += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; background: ${badgeColor}22; color: ${badgeColor}; font-weight: 600;">${key.toUpperCase()}</span>
+                                <span>${count} audios (${pct.toFixed(1)}%)</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading general score:", err);
+            }
+        }
+
+        async function generateConsolidatedPDF() {
+            try {
+                toast.info('Generando PDF Consolidado... (Puede tardar si usa IA)');
+                progressBar.show('Generando reporte PDF...');
+
+                const filenameInput = document.getElementById('pdfGeneralFilename').value;
+                const filename = filenameInput ? filenameInput : 'Reporte_Consolidado';
+                const includeAi = document.getElementById('pdfIncludeAi').checked;
+
+                const params = new URLSearchParams();
+                if (filenameInput) params.append('filename', filenameInput);
+                params.append('include_ai_interpretation', includeAi);
+
+                const response = await fetch(`${CONFIG.API_URL}/export/pdf-general?${params.toString()}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    let errMessage = 'Error al generar el PDF consolidado';
+                    try {
+                        const err = await response.json();
+                        if (err.detail) errMessage = err.detail;
+                    } catch (e) { }
+                    throw new Error(errMessage);
+                }
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+
+                progressBar.hide();
+                toast.success('PDF Consolidado exportado correctamente');
+            } catch (err) {
+                progressBar.hide();
+                console.error('Error:', err);
+                toast.error('Error exportando PDF: ' + err.message);
+            }
+        }
     </script>
 </body>
+
 </html>

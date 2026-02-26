@@ -1,0 +1,874 @@
+{
+  "ba4bb1d3-8eca-4389-8eaa-e43977844b37": {
+    "audio_path": "./feedback_data/audio/ba4bb1d3-8eca-4389-8eaa-e43977844b37.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4977,
+    "metadata": {
+      "text_es": "Amigos, buenos días.",
+      "text_en": "Amigos, buenos días.",
+      "start": 0.0,
+      "end": 1.0
+    },
+    "timestamp": "2026-01-24T06:47:31.772825",
+    "validated": true,
+    "correct_label": "neutral"
+  },
+  "edbea166-d08a-460c-be58-285120c381b0": {
+    "audio_path": "./feedback_data/audio/edbea166-d08a-460c-be58-285120c381b0.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5447,
+    "metadata": {
+      "text_es": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "text_en": "Aquí estoy en efecto, pero nada más que para despedirme.",
+      "start": 1.0,
+      "end": 4.0
+    },
+    "timestamp": "2026-01-24T06:47:35.167095",
+    "validated": true,
+    "correct_label": "triste"
+  },
+  "1377bc88-7c6d-40c5-af1b-5030c1a6d0c9": {
+    "audio_path": "./feedback_data/audio/1377bc88-7c6d-40c5-af1b-5030c1a6d0c9.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.419,
+    "metadata": {
+      "text_es": "Les cuento.",
+      "text_en": "Les cuento.",
+      "start": 15.0,
+      "end": 16.0
+    },
+    "timestamp": "2026-01-24T06:47:40.939094",
+    "validated": true,
+    "correct_label": "neutral"
+  },
+  "068c71e9-29cd-4e45-bfb1-34efbebdd979": {
+    "audio_path": "./feedback_data/audio/068c71e9-29cd-4e45-bfb1-34efbebdd979.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4572,
+    "metadata": {
+      "text_es": "Tilemazonas debe ser vendido.",
+      "text_en": "Tilemazonas debe ser vendido.",
+      "start": 20.0,
+      "end": 22.0
+    },
+    "timestamp": "2026-01-24T06:47:43.764943",
+    "validated": true,
+    "correct_label": "enojado"
+  },
+  "be17ca96-ee9c-4923-a38d-754c1b62e5c3": {
+    "audio_path": "./feedback_data/audio/be17ca96-ee9c-4923-a38d-754c1b62e5c3.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.8817,
+    "metadata": {
+      "text_es": "bailarina hay mucha honra",
+      "text_en": "dancer there's a lot of honor",
+      "start": 159.0,
+      "end": 161.0
+    },
+    "timestamp": "2026-02-08T20:24:27.230522",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-08T20:25:53.939006"
+  },
+  "78df8f6e-203d-4244-ab3c-c46cc6f09893": {
+    "audio_path": "./feedback_data/audio/78df8f6e-203d-4244-ab3c-c46cc6f09893.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.4266,
+    "metadata": {
+      "text_es": "yo estoy aquí dándote la cara",
+      "text_en": "I'm here giving you the face",
+      "start": 169.0,
+      "end": 171.0
+    },
+    "timestamp": "2026-02-08T20:24:30.505655",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-08T20:26:00.325885"
+  },
+  "fbcac8a3-ae77-4138-b700-55b0c3271e01": {
+    "audio_path": "./feedback_data/audio/fbcac8a3-ae77-4138-b700-55b0c3271e01.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.2858,
+    "metadata": {
+      "text_es": "de despedirse de manera emotiva, ficticia de la gente",
+      "text_en": "to say goodbye in an emotional, fictitious way to the people",
+      "start": 116.0,
+      "end": 120.0
+    },
+    "timestamp": "2026-02-09T22:03:08.655345",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:06:06.743868"
+  },
+  "d84cea86-9da9-43b8-b001-6ffdc96c423e": {
+    "audio_path": "./feedback_data/audio/d84cea86-9da9-43b8-b001-6ffdc96c423e.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4199,
+    "metadata": {
+      "text_es": "Después de nueve meses de trabajos, este lunes se abrió nuevamente el intercambiador de la avenida",
+      "text_en": "After nine months of work, this Monday the exchanger of the avenue was reopened",
+      "start": 0.0,
+      "end": 4.8
+    },
+    "timestamp": "2026-02-09T22:06:52.764889",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:07:42.936249"
+  },
+  "3f394dcc-9b64-4474-874b-9442a66c22c4": {
+    "audio_path": "./feedback_data/audio/3f394dcc-9b64-4474-874b-9442a66c22c4.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4865,
+    "metadata": {
+      "text_es": "Está súper fuerte. Yo vine planificando que iba a estar más ligero porque vi el anuncio, pero está peor que lo que estaba la semana pasada.",
+      "text_en": "It's super strong. I came planning it would be lighter because I saw the ad, but it's worse than what I was last week.",
+      "start": 41.24,
+      "end": 49.24
+    },
+    "timestamp": "2026-02-09T22:07:01.553387",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:08:17.454131"
+  },
+  "3ecc5188-614c-443b-8668-e82b0203d262": {
+    "audio_path": "./feedback_data/audio/3ecc5188-614c-443b-8668-e82b0203d262.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.5753,
+    "metadata": {
+      "text_es": "Señorita, como está? Buenos días, tenga la bondad. Mire, yo tengo, estoy bien molesta y tengo un problema muy serio.",
+      "text_en": "Miss, how are you? Good morning, be kind.",
+      "start": 0.0,
+      "end": 6.5
+    },
+    "timestamp": "2026-02-09T22:09:10.322292",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:09:31.275730"
+  },
+  "f4099750-70cf-44a7-a013-a5773f2a8bc8": {
+    "audio_path": "./feedback_data/audio/f4099750-70cf-44a7-a013-a5773f2a8bc8.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4947,
+    "metadata": {
+      "text_es": "Usted, nosotros ya cancelamos la deuda con ustedes. ¿Cómo es eso que están llamando a las amigas y a todos los familiares de mi hija?",
+      "text_en": "You, we already cancelled the debt to you. How is that you're calling my daughter's friends and family?",
+      "start": 6.5,
+      "end": 14.4
+    },
+    "timestamp": "2026-02-09T22:09:11.728731",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:09:33.839112"
+  },
+  "784aa6f9-0b3e-4857-b3f6-1f4c73917345": {
+    "audio_path": "./feedback_data/audio/784aa6f9-0b3e-4857-b3f6-1f4c73917345.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4212,
+    "metadata": {
+      "text_es": "Tenga la bondad, las personas hay que ser serias. Nosotros cancelamos el día que le dijimos se canceló eso y si ustedes no otorgaron un certificado y todo es cuestión suya.",
+      "text_en": "Be kind, people have to be serious. We cancel the day we told you that was canceled and if you didn't issue a certificate and it's all your business.",
+      "start": 14.4,
+      "end": 24.2
+    },
+    "timestamp": "2026-02-09T22:09:13.507123",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:09:41.148180"
+  },
+  "062e1242-af71-44d1-b3b7-59c7ac9e8bae": {
+    "audio_path": "./feedback_data/audio/062e1242-af71-44d1-b3b7-59c7ac9e8bae.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.47,
+    "metadata": {
+      "text_es": "A nosotros, nosotros ya tenemos la conciencia tranquila que ya se canceló eso y no debemos a ustedes.",
+      "text_en": "To us, we already have a clear conscience that that has already been cancelled and we do not owe it to you.",
+      "start": 24.599999999999998,
+      "end": 31.0
+    },
+    "timestamp": "2026-02-09T22:09:14.603502",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:09:54.637929"
+  },
+  "e9ec480b-0a9f-4139-8863-1c920534cabe": {
+    "audio_path": "./feedback_data/audio/e9ec480b-0a9f-4139-8863-1c920534cabe.wav",
+    "predicted_label": "triste",
+    "confidence": 0.4593,
+    "metadata": {
+      "text_es": "nacional en el parlamento. Ingeniero, ¿se asegura que usted se benefició con el voto",
+      "text_en": "Engineer, are you sure that you benefited from the vote?",
+      "start": 30.56,
+      "end": 37.92
+    },
+    "timestamp": "2026-02-09T22:10:54.651305",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:11:51.548052"
+  },
+  "d5537927-ded4-41e9-99bb-25edd08c9101": {
+    "audio_path": "./feedback_data/audio/d5537927-ded4-41e9-99bb-25edd08c9101.wav",
+    "predicted_label": "triste",
+    "confidence": 0.4629,
+    "metadata": {
+      "text_es": "Sin embargo, muchos creen que su campaña anticomunitarista, que resultó tan agresiva,",
+      "text_en": "However, many believe that their anti-communitarian campaign, which proved so aggressive,",
+      "start": 92.52000000000001,
+      "end": 99.52000000000001
+    },
+    "timestamp": "2026-02-09T22:11:05.566356",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:12:22.131849"
+  },
+  "355913ca-0aad-4b89-9eca-e9a2dde2dcfd": {
+    "audio_path": "./feedback_data/audio/355913ca-0aad-4b89-9eca-e9a2dde2dcfd.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.3742,
+    "metadata": {
+      "text_es": "Me acaban de confirmar el deceso, la partida, la ida de José Ignacio Arciniegas.",
+      "text_en": "I have just confirmed the death, the departure, the departure of José Ignacio Arciniegas.",
+      "start": 40.0,
+      "end": 50.0
+    },
+    "timestamp": "2026-02-09T22:13:59.966053",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:15:35.380584"
+  },
+  "b2ba3d33-a89f-44f7-b6ba-2a04da5c8693": {
+    "audio_path": "./feedback_data/audio/b2ba3d33-a89f-44f7-b6ba-2a04da5c8693.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4435,
+    "metadata": {
+      "text_es": "José Ignacio Arciniegas Aragón, director de Radio Red del Tolima, programa que por muchos años ha emitido acá a través de Ondas de Ibagué.",
+      "text_en": "José Ignacio Arciniegas Aragón, director of Radio Red del Tolima, a program he has broadcast here for many years through Ondas de Ibagué.",
+      "start": 138.0,
+      "end": 150.0
+    },
+    "timestamp": "2026-02-09T22:14:14.207958",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:17:04.237741"
+  },
+  "af0a2358-e2de-4fca-9e9d-256a65faeaea": {
+    "audio_path": "./feedback_data/audio/af0a2358-e2de-4fca-9e9d-256a65faeaea.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.3946,
+    "metadata": {
+      "text_es": "José Ignacio Arciniegas Aragón me confirma su hija Andrea, a quien le expreso mis más sentidas y profundas condolencias.",
+      "text_en": "José Ignacio Arciniegas Aragón confirms to me his daughter Andrea, to whom I express my deepest condolences.",
+      "start": 166.0,
+      "end": 174.0
+    },
+    "timestamp": "2026-02-09T22:14:18.364583",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:17:34.611844"
+  },
+  "1ef6b54a-101a-46c4-9382-204d2913ce90": {
+    "audio_path": "./feedback_data/audio/1ef6b54a-101a-46c4-9382-204d2913ce90.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3056,
+    "metadata": {
+      "text_es": "Director de Radio Red del Tolima, un hombre que siempre me acompañó en estas líneas del periodismo, en el ejercicio.",
+      "text_en": "Director of Radio Red del Tolima, a man who always accompanied me in these lines of journalism, in the exercise.",
+      "start": 180.0,
+      "end": 192.0
+    },
+    "timestamp": "2026-02-09T22:14:21.262128",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:17:50.235701"
+  },
+  "c73cc6d8-510a-42ff-b6ba-185c76cac746": {
+    "audio_path": "./feedback_data/audio/c73cc6d8-510a-42ff-b6ba-185c76cac746.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.3197,
+    "metadata": {
+      "text_es": "Murió anoche, no tenemos más datos, es lo único que podemos confirmar.",
+      "text_en": "He died last night, we don't have any more data, that's all we can confirm.",
+      "start": 228.0,
+      "end": 234.0
+    },
+    "timestamp": "2026-02-09T22:14:28.507299",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:18:32.974979"
+  },
+  "25668ad5-bade-41e9-8b1e-ee9861490c5c": {
+    "audio_path": "./feedback_data/audio/25668ad5-bade-41e9-8b1e-ee9861490c5c.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.5082,
+    "metadata": {
+      "text_es": "Nacho había tenido unos quebrantes de salud de los últimos tiempos y nos confirma que se nos ha ido.",
+      "text_en": "Nacho had had some health breakers of recent times and confirms to us that we have gone.",
+      "start": 220.0,
+      "end": 228.0
+    },
+    "timestamp": "2026-02-09T22:14:27.497400",
+    "validated": true,
+    "correct_label": "triste",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:18:37.868541"
+  },
+  "374c563e-a543-46a9-b04b-518bad64798e": {
+    "audio_path": "./feedback_data/audio/374c563e-a543-46a9-b04b-518bad64798e.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.2905,
+    "metadata": {
+      "text_es": "que nos duele la partida de José Ignacio Arciniegas Aragón, por supuesto, nuestras más sentidos y profundas condolencias.",
+      "text_en": "the departure of José Ignacio Arciniegas Aragon pains us, of course, our deepest feelings and condolences.",
+      "start": 256.0,
+      "end": 262.0
+    },
+    "timestamp": "2026-02-09T22:14:33.058781",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:19:03.847187"
+  },
+  "1eabe9d9-c67b-4860-a975-cf0f2ca4dd89": {
+    "audio_path": "./feedback_data/audio/1eabe9d9-c67b-4860-a975-cf0f2ca4dd89.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.555,
+    "metadata": {
+      "text_es": "por el apoyo que siempre me dieron para un trabajo periodístico independiente.",
+      "text_en": "for the support they always gave me for independent journalistic work.",
+      "start": 72.0,
+      "end": 77.0
+    },
+    "timestamp": "2026-02-09T22:22:50.757669",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:24:10.397852"
+  },
+  "6c3d13bc-cef5-4969-b98f-ea1d9fa1bd76": {
+    "audio_path": "./feedback_data/audio/6c3d13bc-cef5-4969-b98f-ea1d9fa1bd76.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5218,
+    "metadata": {
+      "text_es": "El otro a todos ustedes, amigos, por su sintonía diaria, por su apoyo,",
+      "text_en": "The other to all of you, friends, for your daily tuning, for your support,",
+      "start": 77.0,
+      "end": 81.0
+    },
+    "timestamp": "2026-02-09T22:22:51.451523",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:24:13.625898"
+  },
+  "1979c2e3-323a-4fa3-8304-26bbcd5e4d8a": {
+    "audio_path": "./feedback_data/audio/1979c2e3-323a-4fa3-8304-26bbcd5e4d8a.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5679,
+    "metadata": {
+      "text_es": "por sus muchísimos mensajes de respaldo y cariño,",
+      "text_en": "for his many messages of support and affection,",
+      "start": 81.0,
+      "end": 84.0
+    },
+    "timestamp": "2026-02-09T22:22:52.001469",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:24:16.271640"
+  },
+  "89333a52-4988-44d1-ac71-f3a00905e2c2": {
+    "audio_path": "./feedback_data/audio/89333a52-4988-44d1-ac71-f3a00905e2c2.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4023,
+    "metadata": {
+      "text_es": "y también por sus críticas que me sirvieron para tratar de hacer mi trabajo cada vez mejor.",
+      "text_en": "And also for their criticisms that served me to try to do my job better and better.",
+      "start": 84.0,
+      "end": 89.0
+    },
+    "timestamp": "2026-02-09T22:22:52.972721",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:24:19.713968"
+  },
+  "40b3c63d-dd35-4947-9d4f-03e225f41903": {
+    "audio_path": "./feedback_data/audio/40b3c63d-dd35-4947-9d4f-03e225f41903.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.3777,
+    "metadata": {
+      "text_es": "¿Cuándo me reencontraré con ustedes?",
+      "text_en": "When will I meet you again?",
+      "start": 89.0,
+      "end": 91.0
+    },
+    "timestamp": "2026-02-09T22:22:53.388894",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:24:21.979339"
+  },
+  "5a583802-3f29-4948-92d5-edda0308c65e": {
+    "audio_path": "./feedback_data/audio/5a583802-3f29-4948-92d5-edda0308c65e.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.5201,
+    "metadata": {
+      "text_es": "29 desde las 11 de la mañana en un ratito tenemos muchines pero antes ha escuchado usted el",
+      "text_en": "29 since 11 a.m. in a little while we have lots but before you have heard the",
+      "start": 0.0,
+      "end": 5.2
+    },
+    "timestamp": "2026-02-09T22:25:54.446245",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:26:44.873706"
+  },
+  "29df8c05-84c3-4abd-878d-0643c4300be5": {
+    "audio_path": "./feedback_data/audio/29df8c05-84c3-4abd-878d-0643c4300be5.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.5695,
+    "metadata": {
+      "text_es": "neuromarketing nos sirve para fidelizar clientes y para generar ganancias tenemos una nota pon atención",
+      "text_en": "neuromarketing serves us to loyalty clients and to generate profits we have a note pay attention",
+      "start": 5.82,
+      "end": 11.3
+    },
+    "timestamp": "2026-02-09T22:25:55.324315",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:26:46.626748"
+  },
+  "b7da82c2-6786-476a-9697-30a87ebb7174": {
+    "audio_path": "./feedback_data/audio/b7da82c2-6786-476a-9697-30a87ebb7174.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4019,
+    "metadata": {
+      "text_es": "segundo que emoción me genera en una emoción positiva negativa y tercero logro identificar la",
+      "text_en": "second that emotion generates me in a negative positive emotion and third achievement to identify the",
+      "start": 123.11999999999999,
+      "end": 128.2
+    },
+    "timestamp": "2026-02-09T22:26:14.717636",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:27:58.692780"
+  },
+  "85991bbb-4556-42bb-82e1-f29859ff1b89": {
+    "audio_path": "./feedback_data/audio/85991bbb-4556-42bb-82e1-f29859ff1b89.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4755,
+    "metadata": {
+      "text_es": "eso queremos que sus negocios triunfen que sus emprendimientos sean de éxito y ustedes puedan llevar ese concepto que tienen de negocio y lo hagan",
+      "text_en": "that we want your business to succeed your ventures to be successful and you can carry that concept that you have in business and do it",
+      "start": 160.44,
+      "end": 167.48000000000002
+    },
+    "timestamp": "2026-02-09T22:26:21.000610",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:28:24.934490"
+  },
+  "8cedf8d3-0f49-4843-bbfd-7e16d6212c40": {
+    "audio_path": "./feedback_data/audio/8cedf8d3-0f49-4843-bbfd-7e16d6212c40.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4862,
+    "metadata": {
+      "text_es": "muy muy exitoso como el que vamos a ver a continuación porque tal vez le gusten las plantas las orquídeas son mis favoritas como",
+      "text_en": "very very very successful as the one we will see below because maybe you like plants orchids are my favorite like",
+      "start": 167.48,
+      "end": 173.39999999999998
+    },
+    "timestamp": "2026-02-09T22:26:22.132268",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:28:28.243099"
+  },
+  "e7d993b8-f19a-4c35-886c-19aa7856136a": {
+    "audio_path": "./feedback_data/audio/e7d993b8-f19a-4c35-886c-19aa7856136a.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.3395,
+    "metadata": {
+      "text_es": "no es payaso",
+      "text_en": "He's not a clown.",
+      "start": 21.0,
+      "end": 23.0
+    },
+    "timestamp": "2026-02-09T22:29:53.008069",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:31:22.803150"
+  },
+  "556b6910-9749-40b2-8a2f-9daf89e5c47e": {
+    "audio_path": "./feedback_data/audio/556b6910-9749-40b2-8a2f-9daf89e5c47e.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.8817,
+    "metadata": {
+      "text_es": "bailarina hay mucha honra",
+      "text_en": "dancer there's a lot of honor",
+      "start": 159.0,
+      "end": 161.0
+    },
+    "timestamp": "2026-02-09T22:30:31.101708",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:31:44.753756"
+  },
+  "3db95b39-744a-4d52-a25d-c835be874c69": {
+    "audio_path": "./feedback_data/audio/3db95b39-744a-4d52-a25d-c835be874c69.wav",
+    "predicted_label": "feliz",
+    "confidence": 0.4266,
+    "metadata": {
+      "text_es": "yo estoy aquí dándote la cara",
+      "text_en": "I'm here giving you the face",
+      "start": 169.0,
+      "end": 171.0
+    },
+    "timestamp": "2026-02-09T22:30:33.313401",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:31:48.532463"
+  },
+  "e1f5c196-126d-400d-a03e-5d15dc494cd6": {
+    "audio_path": "./feedback_data/audio/e1f5c196-126d-400d-a03e-5d15dc494cd6.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.5624,
+    "metadata": {
+      "text_es": "Yacel, muchas gracias por estar con nosotros respecto, dando también a conocer a la gente",
+      "text_en": "Yacel, thank you so much for being with us about, also making people known",
+      "start": 76.0,
+      "end": 81.0
+    },
+    "timestamp": "2026-02-09T22:34:44.881359",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:35:48.669162"
+  },
+  "a377f444-f0b5-479b-aea1-6395415b88c1": {
+    "audio_path": "./feedback_data/audio/a377f444-f0b5-479b-aea1-6395415b88c1.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4524,
+    "metadata": {
+      "text_es": "¿Y saben cómo es? ¿Cómo? ¿Es igual? Pero sin huevo.",
+      "text_en": "And do you know what it's like?",
+      "start": 91.0,
+      "end": 97.0
+    },
+    "timestamp": "2026-02-09T22:34:47.540871",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:35:58.524235"
+  },
+  "5c5e2288-8d51-40cc-bc53-e3a432830cd8": {
+    "audio_path": "./feedback_data/audio/5c5e2288-8d51-40cc-bc53-e3a432830cd8.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4186,
+    "metadata": {
+      "text_es": "Sin la longaniza, obvio. No, sin huevo.",
+      "text_en": "Without the longaniza, obviously.",
+      "start": 97.0,
+      "end": 101.0
+    },
+    "timestamp": "2026-02-09T22:34:48.246706",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:35:59.782778"
+  },
+  "5678a324-f0b7-4d30-90cb-f155f3c0ff86": {
+    "audio_path": "./feedback_data/audio/5678a324-f0b7-4d30-90cb-f155f3c0ff86.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4148,
+    "metadata": {
+      "text_es": "Catalina.",
+      "text_en": "Catalina.",
+      "start": 101.0,
+      "end": 105.0
+    },
+    "timestamp": "2026-02-09T22:34:48.966338",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:02.037998"
+  },
+  "b5d52f8a-d5bf-4576-90bd-c33a21bbd84c": {
+    "audio_path": "./feedback_data/audio/b5d52f8a-d5bf-4576-90bd-c33a21bbd84c.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.6,
+    "metadata": {
+      "text_es": "Ya, con eso nos despedimos, chiquillo.",
+      "text_en": "Yeah, that's what we say goodbye to, kiddo.",
+      "start": 109.0,
+      "end": 113.0
+    },
+    "timestamp": "2026-02-09T22:34:49.741080",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:04.915146"
+  },
+  "10d04bd1-f89c-4b78-8694-63cffc6770a7": {
+    "audio_path": "./feedback_data/audio/10d04bd1-f89c-4b78-8694-63cffc6770a7.wav",
+    "predicted_label": "triste",
+    "confidence": 0.3068,
+    "metadata": {
+      "text_es": "Catalina era sin huevo, pero bueno.",
+      "text_en": "Catherine was eggless, but good.",
+      "start": 117.0,
+      "end": 121.0
+    },
+    "timestamp": "2026-02-09T22:34:50.452649",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:09.272583"
+  },
+  "93ab8343-a80d-473d-9f45-101885fcc4e6": {
+    "audio_path": "./feedback_data/audio/93ab8343-a80d-473d-9f45-101885fcc4e6.wav",
+    "predicted_label": "triste",
+    "confidence": 0.2863,
+    "metadata": {
+      "text_es": "Sí, era sin huevo. Querían... Gracias Gonzalo, con él tan importante.",
+      "text_en": "They wanted to... thank you Gonzalo, with him so important.",
+      "start": 121.0,
+      "end": 126.0
+    },
+    "timestamp": "2026-02-09T22:34:51.322637",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:11.069009"
+  },
+  "2e35e1b7-9ffa-4660-a1a8-fccc3ae79a39": {
+    "audio_path": "./feedback_data/audio/2e35e1b7-9ffa-4660-a1a8-fccc3ae79a39.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.3392,
+    "metadata": {
+      "text_es": "Nos pasamos a un cuarto y ya regresamos. Gracias.",
+      "text_en": "We're going to a room and we're coming back.",
+      "start": 126.0,
+      "end": 130.0
+    },
+    "timestamp": "2026-02-09T22:34:52.127350",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:14.638057"
+  },
+  "b52314ae-e2d9-4707-b84a-cd2045ad886e": {
+    "audio_path": "./feedback_data/audio/b52314ae-e2d9-4707-b84a-cd2045ad886e.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4192,
+    "metadata": {
+      "text_es": "Gracias.",
+      "text_en": "Thank you.",
+      "start": 131.0,
+      "end": 134.0
+    },
+    "timestamp": "2026-02-09T22:34:52.886740",
+    "validated": true,
+    "correct_label": "feliz",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:36:16.338193"
+  },
+  "647babeb-a7f9-475f-a895-69241a6b9ae3": {
+    "audio_path": "./feedback_data/audio/647babeb-a7f9-475f-a895-69241a6b9ae3.wav",
+    "predicted_label": "triste",
+    "confidence": 0.323,
+    "metadata": {
+      "text_es": "Debajo de mi casa vivían dos personas que se murieron de frío. Perdón, perdón. A ver,",
+      "text_en": "Underneath my house lived two people who died of cold.",
+      "start": 229.96,
+      "end": 235.12
+    },
+    "timestamp": "2026-02-09T22:39:16.456154",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:42:32.428491"
+  },
+  "e8472528-30dc-4999-86fb-88032e5415dc": {
+    "audio_path": "./feedback_data/audio/e8472528-30dc-4999-86fb-88032e5415dc.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4952,
+    "metadata": {
+      "text_es": "¿Has visto a los niños cubanos? ¿Me vas a decir a mí que no hay desnutrición infantil?",
+      "text_en": "Have you seen the Cuban children? Are you going to tell me that there is no child malnutrition?",
+      "start": 239.72,
+      "end": 243.64000000000001
+    },
+    "timestamp": "2026-02-09T22:39:18.237249",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:42:35.664838"
+  },
+  "5f719eb4-5377-478a-8fcf-d167873e95cc": {
+    "audio_path": "./feedback_data/audio/5f719eb4-5377-478a-8fcf-d167873e95cc.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.5765,
+    "metadata": {
+      "text_es": "Las estadísticas de las naciones unidas no entran a Cuba. La nación no entra a Cuba.",
+      "text_en": "The statistics of the united nations do not enter Cuba. The nation does not enter Cuba.",
+      "start": 243.64000000000001,
+      "end": 249.44
+    },
+    "timestamp": "2026-02-09T22:39:19.187732",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:42:39.115650"
+  },
+  "00c14d0d-366f-4b89-9526-789bd6f9514f": {
+    "audio_path": "./feedback_data/audio/00c14d0d-366f-4b89-9526-789bd6f9514f.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.4105,
+    "metadata": {
+      "text_es": "¿Te está diciendo abajo de mi casa viviendo abajo de ese río de frío? ¿Qué le decís?",
+      "text_en": "He's telling you under my house living under that cold river?",
+      "start": 260.76,
+      "end": 264.92
+    },
+    "timestamp": "2026-02-09T22:39:22.098761",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:42:48.198301"
+  },
+  "84fa3536-b36b-4469-ac1d-4192aa068be8": {
+    "audio_path": "./feedback_data/audio/84fa3536-b36b-4469-ac1d-4192aa068be8.wav",
+    "predicted_label": "enojado",
+    "confidence": 0.4282,
+    "metadata": {
+      "text_es": "Sin discusión.",
+      "text_en": "No argument.",
+      "start": 329.32,
+      "end": 330.32
+    },
+    "timestamp": "2026-02-09T22:39:33.670272",
+    "validated": true,
+    "correct_label": "neutral",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-09T22:43:20.409023"
+  },
+  "ad856ec5-cdef-4273-b366-44d89c80ada1": {
+    "audio_path": "./feedback_data/audio/ad856ec5-cdef-4273-b366-44d89c80ada1.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.82,
+    "metadata": {
+      "text_es": "Mire, yo estoy bien molesta y tengo un problema muy serio.",
+      "text_en": "Mire, yo estoy bien molesta y tengo un problema muy serio.",
+      "start": 3.283,
+      "end": 6.528
+    },
+    "timestamp": "2026-02-23T19:14:17.716461",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:20:57.344188"
+  },
+  "1d56f164-f608-4ad4-84e8-b48af5e22898": {
+    "audio_path": "./feedback_data/audio/1d56f164-f608-4ad4-84e8-b48af5e22898.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.817,
+    "metadata": {
+      "text_es": "Nosotros ya cancelamos la deuda con ustedes.",
+      "text_en": "Nosotros ya cancelamos la deuda con ustedes.",
+      "start": 7.128,
+      "end": 9.312
+    },
+    "timestamp": "2026-02-23T19:14:17.963752",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:20:59.299513"
+  },
+  "709d516f-fb92-464a-a4db-b3c79436f362": {
+    "audio_path": "./feedback_data/audio/709d516f-fb92-464a-a4db-b3c79436f362.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8249,
+    "metadata": {
+      "text_es": "¿Cómo es de eso que están llamando las amigas y a todos los familiares de mi hija?",
+      "text_en": "¿Cómo es de eso que están llamando las amigas y a todos los familiares de mi hija?",
+      "start": 9.332,
+      "end": 14.54
+    },
+    "timestamp": "2026-02-23T19:14:27.381911",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:01.598059"
+  },
+  "fe516ae9-a141-4cd1-b3d0-92e4fd5a6a48": {
+    "audio_path": "./feedback_data/audio/fe516ae9-a141-4cd1-b3d0-92e4fd5a6a48.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8114,
+    "metadata": {
+      "text_es": "Tenga la bondad, las personas hay que ser serias.",
+      "text_en": "Tenga la bondad, las personas hay que ser serias.",
+      "start": 14.56,
+      "end": 16.603
+    },
+    "timestamp": "2026-02-23T19:14:27.166564",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:04.738643"
+  },
+  "2e99642f-2e66-45d2-9ff3-9097e2ca32e1": {
+    "audio_path": "./feedback_data/audio/2e99642f-2e66-45d2-9ff3-9097e2ca32e1.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8099,
+    "metadata": {
+      "text_es": "Nosotros cancelamos el día que le dijimos, se canceló eso y si ustedes no otorgaron un certificado y todo es cuestión suya.",
+      "text_en": "Nosotros cancelamos el día que le dijimos, se canceló eso y si ustedes no otorgaron un certificado y todo es cuestión suya.",
+      "start": 16.663,
+      "end": 24.435
+    },
+    "timestamp": "2026-02-23T19:14:27.599733",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:06.683290"
+  },
+  "638d82b2-ce58-4cde-a2ab-7e8da3e16b08": {
+    "audio_path": "./feedback_data/audio/638d82b2-ce58-4cde-a2ab-7e8da3e16b08.wav",
+    "predicted_label": "neutral",
+    "confidence": 0.8082,
+    "metadata": {
+      "text_es": "a nosotros nosotros ya tenemos la conciencia tranquila que no sea que ya se canceló eso y no debemos a ustedes como es posible que después de un año y medio quieran nosotros cobrarnos algo que ya está pagado que les pasa tarea de ladrones",
+      "text_en": "a nosotros nosotros ya tenemos la conciencia tranquila que no sea que ya se canceló eso y no debemos a ustedes como es posible que después de un año y medio quieran nosotros cobrarnos algo que ya está pagado que les pasa tarea de ladrones",
+      "start": 24.415,
+      "end": 37.918
+    },
+    "timestamp": "2026-02-23T19:14:32.309431",
+    "validated": true,
+    "correct_label": "enojado",
+    "user_comment": "Corrección manual desde dashboard",
+    "validation_timestamp": "2026-02-23T20:21:08.307704"
+  }
+}

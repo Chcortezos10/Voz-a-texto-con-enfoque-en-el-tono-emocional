@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
 echo ===================================================
-echo   INICIANDO SISTEMA VOZ-A-TEXTO EMOCIONAL (V5)
-echo   Dashboard Monolitico + API FastAPI
+echo   INICIANDO SISTEMA VOZ-A-TEXTO EMOCIONAL (V8)
+echo   Dashboard Monolitico + API FastAPI (WhisperX)
 echo ===================================================
 echo.
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 # ===================================================
-#   INICIANDO SISTEMA VOZ-A-TEXTO UNIFICADO (V3)
+#   INICIANDO SISTEMA VOZ-A-TEXTO UNIFICADO (V8)
 #   Script para Linux/macOS
 # ===================================================
 
 echo "==================================================="
-echo "  INICIANDO SISTEMA VOZ-A-TEXTO UNIFICADO (V3)"
+echo "  INICIANDO SISTEMA VOZ-A-TEXTO UNIFICADO (V8)"
 echo "==================================================="
 echo ""
 

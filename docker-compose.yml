@@ -1,6 +1,6 @@
 # =====================================================
 # Docker Compose - Voz a Texto con Enfoque en Tono Emocional
-# Versión: 5.0.0
+# Versión: 9.0.0 (Quality Score General + PDF Consolidado + Ollama/Qwen2.5)
 # =====================================================
 # Uso:
 #   docker-compose up --build        # Construir e iniciar
@@ -15,24 +15,38 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transcriptor-emocional-v5
-    image: transcriptor-emocional:5.0.0
+    container_name: transcriptor-emocional-v9
+    image: transcriptor-emocional:9.0.0
 
-    # Configuración para CPU (sin GPU NVIDIA)
-    # Si tienes GPU NVIDIA, descomenta la sección deploy
+    # Shared memory - PyTorch necesita más de los 64MB por defecto
+    # Con 8GB RAM total, usar 1GB para shm es suficiente
+    shm_size: '1gb'
+
+    # Runtime NVIDIA para soporte GPU
+    runtime: nvidia
 
     ports:
       - "8000:8000"
 
+    # Permite al contenedor acceder a servicios del host (Ollama)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
     environment:
       - PYTHONUNBUFFERED=1
-      # Optimizaciones para CPU
-      - OMP_NUM_THREADS=4  # Ajustado para 4 núcleos de CPU (Ryzen 5)
-      # Modelo Whisper se detecta automáticamente según GPU disponible
-      # Para forzar un modelo específico, descomenta la siguiente línea:
-      # - WHISPER_MODEL=small  # Opciones: base, small, medium, large-v3
-      # Variables de la aplicación
+      # Variables NVIDIA para acceso a GPU dentro del contenedor
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HF_TOKEN=${HF_TOKEN}
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # Optimizaciones de memoria para 8GB RAM
+      - OMP_NUM_THREADS=2
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+      # Modelo Whisper: small para ahorrar RAM (medium también funciona)
+      - WHISPER_MODEL=small
+      - LOW_MEMORY_MODE=true
       - LOG_LEVEL=INFO
+      # Ollama (Qwen2.5) - solo para generación de informes PDF
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
 
     volumes:
       # Persistir modelos descargados (evita re-descargar en cada reinicio)
@@ -43,11 +57,16 @@ services:
       - ./data:/app/data
       - ./output:/app/output
       - ./history:/app/history
+      - ./feedback_data:/app/feedback_data
       # Dashboard HTML (hot-reload en desarrollo)
       - ./dashboard.html:/app/dashboard.html:ro
+      # Código fuente (hot-reload)
+      - ./app_fastapi.py:/app/app_fastapi.py
+      - ./core:/app/core
+      - ./routes:/app/routes
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -55,14 +74,14 @@ services:
 
     restart: unless-stopped
 
-    # Límites de recursos (ajustar según tu sistema)
-    # Descomenta para limitar recursos:
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 10G
-    #     reservations:
-    #       memory: 4G
+    # Recursos GPU (Docker Compose v2+)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu, compute, utility ]
 
     logging:
       driver: "json-file"
