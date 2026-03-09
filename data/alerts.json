@@ -2104,5 +2104,281 @@
     "dominant_emotion": "neutral",
     "reviewed": false,
     "review_notes": ""
+  },
+  {
+    "id": "5b6b755c",
+    "timestamp": "2026-02-27T17:28:35.232206",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.086,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "e0bc2b85",
+    "timestamp": "2026-02-27T17:42:50.336146",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0862,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "57a23fdc",
+    "timestamp": "2026-02-27T17:48:16.520423",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 47%",
+      "🔴 13 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.2006,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "9bbbec51",
+    "timestamp": "2026-02-27T17:50:13.680435",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1039,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "c9ca61d8",
+    "timestamp": "2026-02-27T17:51:57.377097",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1341,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "0fae9ba5",
+    "timestamp": "2026-02-27T17:53:24.560911",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "87af4cb8",
+    "timestamp": "2026-02-27T17:55:04.578845",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1199,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "b650b058",
+    "timestamp": "2026-02-27T18:11:08.251602",
+    "filename": "#SOSCuba intenso debate entre un ciudadano cubano y un dirigente del partido comunista.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 43/100"
+    ],
+    "quality_score": 43,
+    "sentiment_score": -0.0864,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "4078e042",
+    "timestamp": "2026-02-27T18:16:35.216673",
+    "filename": "Discusion de Hugo Gavilanes, Carla Sala , y Tito Tomala RTS en vivo.mp3",
+    "severity": "alta",
+    "reasons": [
+      "🔴 Enojo muy alto: 46%",
+      "🔴 12 segmentos negativos consecutivos",
+      "⚠️ Palabras críticas: denuncia, me voy",
+      "📊 Score de calidad deficiente: 46/100"
+    ],
+    "quality_score": 46,
+    "sentiment_score": -0.1983,
+    "dominant_emotion": "enojado",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "0f9441e9",
+    "timestamp": "2026-02-27T18:18:32.134800",
+    "filename": "Entrevista a Miguel Angel Ruiz en TeleAmazonas, Ecuador sobre Neuromarketing.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1039,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8dec1f08",
+    "timestamp": "2026-02-27T18:20:11.054524",
+    "filename": "Jorge Ortíz renuncia a Teleamazonas.wav",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy",
+      "📊 Score de calidad deficiente: 49/100"
+    ],
+    "quality_score": 49,
+    "sentiment_score": -0.1341,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "8e21e9fa",
+    "timestamp": "2026-02-27T18:21:37.367914",
+    "filename": "Noboa descarta reelección indefinida y vincula protestas con financiamiento de bandas  Televistazo.wav",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal",
+      "📊 Score de calidad deficiente: 47/100"
+    ],
+    "quality_score": 47,
+    "sentiment_score": -0.1231,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "7d17e019",
+    "timestamp": "2026-02-27T18:23:20.396188",
+    "filename": "Periodista llora al aire tras recibir noticia de la muerte de su colega.mp3",
+    "severity": "alta",
+    "reasons": [
+      "⚠️ Palabras críticas: legal"
+    ],
+    "quality_score": 53,
+    "sentiment_score": -0.1155,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "37030da2",
+    "timestamp": "2026-02-27T18:24:56.365009",
+    "filename": "Recuerdo de la entrevista de Don Alfonso a León Febres Cordero  En Contacto  Ecuavisa.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.1704,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "871e9782",
+    "timestamp": "2026-02-27T18:26:27.303846",
+    "filename": "test.wav",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 48/100"
+    ],
+    "quality_score": 48,
+    "sentiment_score": -0.0616,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "6ff37cf8",
+    "timestamp": "2026-02-27T18:27:58.828643",
+    "filename": "Un periodista de A24 lloró en vivo por los datos de la pobreza.mp3",
+    "severity": "media",
+    "reasons": [
+      "📊 Score de calidad deficiente: 44/100"
+    ],
+    "quality_score": 44,
+    "sentiment_score": -0.0981,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "4b900daa",
+    "timestamp": "2026-03-04T06:34:49.944646",
+    "filename": "Full_Contact_center -01.mp3",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy"
+    ],
+    "quality_score": 60,
+    "sentiment_score": -0.0751,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "dcb56b75",
+    "timestamp": "2026-03-04T15:17:04.561674",
+    "filename": "Full_Contact_center -01.mp3",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy"
+    ],
+    "quality_score": 60,
+    "sentiment_score": -0.0766,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
+  },
+  {
+    "id": "07d0ec05",
+    "timestamp": "2026-03-09T02:31:37.860205",
+    "filename": "Full_Contact_center -01.mp3",
+    "severity": "media",
+    "reasons": [
+      "⚠️ Palabras críticas: me voy"
+    ],
+    "quality_score": 60,
+    "sentiment_score": -0.0766,
+    "dominant_emotion": "neutral",
+    "reviewed": false,
+    "review_notes": ""
   }
 ]

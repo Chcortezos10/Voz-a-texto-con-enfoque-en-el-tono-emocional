@@ -30,7 +30,7 @@ class AudioValidationResult:
 class AudioValidator:
 
     MIN_DURATION_SEC = 0.5      # Mínimo medio segundo
-    MAX_DURATION_SEC = 600      # Máximo 10 minutos
+    MAX_DURATION_SEC = 1800     # Máximo 30 minutos
     MIN_SAMPLE_RATE = 8000      # Mínimo 8kHz
     MAX_SAMPLE_RATE = 48000     # Máximo 48kHz
     TARGET_SAMPLE_RATE = 16000  # Objetivo para modelos

@@ -1468,6 +1468,32 @@
             color: #10b981;
         }
 
+        .qs-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .qs-pill.qs-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .qs-pill.qs-regular {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .qs-pill.qs-bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
         .scoring-detail-view {
             display: none;
         }
@@ -1638,6 +1664,8 @@
                                             class="sort-icon">↕</span></th>
                                     <th onclick="sortScoringTable('sentiment')">Sentimiento <span
                                             class="sort-icon">↕</span></th>
+                                    <th onclick="sortScoringTable('quality')">Score <span class="sort-icon">↕</span>
+                                    </th>
                                     <th>Acción</th>
                                 </tr>
                             </thead>
@@ -3417,6 +3445,7 @@
                     case 'triste': va = a.emotion_scores?.triste || 0; vb = b.emotion_scores?.triste || 0; break;
                     case 'neutral': va = a.emotion_scores?.neutral || 0; vb = b.emotion_scores?.neutral || 0; break;
                     case 'sentiment': va = a.sentiment_score || 0; vb = b.sentiment_score || 0; break;
+                    case 'quality': va = a.quality_score?.total_score || 0; vb = b.quality_score?.total_score || 0; break;
                     default: va = 0; vb = 0;
                 }
                 if (typeof va === 'string') return scoringSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -3439,12 +3468,13 @@
                     <td><span class="score-bar" style="width:${(s.triste || 0) * 60}px;background:#3b82f6;"></span>${((s.triste || 0) * 100).toFixed(0)}%</td>
                     <td><span class="score-bar" style="width:${(s.neutral || 0) * 60}px;background:#a78bfa;"></span>${((s.neutral || 0) * 100).toFixed(0)}%</td>
                     <td><span class="sentiment-pill ${sentClass}">${sentIcon} ${sent.toFixed(2)}</span></td>
+                    <td>${(() => { const qs = r.quality_score; if (!qs || typeof qs !== 'object') return '<span style="color:var(--text-muted)">-</span>'; const sc = qs.total_score || 0; const cls = sc >= 70 ? 'qs-good' : sc >= 50 ? 'qs-regular' : 'qs-bad'; const label = qs.classification || (sc >= 70 ? 'Bueno' : sc >= 50 ? 'Regular' : 'Deficiente'); return `<span class="qs-pill ${cls}">${sc}/100 ${label}</span>`; })()}</td>
                     <td><button class="btn btn-primary btn-sm" onclick="showScoringDetail('${r.filename}')">Ver →</button></td>
                 </tr>`;
             }).join('');
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin resultados</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin resultados</td></tr>';
             }
         }
 
@@ -3753,7 +3783,7 @@
                 const response = await fetch(`${CONFIG.API_URL}/export/pdf`, { method: 'POST', body: formData });
                 if (!response.ok) {
                     let errMsg = `Error del servidor (${response.status})`;
-                    try { const e = await response.json(); if (e.detail) errMsg = e.detail; } catch (_) {}
+                    try { const e = await response.json(); if (e.detail) errMsg = e.detail; } catch (_) { }
                     throw new Error(errMsg);
                 }
 
@@ -3815,10 +3845,11 @@
         function exportScoringCSV() {
             const successful = scoringResults.filter(r => r.status === 'success');
             if (successful.length === 0) { toast.warning('Sin resultados para exportar'); return; }
-            let csv = 'Archivo,Duración(s),Feliz,Enojado,Triste,Neutral,Sentimiento,Emoción Dominante\n';
+            let csv = 'Archivo,Duración(s),Feliz,Enojado,Triste,Neutral,Sentimiento,Emoción Dominante,Quality Score,Clasificación\n';
             successful.forEach(r => {
                 const s = r.emotion_scores || {};
-                csv += `"${r.filename}",${r.duration_sec || 0},${((s.feliz || 0) * 100).toFixed(1)},${((s.enojado || 0) * 100).toFixed(1)},${((s.triste || 0) * 100).toFixed(1)},${((s.neutral || 0) * 100).toFixed(1)},${(r.sentiment_score || 0).toFixed(4)},${r.dominant_emotion || 'neutral'}\n`;
+                const qs = r.quality_score || {};
+                csv += `"${r.filename}",${r.duration_sec || 0},${((s.feliz || 0) * 100).toFixed(1)},${((s.enojado || 0) * 100).toFixed(1)},${((s.triste || 0) * 100).toFixed(1)},${((s.neutral || 0) * 100).toFixed(1)},${(r.sentiment_score || 0).toFixed(4)},${r.dominant_emotion || 'neutral'},${qs.total_score || 0},"${qs.classification || 'N/A'}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');

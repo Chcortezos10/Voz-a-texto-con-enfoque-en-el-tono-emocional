@@ -78,7 +78,10 @@ RUN pip install --no-cache-dir --upgrade \
     httpx \
     psutil
 
-# Paso 4: Verificación exhaustiva de entorno antes de finalizar build
+# Paso 4: Descargar recursos NLTK necesarios
+RUN python -c "import nltk; nltk.download('punkt_tab'); nltk.download('punkt')"
+
+# Paso 5: Verificación exhaustiva de entorno antes de finalizar build
 RUN python -c "import torch; print(f'Torch: {torch.__version__} | CUDA: {torch.cuda.is_available()}'); \
     import transformers; print(f'Transformers: {transformers.__version__}'); \
     from transformers import pipeline; print('Pipeline import: OK'); \
